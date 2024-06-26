@@ -1,0 +1,17 @@
+{
+  "name": "package-management-system",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "start": "concurrently \"yarn workspace frontend start\" \"yarn workspace backend start\"",
+    "build": "yarn workspace frontend build && yarn workspace backend build"
+  },
+  "devDependencies": {
+    "concurrently": "^6.0.0",
+    "pm2": "^5.4.1"
+  }
+}
