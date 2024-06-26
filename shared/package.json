@@ -1,0 +1,16 @@
+{
+	"name": "@ddlabel/shared",
+	"version": "1.0.0",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"watch": "tsc --watch",
+		"build": "tsc"
+	},
+	"devDependencies": {
+		"typescript": "^4.0.0"
+	},
+	"dependencies": {
+		"sequelize": "^6.37.3"
+	}
+}

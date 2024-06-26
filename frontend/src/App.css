@@ -1,0 +1,23 @@
+/* frontend/src/App.css */
+.App {
+  text-align: center;
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+nav li {
+  display: inline;
+  margin: 0 10px;
+}
+
+nav a {
+  text-decoration: none;
+  color: #61dafb;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}

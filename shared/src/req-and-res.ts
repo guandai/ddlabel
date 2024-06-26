@@ -1,0 +1,168 @@
+// shared/src/req-and-res.ts
+import { Optional } from 'sequelize';
+import { AddressAttributes, AddressModel, PackageModel, PostalZoneAttributes, TransactionModel, UserAttributes, UserModel, UserRolesEnum } from "./models";
+import { SimpleRes } from './types';
+import { BeansAI } from './beans';
+
+// User
+export type RegisterUserReq = Pick<UserAttributes, 'name' | 'email' | 'password' | 'role'> & { warehouseAddress: AddressAttributes };
+export type RegisterUserRes = {
+	success: boolean;
+	userId: number;
+};
+
+export type UpdateUserReq = Omit<UserAttributes, 'password' > & {
+	password?: string;
+} & {
+	warehouseAddress: AddressAttributes;
+};
+export type UpdateUserRes = {
+	success: boolean;
+};
+
+export type GetUsersReq = GetRecordsReq;
+
+export type GetUsersRes = {
+	users: UserModel[],
+	total: number;
+};
+
+export type GetUserRes = {
+	user: UserModel
+};
+
+export type LoginUserReq = Pick<UserAttributes, 'email' | 'password'>;
+export type LoginUserRes = {
+	token: string;
+	userId: number;
+	userRole: UserRolesEnum;
+};
+
+export type Models = UserAttributes | PackageModel | TransactionModel | AddressModel
+export type ModelNames = 'user' | 'package' | 'transaction' | 'address';
+
+export enum ModelEnum {
+	user = 'user',
+	package = 'package',
+	transaction = 'transaction',
+	address = 'address',
+}
+
+// Package
+export type WeightUnit = 'lbs' | 'oz';
+export type VolumeUnit = 'inch' | 'mm';
+
+export type GetRecordsRes = GetPackagesRes | GetTransactionsRes | GetUsersRes;
+export type GetRecordRes = GetPackageRes | GetTransactionRes | GetUserRes;
+
+export type PaginationRecordReq = {
+	limit: number;
+	offset: number;
+};
+
+export type SearchRecordReq = {
+	trackingNo?: string;
+	email?: string;
+	role?: UserRolesEnum;
+	name?: string;
+	address?: string;
+};
+
+export type DateRecordReq = {
+	startDate: string;
+    endDate: string;
+};
+
+export type GetRecordsReq = PaginationRecordReq & SearchRecordReq & DateRecordReq;
+
+export type GetPackagesReq = GetRecordsReq;
+export type GetPackagesCsvReq = SearchRecordReq & DateRecordReq;
+export type GetPackagesCsvRes = string;
+export type GetPackagesRes = {
+	packages: PackageModel[];
+	total: number;	
+};
+export type GetPackageRes = {
+	package: PackageModel;
+};
+
+export type CreatePackageReq = Optional<PackageModel, 'length' | 'width' | 'height' | 'trackingNo'>;
+export type CreatePackageRes = {
+	success: boolean;
+	packageId: number;
+};
+
+export type UpdatePackageReq = CreatePackageReq;
+export type UpdatePackageRes = {
+	success: boolean;
+};
+
+export type ImportPackageReq = FormData;
+
+export type ImportPackageRes = SimpleRes;
+
+// Transaction
+export type GetTransactionsReq = GetRecordsReq;
+export type GetTransactionsRes = {
+	transactions: TransactionModel[];
+	total: number;
+};	
+
+export type GetTransactionRes = {
+	transaction: TransactionModel;
+};
+
+
+// Rate
+export type GetRatesReq = {
+	weight: number;
+	weightUnit: WeightUnit;
+	length: number;
+	width: number;
+	height: number;
+	volumeUnit: VolumeUnit;
+	zone: number;
+};
+export type GetRatesRes = {
+	rates: number[];
+};
+
+export type FullRateReq = GetRatesReq;
+export type FullRateRes = {
+	totalCost: number;
+}
+
+// Postal zip
+export type GetPostalZoneReq = { zip: string };
+export type GetPostalZoneRes = { postalZone: PostalZoneAttributes };;
+
+export type GetPostalZonesRes = { postalZones: PostalZoneAttributes[] };
+
+export type GetZoneReq = { fromZip: string; toZip: string
+ };
+export type GetZoneRes = { zone: string }
+
+// Beans
+export type GetStatusLogReq = { trackingNo: string };
+export type GetStatusLogRes = { listItemReadableStatusLogs: BeansAI.ListItemReadableStatusLogs };
+
+
+export const isGetPackageRes = (res: GetRecordRes): res is GetPackageRes => {
+	return (res as GetPackageRes).package !== undefined;
+};
+export const isGetPackagesRes = (res: GetRecordsRes): res is GetPackagesRes => {
+	return (res as GetPackagesRes).packages !== undefined;
+};
+
+export const isGetTransactionsRes = (res: GetRecordsRes): res is GetTransactionsRes => {
+	return (res as GetTransactionsRes).transactions !== undefined;
+};
+export const isGetTransactionRes = (res: GetRecordRes): res is GetTransactionRes => {
+	return (res as GetTransactionRes).transaction !== undefined;
+};
+export const isGetUsersRes = (res: GetRecordsRes): res is GetUsersRes => {
+	return (res as GetUsersRes).users !== undefined;
+};
+export const isGetUserRes = (res: GetRecordRes): res is GetUserRes => {
+	return (res as GetUserRes).user !== undefined;
+};
