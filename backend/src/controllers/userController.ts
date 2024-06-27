@@ -36,9 +36,13 @@ export const loginUser = async (req: Request, res: Response) => {
 };
 
 export const editUser = async (req: Request, res: Response) => {
-  const { name, warehouseAddress } = req.body;
+  const { name, email, password, role, warehouseAddress } = req.body;
   try {
-    const [rows, user] = await User.update({ name, warehouseAddress }, { where: { id: req.params.id }, returning: true });
+    const updates: Partial<User> = { name, email, role, warehouseAddress };
+    if (password) {
+      updates.password = await bcrypt.hash(password, 10);
+    }
+    const [rows, user] = await User.update(updates, { where: { id: req.params.id }, returning: true });
     res.json(user);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
