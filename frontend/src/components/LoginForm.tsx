@@ -18,8 +18,8 @@ const LoginForm: React.FC = () => {
     tryLoad(async () => {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/users/login`, formData);
         localStorage.setItem('token', response.data.token);
-        // handle success
         window.location.href = '/packages';
+        // handle success
       }, setError);
   };
 
