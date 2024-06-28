@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import { PackageType } from './PackageForm';
 import { tryLoad } from '../util/errors';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
@@ -51,6 +53,50 @@ const PackageTable: React.FC = () => {
     setSelectedPackage(null);
   };
 
+  const generatePDF = async (pkg: PackageType) => {
+    const doc = new jsPDF();
+
+    // Capture HTML content to canvas
+    const input = document.createElement('div');
+    input.innerHTML = `
+      <div>
+        <h3>Package Details</h3>
+        <p><strong>Ship To Address:</strong> ${pkg.shipToAddress}</p>
+        <p><strong>Phone:</strong> ${pkg.phone}</p>
+        <p><strong>Length:</strong> ${pkg.length}</p>
+        <p><strong>Width:</strong> ${pkg.width}</p>
+        <p><strong>Height:</strong> ${pkg.height}</p>
+        <p><strong>Weight:</strong> ${pkg.weight}</p>
+        <p><strong>Post Code:</strong> ${pkg.postCode}</p>
+        <p><strong>Email:</strong> ${pkg.email}</p>
+        <p><strong>State:</strong> ${pkg.state}</p>
+        <p><strong>Name:</strong> ${pkg.name}</p>
+        <p><strong>Tracking Number:</strong> ${pkg.trackingNumber}</p>
+      </div>
+    `;
+    document.body.appendChild(input);
+    const canvas = await html2canvas(input);
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidth = 190;
+    const pageHeight = 290;
+    const imgHeight = canvas.height * imgWidth / canvas.width;
+    let heightLeft = imgHeight;
+
+    let position = 0;
+    doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft >= 0) {
+      position = heightLeft - imgHeight;
+      doc.addPage();
+      doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+    document.body.removeChild(input);
+
+    doc.save(`package_${pkg.id}_label.pdf`);
+  };
+
   return (
     <>
       <TableContainer component={Paper}>
@@ -89,6 +135,7 @@ const PackageTable: React.FC = () => {
                   <Button onClick={() => handleViewDetails(pkg)}>View</Button>
                   <Button onClick={() => handleEdit(pkg.id)}>Edit</Button>
                   <Button onClick={() => handleDelete(pkg.id)}>Delete</Button>
+                  <Button onClick={() => generatePDF(pkg)}>Generate PDF</Button>
                 </TableCell>
               </TableRow>
             ))}
