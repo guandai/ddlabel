@@ -5,12 +5,15 @@ type SetError = (value: React.SetStateAction<string | null>) => void;
 
 const tryError = (error: any, setError: SetError
 ) => {
-    const err = ((error as AxiosError).response?.data as ResError)?.errors;
-      if (err && err.length > 0) {
-        setError(err[0].message);
-        return;
+    const errorData = ((error as AxiosError).response?.data as ResError);
+    let message = 'Failed to perform the operation.';
+    const errors = errorData?.errors;
+      if (errors && errors.length > 0 ) {
+        message = errors[0].message;
+      } else if (errorData?.message) {
+        message = errorData.message;
       }
-      setError('Failed to register. Please try again.');
+      setError(message);
 }
 
 export const tryLoad = async (callback: () => Promise<void>, setError: SetError) => {
