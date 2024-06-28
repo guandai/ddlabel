@@ -1,12 +1,11 @@
-// backend/src/routes/packageRoutes.ts
 import { Router } from 'express';
-import { addPackage, getPackages, updatePackage, deletePackage } from '../controllers/packageController';
+import { addPackage, deletePackage, editPackage, getPackageDetails } from '../controllers/packageController';
 
 const router = Router();
 
 router.post('/', addPackage);
-router.get('/', getPackages);
-router.put('/:id', updatePackage);
 router.delete('/:id', deletePackage);
+router.put('/:id', editPackage);
+router.get('/:id', getPackageDetails);
 
 export default router;
