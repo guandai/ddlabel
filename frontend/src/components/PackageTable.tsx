@@ -5,6 +5,8 @@ import { PackageType } from './PackageForm';
 import { tryLoad } from '../util/errors';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import QRCode from 'qrcode.react';
+import JsBarcode from 'jsbarcode';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
@@ -55,44 +57,38 @@ const PackageTable: React.FC = () => {
 
   const generatePDF = async (pkg: PackageType) => {
     const doc = new jsPDF();
+    
+    doc.setFontSize(12);
+    doc.text('Sender Information', 10, 10);
+    doc.text(`Sender Address: ${pkg.shipFromAddress}`, 10, 30);
+    
+    doc.text('Recipient Information', 10, 70);
+    doc.text(`Recipient Name: ${pkg.name}`, 10, 80);
+    doc.text(`Recipient Address: ${pkg.shipToAddress}`, 10, 90);
+    doc.text(`Contact Number: ${pkg.phone}`, 10, 120);
+    
+    doc.text('Package Information', 10, 130);
+    doc.text(`Tracking Number: ${pkg.trackingNumber}`, 10, 140);
+    doc.text(`Weight: ${pkg.weight}`, 10, 150);
+    doc.text(`Dimensions: ${pkg.length}x${pkg.width}x${pkg.height}`, 10, 160);
 
-    // Capture HTML content to canvas
-    const input = document.createElement('div');
-    input.innerHTML = `
-      <div>
-        <h3>Package Details</h3>
-        <p><strong>Ship To Address:</strong> ${pkg.shipToAddress}</p>
-        <p><strong>Phone:</strong> ${pkg.phone}</p>
-        <p><strong>Length:</strong> ${pkg.length}</p>
-        <p><strong>Width:</strong> ${pkg.width}</p>
-        <p><strong>Height:</strong> ${pkg.height}</p>
-        <p><strong>Weight:</strong> ${pkg.weight}</p>
-        <p><strong>Post Code:</strong> ${pkg.postCode}</p>
-        <p><strong>Email:</strong> ${pkg.email}</p>
-        <p><strong>State:</strong> ${pkg.state}</p>
-        <p><strong>Name:</strong> ${pkg.name}</p>
-        <p><strong>Tracking Number:</strong> ${pkg.trackingNumber}</p>
-      </div>
-    `;
-    document.body.appendChild(input);
-    const canvas = await html2canvas(input);
-    const imgData = canvas.toDataURL('image/png');
-    const imgWidth = 190;
-    const pageHeight = 290;
-    const imgHeight = canvas.height * imgWidth / canvas.width;
-    let heightLeft = imgHeight;
+    // Barcode
+    const barcodeCanvas = document.createElement('canvas');
+    JsBarcode(barcodeCanvas, pkg.trackingNumber, { format: "CODE128" });
+    const barcodeImgData = barcodeCanvas.toDataURL('image/png');
+    doc.addImage(barcodeImgData, 'PNG', 10, 220, 100, 30);
+    
+    // QR Code
+    const qrCodeCanvas = document.createElement('canvas');
+    const qrCode = <QRCode value={`http://localhost:3000/packages/${pkg.id}`} size={100} level="H" includeMargin />;
+    const qrCodeContext = qrCodeCanvas.getContext('2d');
+    await html2canvas(qrCode).then((canvas) => {
+      qrCodeContext?.drawImage(canvas, 0, 0);
+    });
+    const qrCodeImgData = qrCodeCanvas.toDataURL('image/png');
+    doc.addImage(qrCodeImgData, 'PNG', 120, 220, 50, 50);
 
-    let position = 0;
-    doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
-      doc.addPage();
-      doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-    document.body.removeChild(input);
+  
 
     doc.save(`package_${pkg.id}_label.pdf`);
   };

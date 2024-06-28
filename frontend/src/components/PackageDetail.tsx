@@ -54,6 +54,7 @@ const PackageDetail: React.FC = () => {
         </Typography>
         {pkg && (
           <Box sx={{ mt: 3 }}>
+            <Typography variant="body1"><strong>Ship To Address:</strong> {pkg.shipFromAddress}</Typography>
             <Typography variant="body1"><strong>Ship To Address:</strong> {pkg.shipToAddress}</Typography>
             <Typography variant="body1"><strong>Phone:</strong> {pkg.phone}</Typography>
             <Typography variant="body1"><strong>Length:</strong> {pkg.length}</Typography>
