@@ -44,7 +44,7 @@ const PackageDetails: React.FC = () => {
         }}
       >
         <Typography component="h1" variant="h5">
-          Package Details
+          Package Label
         </Typography>
         <Box sx={{ mt: 3 }}>
           <Typography><strong>Ship To Address:</strong> {pkg.shipToAddress}</Typography>
