@@ -1,11 +1,27 @@
 // backend/src/controllers/packageController.ts
 import { Request, Response } from 'express';
 import { Package } from '../models/Package';
+import { generateTrackingNumber } from '../utils/generateTrackingNumber';
 
 export const addPackage = async (req: Request, res: Response) => {
   const { userId, shipToAddress, phone, length, width, height, weight, postCode, email, state, name } = req.body;
+  const trackingNumber = generateTrackingNumber(); // Generate a tracking number
+
   try {
-    const pkg = await Package.create({ userId, shipToAddress, phone, length, width, height, weight, postCode, email, state, name });
+    const pkg = await Package.create({
+      userId,
+      shipToAddress,
+      phone,
+      length,
+      width,
+      height,
+      weight,
+      postCode,
+      email,
+      state,
+      name,
+      trackingNumber // Add the tracking number to the package
+    });
     res.status(201).json(pkg);
   } catch (error: any) {
     res.status(400).json({ message: error.message });

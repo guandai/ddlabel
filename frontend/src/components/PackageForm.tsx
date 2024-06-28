@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { TextField, Button, Box, Typography, Container, Alert } from '@mui/material';
-import { tryLoad } from '../util/errors';
+import { TextField, Button, Box, Typography, Container, Alert, Select, MenuItem, InputLabel, FormControl, SelectChangeEvent } from '@mui/material';
+
+type User = {
+  id: number;
+  name: string;
+};
 
 const PackageForm: React.FC = () => {
+  const [users, setUsers] = useState<User[]>([]);
   const [packageData, setPackageData] = useState({
+    userId: '', // Ensure userId is part of the package data
     shipToAddress: '',
     phone: '',
     length: '',
@@ -19,8 +25,28 @@ const PackageForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const token = localStorage.getItem('token');
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/users`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUsers(response.data);
+      } catch (error) {
+        setError('Failed to fetch users.');
+      }
+    };
+    fetchUsers();
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPackageData({ ...packageData, [e.target.name]: e.target.value });
+  };
+
+  const handleSelectChange = (e: SelectChangeEvent<string>) => {
+    const { name, value } = e.target;
+    setPackageData({ ...packageData, [name as string]: value as string });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,13 +54,14 @@ const PackageForm: React.FC = () => {
     const token = localStorage.getItem('token');
     setError(null);
     setSuccess(null);
-
-    tryLoad(async () => {
-        await axios.post(`${process.env.REACT_APP_API_URL}/api/packages`, packageData, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        setSuccess('Package added successfully.');
-    }, setError);
+    try {
+      await axios.post(`${process.env.REACT_APP_API_URL}/packages`, packageData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSuccess('Package added successfully.');
+    } catch (error) {
+      setError('Failed to add package.');
+    }
   };
 
   return (
@@ -53,6 +80,23 @@ const PackageForm: React.FC = () => {
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+          <FormControl fullWidth margin="normal" required>
+            <InputLabel id="user-label">Assignee</InputLabel>
+            <Select
+              labelId="user-label"
+              id="userId"
+              name="userId"
+              value={packageData.userId}
+              label="Assignee"
+              onChange={handleSelectChange}
+            >
+              {users.map(user => (
+                <MenuItem key={user.id} value={user.id}>
+                  {user.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField
             margin="normal"
             required
@@ -61,7 +105,6 @@ const PackageForm: React.FC = () => {
             label="Ship To Address"
             name="shipToAddress"
             autoComplete="address"
-            autoFocus
             onChange={handleChange}
           />
           <TextField

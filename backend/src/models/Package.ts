@@ -15,6 +15,7 @@ interface PackageAttributes {
   email: string;
   state: string;
   name: string;
+  trackingNumber: string; // Add trackingNumber attribute
 }
 
 interface PackageCreationAttributes extends Optional<PackageAttributes, 'id'> {}
@@ -32,6 +33,7 @@ class Package extends Model<PackageAttributes, PackageCreationAttributes> implem
   public email!: string;
   public state!: string;
   public name!: string;
+  public trackingNumber!: string; // Add trackingNumber attribute
 }
 
 Package.init(
@@ -88,6 +90,11 @@ Package.init(
     name: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    trackingNumber: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true, // Ensure the tracking number is unique
     },
   },
   {

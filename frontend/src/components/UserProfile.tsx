@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { TextField, Button, Box, Typography, Container, Alert, Select, MenuItem, InputLabel, FormControl, SelectChangeEvent } from '@mui/material';
+import { TextField, Button, Box, Typography, Container, Alert, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
+import { SelectChangeEvent } from '@mui/material';
 
 const UserProfile: React.FC = () => {
   const [profile, setProfile] = useState({
@@ -11,6 +12,7 @@ const UserProfile: React.FC = () => {
     role: '',
     warehouseAddress: ''
   });
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -42,6 +44,10 @@ const UserProfile: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (profile.password && profile.password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
     const token = localStorage.getItem('token');
     setError(null);
     setSuccess(null);
@@ -101,8 +107,20 @@ const UserProfile: React.FC = () => {
             label="Password"
             type="password"
             id="password"
-            autoComplete="current-password"
+            autoComplete="new-password"
+            value={profile.password}
             onChange={handleChange}
+          />
+          <TextField
+            margin="normal"
+            fullWidth
+            name="confirmPassword"
+            label="Confirm Password"
+            type="password"
+            id="confirmPassword"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
           />
           <TextField
             margin="normal"

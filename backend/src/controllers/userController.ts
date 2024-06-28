@@ -55,3 +55,12 @@ export const getCurrentUser = (req: AuthRequest, res: Response) => {
   }
   res.json(req.user);
 };
+
+export const getUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await User.findAll({ attributes: ['id', 'name', 'email', 'role', 'warehouseAddress'] }); // Fetch selected attributes
+    res.json(users);
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+};
