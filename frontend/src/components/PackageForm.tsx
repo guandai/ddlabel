@@ -24,20 +24,15 @@ type User = {
   name: string;
 };
 
-const PackageForm: React.FC = () => {
+type PackageFormProps = {
+  initialData?: Partial<PackageType>;
+  onSubmit: (data: Partial<PackageType>) => void;
+};
+
+const PackageForm: React.FC<PackageFormProps> = ({ initialData = {}, onSubmit }) => {
   const [users, setUsers] = useState<User[]>([]);
-  const [packageData, setPackageData] = useState({
-    userId: '', // Ensure userId is part of the package data
-    shipToAddress: '',
-    phone: '',
-    length: '',
-    width: '',
-    height: '',
-    weight: '',
-    postCode: '',
-    email: '',
-    state: '',
-    name: ''
+  const [packageData, setPackageData] = useState<Partial<PackageType>>({
+    ...initialData,
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -68,17 +63,7 @@ const PackageForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    setError(null);
-    setSuccess(null);
-    try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/packages`, packageData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setSuccess('Package added successfully.');
-    } catch (error) {
-      setError('Failed to add package.');
-    }
+    onSubmit(packageData);
   };
 
   return (
@@ -92,7 +77,7 @@ const PackageForm: React.FC = () => {
         }}
       >
         <Typography component="h1" variant="h5">
-          Add Package
+          {initialData.id ? 'Edit Package' : 'Add Package'}
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
@@ -103,7 +88,7 @@ const PackageForm: React.FC = () => {
               labelId="user-label"
               id="userId"
               name="userId"
-              value={packageData.userId}
+              value={packageData.userId?.toString() || ''}
               label="Assignee"
               onChange={handleSelectChange}
             >
@@ -122,6 +107,7 @@ const PackageForm: React.FC = () => {
             label="Ship To Address"
             name="shipToAddress"
             autoComplete="address"
+            value={packageData.shipToAddress || ''}
             onChange={handleChange}
           />
           <TextField
@@ -132,6 +118,7 @@ const PackageForm: React.FC = () => {
             label="Phone"
             name="phone"
             autoComplete="phone"
+            value={packageData.phone || ''}
             onChange={handleChange}
           />
           <TextField
@@ -142,6 +129,7 @@ const PackageForm: React.FC = () => {
             label="Length"
             name="length"
             type="number"
+            value={packageData.length || ''}
             onChange={handleChange}
           />
           <TextField
@@ -152,6 +140,7 @@ const PackageForm: React.FC = () => {
             label="Width"
             name="width"
             type="number"
+            value={packageData.width || ''}
             onChange={handleChange}
           />
           <TextField
@@ -162,6 +151,7 @@ const PackageForm: React.FC = () => {
             label="Height"
             name="height"
             type="number"
+            value={packageData.height || ''}
             onChange={handleChange}
           />
           <TextField
@@ -172,6 +162,7 @@ const PackageForm: React.FC = () => {
             label="Weight"
             name="weight"
             type="number"
+            value={packageData.weight || ''}
             onChange={handleChange}
           />
           <TextField
@@ -182,6 +173,7 @@ const PackageForm: React.FC = () => {
             label="Post Code"
             name="postCode"
             autoComplete="postal-code"
+            value={packageData.postCode || ''}
             onChange={handleChange}
           />
           <TextField
@@ -193,6 +185,7 @@ const PackageForm: React.FC = () => {
             name="email"
             type="email"
             autoComplete="email"
+            value={packageData.email || ''}
             onChange={handleChange}
           />
           <TextField
@@ -203,6 +196,7 @@ const PackageForm: React.FC = () => {
             label="State"
             name="state"
             autoComplete="address-level1"
+            value={packageData.state || ''}
             onChange={handleChange}
           />
           <TextField
@@ -213,6 +207,7 @@ const PackageForm: React.FC = () => {
             label="Name"
             name="name"
             autoComplete="name"
+            value={packageData.name || ''}
             onChange={handleChange}
           />
           <Button
@@ -221,7 +216,7 @@ const PackageForm: React.FC = () => {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Add Package
+            {initialData.id ? 'Update Package' : 'Add Package'}
           </Button>
         </Box>
       </Box>
