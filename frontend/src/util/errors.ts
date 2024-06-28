@@ -5,7 +5,7 @@ type SetError = (value: React.SetStateAction<string | null>) => void;
 
 const tryError = (error: any, setError: SetError
 ) => {
-    const err = ((error as AxiosError).response?.data as ResError).errors;
+    const err = ((error as AxiosError).response?.data as ResError)?.errors;
       if (err && err.length > 0) {
         setError(err[0].message);
         return;
