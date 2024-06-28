@@ -5,6 +5,7 @@ import { TextField, Button, Box, Typography, Container, Alert, Select, MenuItem,
 export type PackageType = {
   id: number;
   userId: number;
+  shipFromAddress: string;
   shipToAddress: string;
   phone: string;
   length: number;

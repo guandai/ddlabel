@@ -5,6 +5,7 @@ import { User } from './User';
 interface PackageAttributes {
   id: number;
   userId: number;
+  shipFromAddress: string;
   shipToAddress: string;
   phone: string;
   length: number;
@@ -23,6 +24,7 @@ interface PackageCreationAttributes extends Optional<PackageAttributes, 'id'> {}
 class Package extends Model<PackageAttributes, PackageCreationAttributes> implements PackageAttributes {
   public id!: number;
   public userId!: number;
+  public shipFromAddress!: string;
   public shipToAddress!: string;
   public phone!: string;
   public length!: number;
@@ -50,6 +52,10 @@ Package.init(
         model: User,
         key: 'id',
       },
+    },
+    shipFromAddress: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     shipToAddress: {
       type: DataTypes.STRING,
