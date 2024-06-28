@@ -3,12 +3,13 @@ import { Package } from '../models/Package';
 import { generateTrackingNumber } from '../utils/generateTrackingNumber';
 
 export const addPackage = async (req: Request, res: Response) => {
-  const { userId, shipToAddress, phone, length, width, height, weight, postCode, email, state, name } = req.body;
+  const { userId, shipFromAddress, shipToAddress, phone, length, width, height, weight, postCode, email, state, name } = req.body;
   const trackingNumber = generateTrackingNumber(); // Generate a tracking number
 
   try {
     const pkg = await Package.create({
       userId,
+      shipFromAddress,
       shipToAddress,
       phone,
       length,
@@ -37,9 +38,9 @@ export const getPackages = async (req: Request, res: Response) => {
 };
 
 export const updatePackage = async (req: Request, res: Response) => {
-  const { shipToAddress, phone, length, width, height, weight, postCode, email, state, name } = req.body;
+  const { shipFromAddress, shipToAddress, phone, length, width, height, weight, postCode, email, state, name } = req.body;
   try {
-    const [rows, pkg] = await Package.update({ shipToAddress, phone, length, width, height, weight, postCode, email, state, name }, { where: { id: req.params.id }, returning: true });
+    const [rows, pkg] = await Package.update({ shipFromAddress, shipToAddress, phone, length, width, height, weight, postCode, email, state, name }, { where: { id: req.params.id }, returning: true });
     res.json(pkg);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
@@ -57,10 +58,11 @@ export const deletePackage = async (req: Request, res: Response) => {
 
 export const editPackage = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { shipToAddress, phone, length, width, height, weight, postCode, email, state, name } = req.body;
+  const { shipFromAddress, shipToAddress, phone, length, width, height, weight, postCode, email, state, name } = req.body;
 
   try {
     const [updated] = await Package.update({
+      shipFromAddress,
       shipToAddress,
       phone,
       length,
