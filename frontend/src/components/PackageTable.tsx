@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { tryLoad } from '../util/errors';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Button, IconButton, Alert, Container } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, IconButton, Alert, Container } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 export type PackageType = {
   id: number;
+  trackingNumber: string;
   userId: number;
   shipToAddress: string;
   phone: string;
@@ -40,7 +41,7 @@ const PackageTable: React.FC = () => {
     const token = localStorage.getItem('token');
 
     tryLoad(async () => {
-      await axios.delete(`${process.env.REACT_APP_API_URL}/api/packages/${id}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/packages/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPackages(packages.filter(pkg => pkg.id !== id));
@@ -65,6 +66,7 @@ const PackageTable: React.FC = () => {
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell>Tracking Number</TableCell>
                 <TableCell>Ship To Address</TableCell>
                 <TableCell>Phone</TableCell>
                 <TableCell>Length</TableCell>
@@ -81,6 +83,7 @@ const PackageTable: React.FC = () => {
             <TableBody>
               {packages.map(pkg => (
                 <TableRow key={pkg.id}>
+                  <TableCell>{pkg.trackingNumber}</TableCell>
                   <TableCell>{pkg.shipToAddress}</TableCell>
                   <TableCell>{pkg.phone}</TableCell>
                   <TableCell>{pkg.length}</TableCell>

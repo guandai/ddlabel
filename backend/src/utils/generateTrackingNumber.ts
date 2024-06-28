@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
-
 const COUNTRY_CODE = 'US'; // Replace with the appropriate country code
 
 const generateRandomLetter = () => {
