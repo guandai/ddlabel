@@ -74,6 +74,7 @@ const PackageTable: React.FC = () => {
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell>id</TableCell>
                 <TableCell>Ship To Address</TableCell>
                 <TableCell>Phone</TableCell>
                 <TableCell>Weight</TableCell>
