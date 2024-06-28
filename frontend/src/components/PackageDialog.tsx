@@ -16,6 +16,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({open, handleClose, selecte
                 {selectedPackage && (
                     <DialogContent>
                         <DialogContentText>
+                            <strong>Id:</strong> {selectedPackage.id}<br />
                             <strong>Tracking Number:</strong> {selectedPackage.trackingNumber}<br />
                             <strong>Name:</strong> {selectedPackage.name}<br />
                             <strong>Ship To Address:</strong> {selectedPackage.shipToAddress}<br />
