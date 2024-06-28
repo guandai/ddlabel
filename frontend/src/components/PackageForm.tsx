@@ -2,6 +2,22 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { TextField, Button, Box, Typography, Container, Alert, Select, MenuItem, InputLabel, FormControl, SelectChangeEvent } from '@mui/material';
 
+export type PackageType = {
+  id: number;
+  userId: number;
+  shipToAddress: string;
+  phone: string;
+  length: number;
+  width: number;
+  height: number;
+  weight: number;
+  postCode: string;
+  email: string;
+  state: string;
+  name: string;
+  trackingNumber: string;
+}
+
 type User = {
   id: number;
   name: string;
