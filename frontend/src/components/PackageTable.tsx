@@ -1,7 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Alert, Typography, Box, Container } from '@mui/material';
-import { Visibility, Edit, Delete, PictureAsPdf } from '@mui/icons-material';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Alert,
+  Typography,
+  Box,
+  Container
+} from '@mui/material';
+import { Visibility, Edit, Delete, PictureAsPdf, Label } from '@mui/icons-material';
 import { PackageType } from './PackageForm';
 import { tryLoad } from '../util/errors';
 import { generatePDF } from './generatePDF';
@@ -17,14 +30,12 @@ const PackageTable: React.FC = () => {
   useEffect(() => {
     const fetchPackages = async () => {
       const token = localStorage.getItem('token');
-      try {
+      tryLoad(async () => {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/packages`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setPackages(response.data);
-      } catch (error) {
-        setError('Failed to fetch packages.');
-      }
+      }, setError);
     };
     fetchPackages();
   }, []);
@@ -69,7 +80,6 @@ const PackageTable: React.FC = () => {
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         <TableContainer component={Paper}>
-          {error && <Alert severity="error">{error}</Alert>}
           {success && <Alert severity="success">{success}</Alert>}
           <Table>
             <TableHead>
@@ -94,11 +104,12 @@ const PackageTable: React.FC = () => {
                   <TableCell>{pkg.email}</TableCell>
                   <TableCell>{pkg.state}</TableCell>
                   <TableCell>{pkg.name}</TableCell>
-                  <TableCell>
+                  <TableCell style={{ width: '200px', whiteSpace: 'nowrap' }}>
                     <IconButton onClick={() => handleViewDetails(pkg)}><Visibility /></IconButton>
                     <IconButton onClick={() => handleEdit(pkg.id)}><Edit /></IconButton>
                     <IconButton onClick={() => handleDelete(pkg.id)}><Delete /></IconButton>
                     <IconButton onClick={() => generatePDF(pkg)}><PictureAsPdf /></IconButton>
+                    <IconButton component="a" href={`/packages/${pkg.id}/label`} target="_blank"><Label /></IconButton>
                   </TableCell>
                 </TableRow>
               ))}
