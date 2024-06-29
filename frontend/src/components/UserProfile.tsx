@@ -49,7 +49,7 @@ const UserProfile: React.FC = () => {
       return;
     }
     const token = localStorage.getItem('token');
-    setError(null);
+
     setSuccess(null);
     try {
       await axios.put(`${process.env.REACT_APP_API_URL}/users/${profile.id}`, profile, {
