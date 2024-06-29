@@ -7,6 +7,7 @@
     "backend"
   ],
   "scripts": {
+    "prod": "concurrently \"yarn workspace frontend prod\" \"yarn workspace backend prod\"",
     "start": "concurrently \"yarn workspace frontend start\" \"yarn workspace backend start\"",
     "build": "yarn workspace frontend build && yarn workspace backend build"
   },
