@@ -2,20 +2,21 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Container, Typography, Box, Alert } from '@mui/material';
+import { Container, Typography, Box, Alert, Button } from '@mui/material';
 import { PackageType } from './PackageForm';
 
 const PackageDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [pkg, setPkg] = useState<PackageType | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [rate, setRate] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchPackage = async () => {
       const token = localStorage.getItem('token');
       try {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/packages/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
         setPkg(response.data);
       } catch (error) {
@@ -24,6 +25,28 @@ const PackageDetails: React.FC = () => {
     };
     fetchPackage();
   }, [id]);
+
+  const handleGetRate = async () => {
+    if (pkg) {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/shipping-rates/calculate-rate`, {
+            params: {
+              length: 100, // Use actual values as needed
+              width: 100, // Use actual values as needed
+              height: 10, // Use actual values as needed
+              actualWeight: pkg.weight,
+              zone: 3, // Use actual zone as needed
+              unit: 'lbs',
+            },
+          }
+        );
+        setRate(response.data.totalCost);
+      } catch (error) {
+        setError('Failed to calculate shipping rate.');
+      }
+    }
+  };
 
   if (error) {
     return <Alert severity="error">{error}</Alert>;
@@ -55,6 +78,10 @@ const PackageDetails: React.FC = () => {
           <Typography><strong>State:</strong> {pkg.state}</Typography>
           <Typography><strong>Name:</strong> {pkg.name}</Typography>
           <Typography><strong>Tracking Number:</strong> {pkg.trackingNumber}</Typography>
+          {rate !== null && <Typography><strong>Shipping Rate:</strong> ${rate.toFixed(2)}</Typography>}
+          <Button variant="contained" color="primary" onClick={handleGetRate} sx={{ mt: 2 }}>
+            Get Rate
+          </Button>
         </Box>
       </Box>
     </Container>
