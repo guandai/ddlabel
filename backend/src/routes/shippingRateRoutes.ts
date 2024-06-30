@@ -1,13 +1,13 @@
 // backend/src/routes/shippingRateRoutes.ts
 import { Router, Request, Response } from 'express';
-import { getRate, getCalculateRate, getShippingRates } from '../controllers/shippingRateController';
+import { getSimpleRate, getFullRate, getShippingRates } from '../controllers/shippingRateController';
 
 const router = Router();
 
 router.get('/', getShippingRates);
 
-router.get('/rate', getRate);
+router.get('/simple-rate', getSimpleRate);
 
-router.get('/calculate-rate', getCalculateRate);
+router.get('/full-rate', getFullRate);
 
 export default router;
