@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Alert, Typography, Box, Container, Button } from '@mui/material';
-import { Visibility, Edit, Delete, PictureAsPdf, Label } from '@mui/icons-material';
+import { Visibility, Edit, Delete, PictureAsPdf, Label, AddCircle } from '@mui/icons-material';
 import { PackageType } from './PackageForm';
 import { tryLoad } from '../util/errors';
 import { generatePDF } from './generatePDF';
@@ -39,11 +39,11 @@ const PackageTable: React.FC = () => {
       setSuccess('Package deleted successfully.');
     }, setError);
   };
-  
+
   const handleEdit = (pkg: PackageType) => {
     navigate(`/packages/edit/${pkg.id}`);
   };
-  
+
   // Pass handleFormSubmit as a prop in PackageForm component call if directly used
 
   const handleViewDetails = (pkg: PackageType) => {
@@ -59,12 +59,18 @@ const PackageTable: React.FC = () => {
   return (
     <Container component="main" maxWidth="lg">
       <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography component="h1" variant="h5">Packages</Typography>
+        <Typography component="h1" variant="h5">Packages
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ ml: 2 }}
+            onClick={() => navigate('/packages/create')}
+            startIcon={<AddCircle />} // Adds the plus icon to the button
+          >
+            Add
+          </Button></Typography>
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
-        <Button variant="contained" color="primary" onClick={() => navigate('/packages/create')} sx={{ mb: 2 }}>
-          Add Package
-        </Button>
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
@@ -72,7 +78,7 @@ const PackageTable: React.FC = () => {
                 <TableCell>Ship To Address</TableCell>
                 <TableCell>Phone</TableCell>
                 <TableCell>Weight</TableCell>
-                <TableCell>Post Code</TableCell>
+                <TableCell>Postal</TableCell>
                 <TableCell>Email</TableCell>
                 <TableCell>State</TableCell>
                 <TableCell>Name</TableCell>
