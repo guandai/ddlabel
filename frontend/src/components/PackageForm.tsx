@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { TextField, Button, Box, Typography, Container, Alert, Select, MenuItem, InputLabel, FormControl, SelectChangeEvent } from '@mui/material';
+import { useNavigate, useParams } from 'react-router-dom';
+import { tryLoad } from '../util/errors';
 
 export type PackageType = {
   id: number;
@@ -29,28 +31,56 @@ type PackageFormProps = {
   onSubmit: (data: Partial<PackageType>) => void;
 };
 
-const PackageForm: React.FC<PackageFormProps> = ({ initialData = {}, onSubmit }) => {
+const PackageForm: React.FC<PackageFormProps> = ({ initialData = {} }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [packageData, setPackageData] = useState<Partial<PackageType>>({
     ...initialData,
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const navigate = useNavigate(); // Initialize useNavigate
+  const { id } = useParams<{ id: string }>(); // Get the id from the URL
+
+  console.log(`id`,id);
 
   useEffect(() => {
     const fetchUsers = async () => {
       const token = localStorage.getItem('token');
-      try {
+      tryLoad(async () => {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/users`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUsers(response.data);
-      } catch (error) {
-        setError('Failed to fetch users.');
-      }
+      }, setError);
     };
     fetchUsers();
+
+    if (id) {
+      const token = localStorage.getItem('token');
+      tryLoad(async () => {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/packages/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setPackageData(response.data);
+      }, setError);
+
+    }
   }, []);
+
+  const onSubmit = async (data: Partial<PackageType>) => {
+    const token = localStorage.getItem('token');
+    const header = {
+      headers: { Authorization: `Bearer ${token}` }
+    }
+    try {
+      id 
+        ? await axios.put(`${process.env.REACT_APP_API_URL}/packages/${id}`, data, header) 
+        : await axios.post(`${process.env.REACT_APP_API_URL}/packages`, data, header);
+      navigate('/packages'); // Redirect to the list of packages after successful creation
+    } catch (error) {
+      setError('Failed to create package.');
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPackageData({ ...packageData, [e.target.name]: e.target.value });
@@ -77,7 +107,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = {}, onSubmit })
         }}
       >
         <Typography component="h1" variant="h5">
-          {initialData.id ? 'Edit Package' : 'Add Package'}
+          {id ? 'Edit Package' : 'Add Package'}
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
@@ -99,6 +129,17 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = {}, onSubmit })
               ))}
             </Select>
           </FormControl>
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="shipFromAddress"
+            label="Ship From Address"
+            name="shipFromAddress"
+            autoComplete="address"
+            value={packageData.shipFromAddress || ''}
+            onChange={handleChange}
+          />
           <TextField
             margin="normal"
             required
@@ -216,7 +257,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = {}, onSubmit })
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            {initialData.id ? 'Update Package' : 'Add Package'}
+            {id ? 'Update Package' : 'Add Package'}
           </Button>
         </Box>
       </Box>
