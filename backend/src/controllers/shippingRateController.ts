@@ -5,31 +5,36 @@ import { Op } from 'sequelize';
 import { get } from 'mongoose';
 
 // Function to calculate shipping rate
-export async function calculateShippingRate(
+export const calculateShippingRate = async (
   length: number,
   width: number,
   height: number,
   actualWeight: number,
   zone: number,
   unit: string = "lbs"
-): Promise<number> {
+): Promise<number> => {
+  if (unit === "lbs" && actualWeight <= 1) {
+    actualWeight *= 16; // Convert pounds to ounces
+    unit = "oz"; // Change unit to ounces
+  }
+
   const volumetricWeight = unit === "inch"
     ? (length * width * height) / 250
     : (length * width * height) / 9000;
 
-  const billingWeight = Math.ceil(Math.max(volumetricWeight, actualWeight));
+  const weight = Math.ceil(Math.max(volumetricWeight, actualWeight));
 
-  const shippingRates = await getShippingRatesForWeight(billingWeight, unit);
+  const shippingRates = await getShippingRatesForWeight(weight, unit);
 
   if (!shippingRates) {
     throw new Error("No shipping rate found for the specified weight and zone");
   }
 
-  const rate = Number(shippingRates[`zone${zone}` as keyof ShippingRate]);
+  const rate = Number(shippingRates[`zone${zone}` as keyof ShippingRate]); // Convert rate to a number
 
-  const pickupCharge = Math.max(125, 0.065 * billingWeight);
+  const pickupCharge = Math.max(125, 0.065 * weight);
 
-  const fuelSurcharge = 0.10 * rate;
+  const fuelSurcharge = 0.10 * rate; // Use the converted rate
 
   const totalCost = rate + pickupCharge + fuelSurcharge;
 
@@ -37,7 +42,10 @@ export async function calculateShippingRate(
 }
 
 // Function to get shipping rates for a specific weight and zone
-export async function getShippingRatesForWeight(weight: number, unit: string): Promise<ShippingRate | null> {
+export const getShippingRatesForWeight = async (weight: number, unit: string): Promise<ShippingRate | null> => {
+  console.log(`key`, [Op.regexp]);
+  console.log(`value`, `\\d*<n=${weight}`);
+
   const data = await ShippingRate.findAll({
     where: {
       unit,
@@ -81,7 +89,7 @@ export const getRate = async (req: Request, res: Response) => {
   }
 }
 
-export const getCalculateRate =  (req: Request, res: Response) => {
+export const getCalculateRate = async (req: Request, res: Response) => {
   const { length, width, height, actualWeight, zone, unit } = req.query;
 
   if (!length || !width || !height || !actualWeight || !zone || !unit) {
@@ -95,7 +103,7 @@ export const getCalculateRate =  (req: Request, res: Response) => {
     const actualWeightNum = parseFloat(actualWeight as string);
     const zoneNum = parseInt(zone as string, 10);
 
-    const totalCost = calculateShippingRate(lengthNum, widthNum, heightNum, actualWeightNum, zoneNum, unit as string);
+    const totalCost = await calculateShippingRate(lengthNum, widthNum, heightNum, actualWeightNum, zoneNum, unit as string);
     res.json({ totalCost });
   } catch (error: any) {
     res.status(500).json({ message: error.message });

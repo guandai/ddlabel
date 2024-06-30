@@ -6,7 +6,6 @@ const router = Router();
 
 router.get('/', getShippingRates);
 
-
 router.get('/rate', getRate);
 
 router.get('/calculate-rate', getCalculateRate);
