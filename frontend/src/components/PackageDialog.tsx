@@ -5,11 +5,12 @@ import { PackageType } from './PackageForm';
 
 type PackageDialogProps = {
     open: boolean;
-    onClose: () => void;
-    selectedPackage: PackageType | null;
+    handleClose: () => void;
+    selectedPackage: PackageType | null
+    ;
 };
 
-const PackageDialog: React.FC<PackageDialogProps> = ({ open, onClose, selectedPackage }) => {
+const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, selectedPackage }) => {
     const [rate, setRate] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -34,7 +35,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, onClose, selectedPa
     };
 
     return (
-        <Dialog open={open} onClose={onClose} aria-labelledby="package-details-title">
+        <Dialog open={open} onClose={handleClose} aria-labelledby="package-details-title">
             <DialogTitle id="package-details-title">Package Details</DialogTitle>
             {selectedPackage && (
                 <DialogContent>
@@ -62,7 +63,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, onClose, selectedPa
             )}
             <DialogActions>
                 <Button onClick={handleGetRate} color="primary">Get Rate</Button>
-                <Button onClick={onClose} color="primary">Close</Button>
+                <Button onClick={handleClose} color="primary">Close</Button>
             </DialogActions>
         </Dialog>
     );
