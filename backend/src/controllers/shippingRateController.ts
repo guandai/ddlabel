@@ -13,9 +13,9 @@ export const calculateShippingRate = async (
   zone: number,
   unit: string = "lbs"
 ): Promise<number> => {
-  if (unit === "lbs" && actualWeight <= 1) {
-    actualWeight *= 16; // Convert pounds to ounces
-    unit = "oz"; // Change unit to ounces
+  if (unit === "oz" && actualWeight <= 1) {
+    actualWeight /= 16; // Convert pounds to ounces
+    unit = "lbs"; // Change unit to ounces
   }
 
   const volumetricWeight = unit === "inch"
@@ -43,9 +43,6 @@ export const calculateShippingRate = async (
 
 // Function to get shipping rates for a specific weight and zone
 export const getShippingRatesForWeight = async (weight: number, unit: string): Promise<ShippingRate | null> => {
-  console.log(`key`, [Op.regexp]);
-  console.log(`value`, `\\d*<n=${weight}`);
-
   const data = await ShippingRate.findAll({
     where: {
       unit,
