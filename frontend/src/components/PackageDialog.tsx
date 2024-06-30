@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Typography } from '@mui/material';
 import axios from 'axios';
 import { PackageType } from './PackageForm';
+import { borderBottomStyle } from 'html2canvas/dist/types/css/property-descriptors/border-style';
 
 type PackageDialogProps = {
     open: boolean;
@@ -48,11 +49,13 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                 <DialogContent>
                     <DialogContentText>
                         <strong>Id:</strong> {selectedPackage.id}<br />
-                        <Typography><strong>Shipping Rate: </strong>{rate === null ? '...' :  '$' + rate.toFixed(2) }</Typography>
+                        <strong>Shipping Rate: </strong>{rate === null ? '...' :  '$' + rate.toFixed(2) }
                         {error && (
                             <Typography color="error">{error}</Typography>
                         )}
-                        <hr></hr><br />
+                        <br />
+                        <span style={{ borderBottom: '1px solid black', width: '100%'}}>{'-'}</span>
+                        <br />
                         <strong>Tracking Number:</strong> {selectedPackage.trackingNumber}<br />
                         <strong>Name:</strong> {selectedPackage.name}<br />
                         <strong>Ship From Address:</strong> {selectedPackage.shipFromAddress}<br />

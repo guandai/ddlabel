@@ -78,8 +78,6 @@ const PackageTable: React.FC = () => {
                 <TableCell>Ship To Address</TableCell>
                 <TableCell>Phone</TableCell>
                 <TableCell>Weight</TableCell>
-                <TableCell>Postal</TableCell>
-                <TableCell>Email</TableCell>
                 <TableCell>State</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Actions</TableCell>
@@ -91,8 +89,6 @@ const PackageTable: React.FC = () => {
                   <TableCell>{pkg.shipToAddress}</TableCell>
                   <TableCell>{pkg.phone}</TableCell>
                   <TableCell>{pkg.weight}</TableCell>
-                  <TableCell>{pkg.postCode}</TableCell>
-                  <TableCell>{pkg.email}</TableCell>
                   <TableCell>{pkg.state}</TableCell>
                   <TableCell>{pkg.name}</TableCell>
                   <TableCell style={{ width: '200px', whiteSpace: 'nowrap' }}>
