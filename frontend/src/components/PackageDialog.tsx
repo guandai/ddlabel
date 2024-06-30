@@ -54,7 +54,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                             <Typography color="error">{error}</Typography>
                         )}
                         <br />
-                        <span style={{ borderBottom: '1px solid black', width: '100%'}}>{'-'}</span>
+                        <span style={{ fontSize: '0px' , paddingLeft: '100%', lineHeight: '30px', borderBottom: '1px solid black'}}>{' '}</span>
                         <br />
                         <strong>Tracking Number:</strong> {selectedPackage.trackingNumber}<br />
                         <strong>Name:</strong> {selectedPackage.name}<br />
