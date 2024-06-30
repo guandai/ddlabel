@@ -23,7 +23,7 @@ export const fullShippingRate = async (
 
   weight = Math.ceil(Math.max(volumetricWeight, weight));
 
-  if (width > 108 || height > 108 || length > 108 || weight > 150 ) {
+  if (width > 108 || height > 108 || length > 108 ) {
     return 1000;
   }
 
@@ -46,6 +46,21 @@ export const fullShippingRate = async (
 
 // Function to get shipping rates for a specific weight and zone
 export const getShippingRatesForWeight = async (weight: number, unit: string): Promise<ShippingRate | null> => {
+  if ( weight > 150 ) {
+    return {
+      weightRange: '150<n=999999',
+      unit: 'lbs',
+      zone1: 1000,
+      zone2: 1000,
+      zone3: 1000,
+      zone4: 1000,
+      zone5: 1000,
+      zone6: 1000,
+      zone7: 1000,
+      zone8: 1000,
+    } as ShippingRate;
+  }
+
   const data = await ShippingRate.findAll({
     where: {
       unit,

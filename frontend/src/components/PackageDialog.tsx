@@ -22,7 +22,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                         length: selectedPackage.length,
                         width: selectedPackage.width,
                         height: selectedPackage.height,
-                        actualWeight: selectedPackage.weight,
+                        weight: selectedPackage.weight,
                         zone: 3, // Replace with actual zone if available
                         unit: 'lbs',
                     },
@@ -55,6 +55,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                         <hr></hr><br />
                         <strong>Tracking Number:</strong> {selectedPackage.trackingNumber}<br />
                         <strong>Name:</strong> {selectedPackage.name}<br />
+                        <strong>Ship From Address:</strong> {selectedPackage.shipFromAddress}<br />
                         <strong>Ship To Address:</strong> {selectedPackage.shipToAddress}<br />
                         <strong>Phone:</strong> {selectedPackage.phone}<br />
                         <strong>Post Code:</strong> {selectedPackage.postCode}<br />
