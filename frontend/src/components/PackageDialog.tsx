@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Typography } from '@mui/material';
 import axios from 'axios';
 import { PackageType } from './PackageForm';
@@ -17,7 +17,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
     const handleGetRate = async () => {
         if (selectedPackage) {
             try {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL}/shipping-rates/calculate-rate`, {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/shipping-rates/full-rate`, {
                     params: {
                         length: selectedPackage.length,
                         width: selectedPackage.width,
@@ -34,6 +34,13 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
         }
     };
 
+    useEffect(() => {
+        setRate(null);
+        setError(null);
+        handleGetRate();
+    }
+    , [selectedPackage]);
+
     return (
         <Dialog open={open} onClose={handleClose} aria-labelledby="package-details-title">
             <DialogTitle id="package-details-title">Package Details</DialogTitle>
@@ -41,6 +48,11 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                 <DialogContent>
                     <DialogContentText>
                         <strong>Id:</strong> {selectedPackage.id}<br />
+                        <Typography><strong>Shipping Rate: </strong>{rate === null ? '...' :  '$' + rate.toFixed(2) }</Typography>
+                        {error && (
+                            <Typography color="error">{error}</Typography>
+                        )}
+                        <hr></hr><br />
                         <strong>Tracking Number:</strong> {selectedPackage.trackingNumber}<br />
                         <strong>Name:</strong> {selectedPackage.name}<br />
                         <strong>Ship To Address:</strong> {selectedPackage.shipToAddress}<br />
@@ -52,12 +64,6 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                         <strong>Length:</strong> {selectedPackage.length}<br />
                         <strong>Width:</strong> {selectedPackage.width}<br />
                         <strong>Height:</strong> {selectedPackage.height}<br />
-                        {rate !== null && (
-                            <Typography><strong>Shipping Rate:</strong> ${rate.toFixed(2)}</Typography>
-                        )}
-                        {error && (
-                            <Typography color="error">{error}</Typography>
-                        )}
                     </DialogContentText>
                 </DialogContent>
             )}
