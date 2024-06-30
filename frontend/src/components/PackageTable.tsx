@@ -1,25 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
-  Alert,
-  Typography,
-  Box,
-  Container,
-} from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Alert, Typography, Box, Container, Button } from '@mui/material';
 import { Visibility, Edit, Delete, PictureAsPdf, Label } from '@mui/icons-material';
 import { PackageType } from './PackageForm';
 import { tryLoad } from '../util/errors';
 import { generatePDF } from './generatePDF';
 import PackageDialog from './PackageDialog';
-import { useNavigate } from 'react-router-dom'; // Use useNavigate instead of useHistory
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
@@ -27,7 +14,7 @@ const PackageTable: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(null);
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     const fetchPackages = async () => {
@@ -52,10 +39,12 @@ const PackageTable: React.FC = () => {
       setSuccess('Package deleted successfully.');
     }, setError);
   };
-
+  
   const handleEdit = (pkg: PackageType) => {
-    navigate(`/packages/edit/${pkg.id}`); // Use navigate instead of history.push
+    navigate(`/packages/edit/${pkg.id}`);
   };
+  
+  // Pass handleFormSubmit as a prop in PackageForm component call if directly used
 
   const handleViewDetails = (pkg: PackageType) => {
     setSelectedPackage(pkg);
@@ -69,19 +58,13 @@ const PackageTable: React.FC = () => {
 
   return (
     <Container component="main" maxWidth="lg">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Typography component="h1" variant="h5">
-          Packages
-        </Typography>
+      <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Typography component="h1" variant="h5">Packages</Typography>
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
+        <Button variant="contained" color="primary" onClick={() => navigate('/packages/create')} sx={{ mb: 2 }}>
+          Add Package
+        </Button>
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
@@ -109,7 +92,7 @@ const PackageTable: React.FC = () => {
                   <TableCell style={{ width: '200px', whiteSpace: 'nowrap' }}>
                     <IconButton onClick={() => handleViewDetails(pkg)}><Visibility /></IconButton>
                     <IconButton onClick={() => handleEdit(pkg)}><Edit /></IconButton>
-                    <IconButton onClick={() => handleDelete(pkg.id)}><Delete /></IconButton>
+                    <IconButton onClick={() => handleDelete(pkg.id || 0)}><Delete /></IconButton>
                     <IconButton onClick={() => generatePDF(pkg)}><PictureAsPdf /></IconButton>
                     <IconButton component="a" href={`/packages/${pkg.id}/label`} target="_blank"><Label /></IconButton>
                   </TableCell>
@@ -118,8 +101,7 @@ const PackageTable: React.FC = () => {
             </TableBody>
           </Table>
         </TableContainer>
-
-        <PackageDialog open={open} onClose={handleClose} selectedPackage={selectedPackage} />
+        <PackageDialog open={open} handleClose={handleClose} selectedPackage={selectedPackage} />
       </Box>
     </Container>
   );
