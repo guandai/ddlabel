@@ -22,7 +22,8 @@ const App: React.FC = () => {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/profile" element={<PrivateRoute component={UserProfile} />} />
-        <Route path="/add-package" element={<PrivateRoute component={PackageForm} />} />
+        <Route path="/packages/create" element={<PrivateRoute component={PackageForm} />} />
+        <Route path="/packages/edit/:id" element={<PrivateRoute component={PackageForm} />} />
         <Route path="/packages" element={<PrivateRoute component={PackageTable} />} />
         <Route path="/transactions" element={<PrivateRoute component={TransactionTable} />} />
         <Route path="/packages/:id/label" element={<PrivateRoute component={PackageLabelPage} />} />
