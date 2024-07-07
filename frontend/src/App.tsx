@@ -1,6 +1,6 @@
 // frontend/src/App.tsx
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import Home from './components/Home';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
@@ -12,10 +12,14 @@ import PackageLabelPage from './components/PackageLabelPage';
 import PrivateRoute from './components/PrivateRoute';
 import Header from './components/Header';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const location = useLocation();
+
+  const showHeader = !(location.pathname.startsWith('/packages/') && location.pathname.match(/\/packages\/\d+\/label/));
+
   return (
-    <Router>
-      <Header />
+    <>
+      {showHeader && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
@@ -28,6 +32,14 @@ const App: React.FC = () => {
         <Route path="/transactions" element={<PrivateRoute component={TransactionTable} />} />
         <Route path="/packages/:id/label" element={<PrivateRoute component={PackageLabelPage} />} />
       </Routes>
+    </>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 };

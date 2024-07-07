@@ -9,7 +9,7 @@ export const fullShippingRate = async (
   width: number,
   height: number,
   weight: number,
-  zone: number,
+  zoneNum: number,
   unit: string = "lbs"
 ): Promise<number> => {
   if (unit === "oz" && weight <= 1) {
@@ -33,7 +33,7 @@ export const fullShippingRate = async (
     throw new Error(`No shipping rate found for the specified weight and zone ${weight} ${unit}`);
   }
 
-  const rate = Number(shippingRates[`zone${zone}` as keyof ShippingRate]); // Convert rate to a number
+  const rate = Number(shippingRates[`zone${zoneNum}` as keyof ShippingRate]); // Convert rate to a number
 
   const pickupCharge = Math.max(125, 0.065 * weight);
 

@@ -7,6 +7,7 @@ import userRoutes from './routes/userRoutes';
 import packageRoutes from './routes/packageRoutes';
 import transactionRoutes from './routes/transactionRoutes';
 import shippingRateRoutes from './routes/shippingRateRoutes';
+import postalZoneRoutes from './routes/postalZoneRoutes';
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/packages', packageRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/shipping-rates', shippingRateRoutes); // Add this line
+app.use('/api/postal-zones', postalZoneRoutes);
 
 // Connect to the database and start the server
 connectDB().then(() => {
