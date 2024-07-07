@@ -76,21 +76,19 @@ const PackageTable: React.FC = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Ship To Address</TableCell>
-                <TableCell>Phone</TableCell>
-                <TableCell>Weight</TableCell>
                 <TableCell>State</TableCell>
-                <TableCell>Name</TableCell>
+                <TableCell>Weight</TableCell>
+                <TableCell>Tracking</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {packages.map(pkg => (
                 <TableRow key={pkg.id}>
-                  <TableCell>{pkg.shipToAddress}</TableCell>
-                  <TableCell>{pkg.phone}</TableCell>
+                  <TableCell>{pkg.shipToAddress.addressLine1}</TableCell>
+                  <TableCell>{pkg.shipToAddress.state}</TableCell>
                   <TableCell>{pkg.weight}</TableCell>
-                  <TableCell>{pkg.state}</TableCell>
-                  <TableCell>{pkg.name}</TableCell>
+                  <TableCell>{pkg.trackingNumber}</TableCell>
                   <TableCell style={{ width: '200px', whiteSpace: 'nowrap' }}>
                     <IconButton onClick={() => handleViewDetails(pkg)}><Visibility /></IconButton>
                     <IconButton onClick={() => handleEdit(pkg)}><Edit /></IconButton>

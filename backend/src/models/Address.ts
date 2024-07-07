@@ -10,7 +10,7 @@ interface AddressAttributes {
   city: string;
   state: string;
   zip: string;
-  country: string;
+  email?: string;
   phone?: string;
 }
 
@@ -24,7 +24,7 @@ class Address extends Model<AddressAttributes, AddressCreationAttributes> implem
   public city!: string;
   public state!: string;
   public zip!: string;
-  public country!: string;
+  public email?: string;
   public phone?: string;
 }
 
@@ -59,9 +59,9 @@ Address.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    country: {
+    email: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     phone: {
       type: DataTypes.STRING,

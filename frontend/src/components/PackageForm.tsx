@@ -1,25 +1,22 @@
+// frontend/src/components/PackageForm.tsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { TextField, Button, Box, Typography, Container, Alert, Select, MenuItem, InputLabel, FormControl, SelectChangeEvent } from '@mui/material';
+import { TextField, Button, Box, Typography, Container, Alert, Select, MenuItem, InputLabel, FormControl, SelectChangeEvent, Grid } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { tryLoad } from '../util/errors';
+import AddressForm, { AddressType } from './AddressForm';
 
 export type PackageType = {
   id: number;
   userId: number;
-  shipFromAddress: string;
-  shipToAddress: string;
-  phone: string;
+  shipFromAddress: AddressType;
+  shipToAddress: AddressType;
   length: number;
   width: number;
   height: number;
   weight: number;
-  postCode: string;
-  email: string;
-  state: string;
-  name: string;
   trackingNumber: string;
-}
+};
 
 type User = {
   id: number;
@@ -38,10 +35,8 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = {} }) => {
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const navigate = useNavigate(); // Initialize useNavigate
-  const { id } = useParams<{ id: string }>(); // Get the id from the URL
-
-  console.log(`id`,id);
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -63,20 +58,19 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = {} }) => {
         });
         setPackageData(response.data);
       }, setError);
-
     }
-  }, []);
+  }, [id]);
 
   const onSubmit = async (data: Partial<PackageType>) => {
     const token = localStorage.getItem('token');
     const header = {
       headers: { Authorization: `Bearer ${token}` }
-    }
+    };
     try {
-      id 
-        ? await axios.put(`${process.env.REACT_APP_API_URL}/packages/${id}`, data, header) 
+      id
+        ? await axios.put(`${process.env.REACT_APP_API_URL}/packages/${id}`, data, header)
         : await axios.post(`${process.env.REACT_APP_API_URL}/packages`, data, header);
-      navigate('/packages'); // Redirect to the list of packages after successful creation
+      navigate('/packages');
     } catch (error) {
       setError('Failed to create package.');
     }
@@ -88,7 +82,17 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = {} }) => {
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
-    setPackageData({ ...packageData, [name as string]: value as string });
+    setPackageData({ ...packageData, [name]: value });
+  };
+
+  const handleAddressChange = (addressType: 'shipFromAddress' | 'shipToAddress') => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPackageData({
+      ...packageData,
+      [addressType]: {
+        ...packageData[addressType],
+        [e.target.name]: e.target.value,
+      },
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,7 +101,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = {} }) => {
   };
 
   return (
-    <Container component="main" maxWidth="sm">
+    <Container component="main" maxWidth="md">
       <Box
         sx={{
           marginTop: 8,
@@ -112,153 +116,99 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = {} }) => {
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-          <FormControl fullWidth margin="normal" required>
-            <InputLabel id="user-label">Assignee</InputLabel>
-            <Select
-              labelId="user-label"
-              id="userId"
-              name="userId"
-              value={packageData.userId?.toString() || ''}
-              label="Assignee"
-              onChange={handleSelectChange}
-            >
-              {users.map(user => (
-                <MenuItem key={user.id} value={user.id}>
-                  {user.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="shipFromAddress"
-            label="Ship From Address"
-            name="shipFromAddress"
-            autoComplete="address"
-            value={packageData.shipFromAddress || ''}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="shipToAddress"
-            label="Ship To Address"
-            name="shipToAddress"
-            autoComplete="address"
-            value={packageData.shipToAddress || ''}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="phone"
-            label="Phone"
-            name="phone"
-            autoComplete="phone"
-            value={packageData.phone || ''}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="length"
-            label="Length"
-            name="length"
-            type="number"
-            value={packageData.length || ''}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="width"
-            label="Width"
-            name="width"
-            type="number"
-            value={packageData.width || ''}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="height"
-            label="Height"
-            name="height"
-            type="number"
-            value={packageData.height || ''}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="weight"
-            label="Weight"
-            name="weight"
-            type="number"
-            value={packageData.weight || ''}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="postCode"
-            label="Post Code"
-            name="postCode"
-            autoComplete="postal-code"
-            value={packageData.postCode || ''}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            value={packageData.email || ''}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="state"
-            label="State"
-            name="state"
-            autoComplete="address-level1"
-            value={packageData.state || ''}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="name"
-            label="Name"
-            name="name"
-            autoComplete="name"
-            value={packageData.name || ''}
-            onChange={handleChange}
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
-            {id ? 'Update Package' : 'Add Package'}
-          </Button>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <FormControl fullWidth required>
+                <InputLabel id="user-label">Assignee</InputLabel>
+                <Select
+                  labelId="user-label"
+                  id="userId"
+                  name="userId"
+                  value={packageData.userId?.toString() || ''}
+                  label="Assignee"
+                  onChange={handleSelectChange}
+                >
+                  {users.map(user => (
+                    <MenuItem key={user.id} value={user.id}>
+                      {user.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <AddressForm
+                addressData={packageData.shipFromAddress}
+                onChange={handleAddressChange('shipFromAddress')}
+                title="Ship From Address"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <AddressForm
+                addressData={packageData.shipToAddress}
+                onChange={handleAddressChange('shipToAddress')}
+                title="Ship To Address"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                required
+                fullWidth
+                id="length"
+                label="Length"
+                name="length"
+                type="number"
+                value={packageData.length || ''}
+                onChange={handleChange}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                required
+                fullWidth
+                id="width"
+                label="Width"
+                name="width"
+                type="number"
+                value={packageData.width || ''}
+                onChange={handleChange}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                required
+                fullWidth
+                id="height"
+                label="Height"
+                name="height"
+                type="number"
+                value={packageData.height || ''}
+                onChange={handleChange}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                required
+                fullWidth
+                id="weight"
+                label="Weight"
+                name="weight"
+                type="number"
+                value={packageData.weight || ''}
+                onChange={handleChange}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+              >
+                {id ? 'Update Package' : 'Add Package'}
+              </Button>
+            </Grid>
+          </Grid>
         </Box>
       </Box>
     </Container>

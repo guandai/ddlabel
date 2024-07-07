@@ -1,21 +1,17 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 import { User } from './User';
+import { Address } from './Address';
 
 interface PackageAttributes {
   id: number;
   userId: number;
-  shipFromAddress: string;
-  shipToAddress: string;
-  phone: string;
+  shipFromAddressId: number;
+  shipToAddressId: number;
   length: number;
   width: number;
   height: number;
   weight: number;
-  postCode: string;
-  email: string;
-  state: string;
-  name: string;
   trackingNumber: string; // Add trackingNumber attribute
 }
 
@@ -24,17 +20,12 @@ interface PackageCreationAttributes extends Optional<PackageAttributes, 'id'> {}
 class Package extends Model<PackageAttributes, PackageCreationAttributes> implements PackageAttributes {
   public id!: number;
   public userId!: number;
-  public shipFromAddress!: string;
-  public shipToAddress!: string;
-  public phone!: string;
+  public shipFromAddressId!: number;
+  public shipToAddressId!: number;
   public length!: number;
   public width!: number;
   public height!: number;
   public weight!: number;
-  public postCode!: string;
-  public email!: string;
-  public state!: string;
-  public name!: string;
   public trackingNumber!: string; // Add trackingNumber attribute
 }
 
@@ -53,17 +44,21 @@ Package.init(
         key: 'id',
       },
     },
-    shipFromAddress: {
-      type: DataTypes.STRING,
+    shipFromAddressId: {
+      type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
+      references: {
+        model: Address,
+        key: 'id',
+      },
     },
-    shipToAddress: {
-      type: DataTypes.STRING,
+    shipToAddressId: {
+      type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
-    },
-    phone: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      references: {
+        model: Address,
+        key: 'id',
+      },
     },
     length: {
       type: DataTypes.DECIMAL(10, 2),
@@ -81,22 +76,6 @@ Package.init(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
-    postCode: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    state: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     trackingNumber: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -108,5 +87,8 @@ Package.init(
     tableName: 'packages',
   }
 );
+
+Package.belongsTo(Address, { as: 'shipFromAddress', foreignKey: 'shipFromAddressId' });
+Package.belongsTo(Address, { as: 'shipToAddress', foreignKey: 'shipToAddressId' });
 
 export { Package, PackageAttributes, PackageCreationAttributes };
