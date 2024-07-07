@@ -6,61 +6,38 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import html2canvas from 'html2canvas';
 
-
 export const generatePDF = async (pkg: PackageType) => {
+  // Create a container for the label
   const labelContainer = document.createElement('div');
-  labelContainer.style.width = '4in';
-  labelContainer.style.height = '6in';
+  labelContainer.style.width = '110mm'; // 4 inches in pixels (1 inch = 96 pixels)
+  labelContainer.style.height = 'auto'; // 6 inches in pixels
   labelContainer.style.position = 'absolute';
-  labelContainer.style.top = '-9999px';
-  labelContainer.style.left = '-9999px';
+  labelContainer.style.top = '-9999px'; // Move out of visible area
+  labelContainer.style.left = '-9999px'; // Move out of visible area
   document.body.appendChild(labelContainer);
+
+  // Create a root for React rendering
   const labelRoot = createRoot(labelContainer);
   labelRoot.render(<PackageLabel pkg={pkg} />);
   
   // Wait for the component to render
   await new Promise(resolve => setTimeout(resolve, 1000));
   
-  const canvas = await html2canvas(labelContainer);
+  // Convert the label to a canvas
+  const canvas = await html2canvas(labelContainer, { scale: 3 }); // Scale up to increase quality
   const imgData = canvas.toDataURL('image/png');
   
+  // Create a new PDF document
   const doc = new jsPDF({
     orientation: 'portrait',
-    unit: 'in',
-    format: [4, 6] // 4 inches x 6 inches
+    unit: 'mm',
+    format: [102, 152] // 4 inches x 6 inches
   });
-  doc.addImage(imgData, 'PNG', 0, 0, 4, 6); // Full 4"x6" size
+  doc.addImage(imgData, 'PNG', 0, 0, 102, 152); // Add the image to the PDF
   
+  // Clean up by removing the label container
   document.body.removeChild(labelContainer);
+  
+  // Save the PDF
   doc.save(`package_${pkg.id}_label.pdf`);
 };
-
-
-
-// export const generatePDF2 = async (pkg: PackageType) => {
-//   const labelContainer = document.createElement('div');
-//   labelContainer.style.width = '4in';
-//   labelContainer.style.height = '6in';
-//   labelContainer.style.position = 'absolute';
-//   labelContainer.style.top = '-9999px';
-//   labelContainer.style.left = '-9999px';
-//   document.body.appendChild(labelContainer);
-//   const labelRoot = createRoot(labelContainer);
-//   labelRoot.render();
-  
-//   // Wait for the component to render
-//   await new Promise(resolve => setTimeout(resolve, 1000));
-  
-//   const canvas = await html2canvas(labelContainer);
-//   const imgData = canvas.toDataURL('image/png');
-  
-//   const doc = new jsPDF({
-//   orientation: 'portrait',
-//   unit: 'in',
-//   format: [4, 6] // 4 inches x 6 inches
-//   });
-//   doc.addImage(imgData, 'PNG', 0, 0, 4, 6); // Full 4”x6” size
-  
-//   document.body.removeChild(labelContainer);
-//   doc.save(`package_${pkg.id}_label.pdf`);
-//   };

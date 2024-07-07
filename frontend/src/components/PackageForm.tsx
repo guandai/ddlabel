@@ -16,6 +16,7 @@ export type PackageType = {
   height: number;
   weight: number;
   trackingNumber: string;
+  reference?: string;
 };
 
 type User = {
