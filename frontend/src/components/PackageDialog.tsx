@@ -57,13 +57,15 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                         <span style={{ fontSize: '0px' , paddingLeft: '100%', lineHeight: '30px', borderBottom: '1px solid black'}}>{' '}</span>
                         <br />
                         <strong>Tracking Number:</strong> {selectedPackage.trackingNumber}<br />
-                        <strong>Name:</strong> {selectedPackage.name}<br />
-                        <strong>Ship From Address:</strong> {selectedPackage.shipFromAddress}<br />
-                        <strong>Ship To Address:</strong> {selectedPackage.shipToAddress}<br />
-                        <strong>Phone:</strong> {selectedPackage.phone}<br />
-                        <strong>Post Code:</strong> {selectedPackage.postCode}<br />
-                        <strong>Email:</strong> {selectedPackage.email}<br />
-                        <strong>State:</strong> {selectedPackage.state}<br />
+                        <strong>Ship From Address:</strong> {selectedPackage.shipFromAddress.addressLine1}<br />
+                        <strong>Name:</strong> {selectedPackage.shipToAddress.name}<br />
+                        <strong>City:</strong> {selectedPackage.shipToAddress.city}<br />
+                        <strong>Address:</strong> {selectedPackage.shipToAddress.addressLine1}<br />
+                        <strong>Address2:</strong> {selectedPackage.shipToAddress.addressLine2}<br />
+                        <strong>Phone:</strong> {selectedPackage.shipToAddress.phone}<br />
+                        <strong>To Zip Code:</strong> {selectedPackage.shipToAddress.zip}<br />
+                        <strong>Email:</strong> {selectedPackage.shipToAddress.email}<br />
+                        <strong>State:</strong> {selectedPackage.shipToAddress.state}<br />
                         <strong>Weight:</strong> {selectedPackage.weight}<br />
                         <strong>Length:</strong> {selectedPackage.length}<br />
                         <strong>Width:</strong> {selectedPackage.width}<br />
