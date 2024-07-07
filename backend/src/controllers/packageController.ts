@@ -5,7 +5,7 @@ import { Address } from '../models/Address';
 import { generateTrackingNumber } from '../utils/generateTrackingNumber';
 
 export const addPackage = async (req: Request, res: Response) => {
-  const { userId, shipFromAddress, shipToAddress, length, width, height, weight } = req.body;
+  const { userId, shipFromAddress, shipToAddress, length, width, height, weight, reference } = req.body;
   const trackingNumber = generateTrackingNumber();
 
   try {
@@ -21,6 +21,7 @@ export const addPackage = async (req: Request, res: Response) => {
       height,
       weight,
       trackingNumber,
+      reference,
     });
 
     res.status(201).json(pkg);

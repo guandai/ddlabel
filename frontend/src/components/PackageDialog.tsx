@@ -15,23 +15,40 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
     const [rate, setRate] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    const getZone = async () => {
+        if (!selectedPackage) {
+            return;
+        }
+        try {
+            const response = await axios.get(`${ process.env.REACT_APP_API_URL}/postal_zones/get_zone`, {
+                params: {
+                    zip: selectedPackage.shipToAddress.zip,
+                },
+            });
+            setRate(response.data.totalCost);
+        } catch (error) {
+            setError('Failed to calculate shipping rate.');
+        }
+    }
+
     const handleGetRate = async () => {
-        if (selectedPackage) {
-            try {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL}/shipping-rates/full-rate`, {
-                    params: {
-                        length: selectedPackage.length,
-                        width: selectedPackage.width,
-                        height: selectedPackage.height,
-                        weight: selectedPackage.weight,
-                        zone: 3, // Replace with actual zone if available
-                        unit: 'lbs',
-                    },
-                });
-                setRate(response.data.totalCost);
-            } catch (error) {
-                setError('Failed to calculate shipping rate.');
-            }
+        if (!selectedPackage) {
+            return;
+        }
+        try {
+            const response = await axios.get(`${ process.env.REACT_APP_API_URL}/shipping-rates/full-rate`, {
+                params: {
+                    length: selectedPackage.length,
+                    width: selectedPackage.width,
+                    height: selectedPackage.height,
+                    weight: selectedPackage.weight,
+                    zone: 3, // Replace with actual zone if available
+                    unit: 'lbs',
+                },
+            });
+            setRate(response.data.totalCost);
+        } catch (error) {
+            setError('Failed to calculate shipping rate.');
         }
     };
 
@@ -57,6 +74,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                         <span style={{ fontSize: '0px' , paddingLeft: '100%', lineHeight: '30px', borderBottom: '1px solid black'}}>{' '}</span>
                         <br />
                         <strong>Tracking Number:</strong> {selectedPackage.trackingNumber}<br />
+                        <strong>Tracking Number:</strong> {selectedPackage.reference}<br />
                         <strong>Ship From Address:</strong> {selectedPackage.shipFromAddress.addressLine1}<br />
                         <strong>Name:</strong> {selectedPackage.shipToAddress.name}<br />
                         <strong>City:</strong> {selectedPackage.shipToAddress.city}<br />

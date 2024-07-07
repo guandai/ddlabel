@@ -23,3 +23,13 @@ export type ResError = {
     "message": "Validation error" | string,
     "errors": ErrorDetail[];
 }
+
+declare module "*.svg" {
+    const content: string;
+    export default content;
+}
+
+declare module "*.jpg" {
+    const content: string;
+    export default content;
+}

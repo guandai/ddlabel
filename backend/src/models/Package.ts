@@ -13,6 +13,7 @@ interface PackageAttributes {
   height: number;
   weight: number;
   trackingNumber: string; // Add trackingNumber attribute
+  reference?: string;
 }
 
 interface PackageCreationAttributes extends Optional<PackageAttributes, 'id'> {}
@@ -27,6 +28,7 @@ class Package extends Model<PackageAttributes, PackageCreationAttributes> implem
   public height!: number;
   public weight!: number;
   public trackingNumber!: string; // Add trackingNumber attribute
+  public reference!: string;
 }
 
 Package.init(
@@ -77,6 +79,11 @@ Package.init(
       allowNull: false,
     },
     trackingNumber: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true, // Ensure the tracking number is unique
+    },
+    reference: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true, // Ensure the tracking number is unique
