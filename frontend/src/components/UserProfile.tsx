@@ -2,15 +2,26 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { TextField, Button, Box, Typography, Container, Alert, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material';
+import { tryLoad } from '../util/errors';
 
+type ProfileType = {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+  warehouseAddress: string;
+  warehouseZip: string;
+};
 const UserProfile: React.FC = () => {
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<ProfileType>({
     id: '',
     name: '',
     email: '',
     password: '',
     role: '',
-    warehouseAddress: ''
+    warehouseAddress: '',
+    warehouseZip: ''
   });
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -19,14 +30,12 @@ const UserProfile: React.FC = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem('token');
-      try {
+      tryLoad(setError, async () => {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/users/me`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setProfile(response.data);
-      } catch (error) {
-        setError('Failed to fetch profile data.');
-      }
+      });
     };
     fetchProfile();
   }, []);
@@ -51,14 +60,12 @@ const UserProfile: React.FC = () => {
     const token = localStorage.getItem('token');
 
     setSuccess(null);
-    try {
+    tryLoad(setError, async () => {
       await axios.put(`${process.env.REACT_APP_API_URL}/users/${profile.id}`, profile, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSuccess('Profile updated successfully.');
-    } catch (error) {
-      setError('Failed to update profile.');
-    }
+    });
   };
 
   return (
@@ -129,8 +136,19 @@ const UserProfile: React.FC = () => {
             id="warehouseAddress"
             label="Warehouse Address"
             name="warehouseAddress"
-            autoComplete="address"
+            autoComplete="warehouseAddress"
             value={profile.warehouseAddress}
+            onChange={handleChange}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="warehouseZip"
+            label="Warehouse Zip"
+            name="warehouseZip"
+            autoComplete="warehouseZip"
+            value={profile.warehouseZip}
             onChange={handleChange}
           />
           <FormControl fullWidth margin="normal">

@@ -12,8 +12,9 @@ interface PackageAttributes {
   width: number;
   height: number;
   weight: number;
-  trackingNumber: string; // Add trackingNumber attribute
+  trackingNumber: string;
   reference?: string;
+  warehouseZip?: string;
 }
 
 interface PackageCreationAttributes extends Optional<PackageAttributes, 'id'> {}
@@ -27,8 +28,9 @@ class Package extends Model<PackageAttributes, PackageCreationAttributes> implem
   public width!: number;
   public height!: number;
   public weight!: number;
-  public trackingNumber!: string; // Add trackingNumber attribute
+  public trackingNumber!: string;
   public reference!: string;
+  public warehouseZip!: string;
 }
 
 Package.init(
@@ -81,12 +83,15 @@ Package.init(
     trackingNumber: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true, // Ensure the tracking number is unique
+      unique: true,
     },
     reference: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true, // Ensure the tracking number is unique
+    },
+    warehouseZip: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
   },
   {
@@ -97,5 +102,6 @@ Package.init(
 
 Package.belongsTo(Address, { as: 'shipFromAddress', foreignKey: 'shipFromAddressId' });
 Package.belongsTo(Address, { as: 'shipToAddress', foreignKey: 'shipToAddressId' });
+Package.belongsTo(User, { as: 'user', foreignKey: 'userId' }); // Ensure alias 'owner' is defined here
 
 export { Package, PackageAttributes, PackageCreationAttributes };

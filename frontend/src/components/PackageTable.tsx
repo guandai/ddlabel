@@ -19,25 +19,25 @@ const PackageTable: React.FC = () => {
   useEffect(() => {
     const fetchPackages = async () => {
       const token = localStorage.getItem('token');
-      tryLoad(async () => {
+      tryLoad(setError, async () => {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/packages`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setPackages(response.data);
-      }, setError);
+      });
     };
     fetchPackages();
   }, []);
 
   const handleDelete = async (id: number) => {
     const token = localStorage.getItem('token');
-    tryLoad(async () => {
+    tryLoad(setError, async () => {
       await axios.delete(`${process.env.REACT_APP_API_URL}/packages/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPackages(packages.filter(pkg => pkg.id !== id));
       setSuccess('Package deleted successfully.');
-    }, setError);
+    });
   };
 
   const handleEdit = (pkg: PackageType) => {
