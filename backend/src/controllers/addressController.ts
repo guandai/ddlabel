@@ -14,7 +14,6 @@ export const createAddress = async (req: Request, res: Response) => {
       city,
       state,
       zip,
-      country,
       phone,
     });
     res.status(201).json(address);
@@ -62,7 +61,6 @@ export const updateAddress = async (req: Request, res: Response) => {
     address.city = city;
     address.state = state;
     address.zip = zip;
-    address.country = country;
     address.phone = phone;
 
     await address.save();
