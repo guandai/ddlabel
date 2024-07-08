@@ -23,8 +23,8 @@ app.use(cors({
 app.use('/api/users', userRoutes);
 app.use('/api/packages', packageRoutes);
 app.use('/api/transactions', transactionRoutes);
-app.use('/api/shipping-rates', shippingRateRoutes); // Add this line
-app.use('/api/postal-zones', postalZoneRoutes);
+app.use('/api/shipping_rates', shippingRateRoutes); // Add this line
+app.use('/api/postal_zones', postalZoneRoutes);
 
 // Connect to the database and start the server
 connectDB().then(() => {

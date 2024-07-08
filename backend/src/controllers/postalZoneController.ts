@@ -17,7 +17,46 @@ export const getPostalZoneById = async (req: Request, res: Response) => {
     if (postalZone) {
       res.json(postalZone);
     } else {
-      res.status(404).json({ message: 'Postal Zone not found' });
+      res.status(404).json({ message: 'PostalZone not found' });
+    }
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const getProposalByZip = async (req: Request, res: Response) => {
+  const { zip_code } = req.query as { zip_code: string };
+  try {
+    const postalZone = await PostalZone.findOne({
+      where: { zip_code }, // Cast zip to string
+    });
+
+    if (postalZone) {
+      res.json(postalZone.proposal);
+    } else {
+      res.status(404).json({ message: 'Proposal not found' });
+    }
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+type Zones = Pick<PostalZone ,'LAX' | 'SFO' | 'ORD' | 'JFK' | 'ATL' | 'DFW' | 'MIA' | 'SEA' | 'BOS' | 'PDX'>;
+
+export const getZoneByProposalAndZip = async (req: Request, res: Response) => {
+  const { proposal, zip_code } = req.query as { zip_code: string; proposal: string };
+
+  try {
+    const postalZone: PostalZone | null = await PostalZone.findOne({
+      where: {
+          zip_code,
+       },
+    });
+
+    if (postalZone) {
+      res.json(postalZone[proposal as keyof Zones]);
+    } else {
+      res.status(404).json({ message: 'Zone not found' });
     }
   } catch (error: any) {
     res.status(400).json({ message: error.message });
