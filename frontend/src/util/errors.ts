@@ -15,7 +15,7 @@ const tryError = (setError: SetError, error: any ) => {
       setError(message);
 }
 
-export const tryLoad = async (setError: SetError, callback: () => Promise<void>, errorCallback?: () => Promise<void>) => {
+export const tryLoad = async <T, P = void>(setError: SetError, callback: () => Promise<T>, errorCallback?: () => Promise<P>) => {
     try {
       return await callback();
     } catch (error) {

@@ -9,7 +9,7 @@ import html2canvas from 'html2canvas';
 export const generatePDF = async (pkg: PackageType) => {
   // Create a container for the label
   const labelContainer = document.createElement('div');
-  labelContainer.style.width = '110mm'; // 4 inches in pixels (1 inch = 96 pixels)
+  labelContainer.style.width = '100mm'; // 4 inches in pixels (1 inch = 96 pixels)
   labelContainer.style.height = 'auto'; // 6 inches in pixels
   labelContainer.style.position = 'absolute';
   labelContainer.style.top = '-9999px'; // Move out of visible area
