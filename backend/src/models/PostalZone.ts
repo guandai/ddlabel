@@ -3,16 +3,16 @@ import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../config/database';
 
 interface PostalZoneAttributes {
-  ZIP_CODE: string;
-  NEW_SORT_CODE: string;
-  SORT_CODE: string;
-  STATE: string;
-  CITY: string;
-  REMOTE_CODE: string;
-  CODE: string;
-  PROPOSAL: string;
-  START_ZIP?: string;
-  OPEN_DATE: string;
+  zip_code: string;
+  new_sort_code: string;
+  sort_code: string;
+  state: string;
+  city: string;
+  remote_code: string;
+  code: string;
+  proposal: string;
+  start_zip?: string;
+  open_date: string;
   LAX?: string;
   SFO?: string;
   ORD?: string;
@@ -26,16 +26,16 @@ interface PostalZoneAttributes {
 }
 
 class PostalZone extends Model<PostalZoneAttributes> implements PostalZoneAttributes {
-  public ZIP_CODE!: string;
-  public NEW_SORT_CODE!: string;
-  public SORT_CODE!: string;
-  public STATE!: string;
-  public CITY!: string;
-  public REMOTE_CODE!: string;
-  public CODE!: string;
-  public PROPOSAL!: string;
-  public START_ZIP?: string;
-  public OPEN_DATE!: string;
+  public zip_code!: string;
+  public new_sort_code!: string;
+  public sort_code!: string;
+  public state!: string;
+  public city!: string;
+  public remote_code!: string;
+  public code!: string;
+  public proposal!: string;
+  public start_zip?: string;
+  public open_date!: string;
   public LAX?: string;
   public SFO?: string;
   public ORD?: string;
@@ -50,44 +50,44 @@ class PostalZone extends Model<PostalZoneAttributes> implements PostalZoneAttrib
 
 PostalZone.init(
   {
-    ZIP_CODE: {
+    zip_code: {
       type: DataTypes.STRING(5),
       primaryKey: true,
     },
-    NEW_SORT_CODE: {
+    new_sort_code: {
       type: DataTypes.STRING(10),
       allowNull: false,
       defaultValue: '',
     },
-    SORT_CODE: {
+    sort_code: {
       type: DataTypes.STRING(10),
       allowNull: false,
     },
-    STATE: {
+    state: {
       type: DataTypes.STRING(2),
       allowNull: false,
     },
-    CITY: {
+    city: {
       type: DataTypes.STRING(50),
       allowNull: false,
     },
-    REMOTE_CODE: {
+    remote_code: {
       type: DataTypes.STRING(10),
       allowNull: false,
     },
-    CODE: {
+    code: {
       type: DataTypes.STRING(10),
       allowNull: false,
     },
-    PROPOSAL: {
+    proposal: {
       type: DataTypes.STRING(20),
       allowNull: false,
     },
-    START_ZIP: {
+    start_zip: {
       type: DataTypes.STRING(20),
       allowNull: true,
     },
-    OPEN_DATE: {
+    open_date: {
       type: DataTypes.STRING(20),
       allowNull: false,
     },
