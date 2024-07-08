@@ -2,6 +2,7 @@
 import React from 'react';
 import { AppBar, Toolbar, Button, Typography } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
+import MonkeyLogo from '../assets/svg/monkey_logo.svg';
 
 const Header: React.FC = () => {
   const isAuthenticated = !!localStorage.getItem('token'); // Check if user is authenticated
@@ -15,7 +16,8 @@ const Header: React.FC = () => {
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+        <img src={MonkeyLogo} width="48px" alt="Monkey Logo" />
+        <Typography variant="h6" sx={{ marginLeft: '0.5em', flexGrow: 1 }}>
           TMS Labeling System
         </Typography>
         <Button color="inherit" component={Link} to="/">
