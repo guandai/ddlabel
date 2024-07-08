@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Typography } from '@mui/material';
 import axios from 'axios';
 import { PackageType } from './PackageForm';
-import { borderBottomStyle } from 'html2canvas/dist/types/css/property-descriptors/border-style';
+import { tryLoad } from '../util/errors';
 
 type PackageDialogProps = {
     open: boolean;
@@ -19,10 +19,10 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
         if (!selectedPackage) {
             return;
         }
-        try {
+        return tryLoad(setError, async () => {
             const proposal = await axios.get(`${ process.env.REACT_APP_API_URL}/postal_zones/get_proposal`, {
                 params: {
-                    zip_code: selectedPackage.shipToAddress.zip,
+                    zip_code: selectedPackage.user.warehouseZip,
                 },
             });
 
@@ -32,20 +32,18 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                     proposal: proposal.data, 
                 },
             });
-
+            
             return zone.data.replace('Zone ', '');
-        } catch (error) {
-            setError('Failed to get zone.');
-        }
+        });
     }
-    // const response = await axios.get(`${ process.env.REACT_APP_API_URL}/postal_zones/get_proposal`,
+
     const handleGetRate = async () => {
         if (!selectedPackage) {
             return;
         }
-        try {
+        tryLoad(setError, async () =>{
             const zone = await getZone();
-            console.log(`z`, zone);
+            console.log(`zone x`, zone);
             const response = await axios.get(`${ process.env.REACT_APP_API_URL}/shipping_rates/full-rate`, {
                 params: {
                     length: selectedPackage.length,
@@ -57,9 +55,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                 },
             });
             setRate(response.data.totalCost);
-        } catch (error) {
-            setError('Failed to calculate shipping rate.');
-        }
+        });
     };
 
     useEffect(() => {
@@ -74,18 +70,19 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
             <DialogTitle id="package-details-title">Package Details</DialogTitle>
             {selectedPackage && (
                 <DialogContent>
+                    {error && (
+                <Typography color="error">{error}</Typography>
+            )}
                     <DialogContentText>
                         <strong>Id:</strong> {selectedPackage.id}<br />
                         <strong>Shipping Rate: </strong>{rate === null ? '...' :  '$' + rate.toFixed(2) }
-                        {error && (
-                            <Typography color="error">{error}</Typography>
-                        )}
+                        
                         <br />
                         <span style={{ fontSize: '0px' , paddingLeft: '100%', lineHeight: '30px', borderBottom: '1px solid black'}}>{' '}</span>
                         <br />
                         <strong>Tracking Number:</strong> {selectedPackage.trackingNumber}<br />
                         <strong>Reference Number:</strong> {selectedPackage.reference}<br />
-                        <strong>Warehouse Zip:</strong> {selectedPackage.warehouse_zip}<br />
+                        <strong>Warehouse Zip:</strong> {selectedPackage.warehouseZip}<br />
                         <strong>Ship From Address:</strong> {selectedPackage.shipFromAddress.addressLine1}<br />
                         <strong>Name:</strong> {selectedPackage.shipToAddress.name}<br />
                         <strong>City:</strong> {selectedPackage.shipToAddress.city}<br />

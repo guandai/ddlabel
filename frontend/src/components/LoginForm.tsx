@@ -15,12 +15,12 @@ const LoginForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    tryLoad(async () => {
+    tryLoad(setError, async () => {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/users/login`, formData);
         localStorage.setItem('token', response.data.token);
         window.location.href = '/packages';
         // handle success
-      }, setError);
+      });
   };
 
   return (

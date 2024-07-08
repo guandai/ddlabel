@@ -1,4 +1,3 @@
-// backend/src/controllers/packageController.ts
 import { Request, Response } from 'express';
 import { Package } from '../models/Package';
 import { Address } from '../models/Address';
@@ -6,7 +5,7 @@ import { generateTrackingNumber } from '../utils/generateTrackingNumber';
 import { User } from '../models/User';
 
 export const addPackage = async (req: Request, res: Response) => {
-  const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference, warehouse_zip } = req.body;
+  const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference, warehouseZip } = req.body;
   const trackingNumber = generateTrackingNumber();
 
   try {
@@ -23,7 +22,7 @@ export const addPackage = async (req: Request, res: Response) => {
       weight,
       trackingNumber,
       reference,
-      warehouse_zip,
+      warehouseZip,
     });
 
     res.status(201).json(pkg);
@@ -38,7 +37,7 @@ export const getPackages = async (req: Request, res: Response) => {
       include: [
         { model: Address, as: 'shipFromAddress' },
         { model: Address, as: 'shipToAddress' },
-        { model: User, as: 'owner' },
+        { model: User, as: 'user' },
       ],
     });
     res.json(packages);
@@ -116,7 +115,7 @@ export const getPackageDetails = async (req: Request, res: Response) => {
       include: [
         { model: Address, as: 'shipFromAddress' },
         { model: Address, as: 'shipToAddress' },
-        { model: User, as: 'owner'},
+        { model: User, as: 'user' },
       ],
     });
 

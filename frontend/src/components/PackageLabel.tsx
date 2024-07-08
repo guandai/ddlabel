@@ -1,4 +1,4 @@
-// frontend/src/components/NewPackageLabel.tsx
+// frontend/src/components PackageLabel.tsx
 import React from 'react';
 import QRCode from 'qrcode.react';
 import BarcodeComponent from './BarcodeComponent';
@@ -11,8 +11,7 @@ interface PackageLabelProps {
   pkg: PackageType;
 }
 
-const NewPackageLabel: React.FC<PackageLabelProps> = ({ pkg }) => {
-  console.log(`pkg`, pkg);
+const PackageLabel: React.FC<PackageLabelProps> = ({ pkg }) => {
   return (
     <Box sx={{ width: '384px', height: '576px', padding: '1em', border: '0.25em solid black', position: 'relative' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'top' }}>
@@ -44,7 +43,7 @@ const NewPackageLabel: React.FC<PackageLabelProps> = ({ pkg }) => {
         <Box sx={{ textAlign: 'right', mt: '1em', width: '40%' }}>
           <QRCode value={`${process.env.REACT_APP_URL}/packages/${pkg.id}`} size={136} /> {/* Increase QR code size */}
           <Typography sx={{ textAlign: 'center', fontSize: '2rem', color: 'white', backgroundColor: 'black', mt: '0.5em', lineHeight: 1 }}>{pkg.shipFromAddress.zip}</Typography> {/* SHIP TO zip code */}
-          <Typography sx={{ textAlign: 'center', fontSize: '0.8rem', color: 'black', backgroundColor: 'white', mt: '0.5em', lineHeight: 1 }}>Warehouse: {pkg.id}</Typography> {/* SHIP TO zip code */}
+          <Typography sx={{ textAlign: 'center', fontSize: '0.8rem', color: 'black', backgroundColor: 'white', mt: '0.5em', lineHeight: 1 }}>Warehouse: {pkg.user.warehouseZip}</Typography> {/* SHIP TO zip code */}
 
         </Box>
       </Box>
@@ -66,4 +65,4 @@ const NewPackageLabel: React.FC<PackageLabelProps> = ({ pkg }) => {
   );
 };
 
-export default NewPackageLabel;
+export default PackageLabel;
