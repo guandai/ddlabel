@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import { PackageType } from './PackageForm';
 import PackageLabel from './PackageLabel';
 import { Alert, CircularProgress } from '@mui/material';
+import { tryLoad } from '../util/errors';
 
 const PackageLabelPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,16 +16,13 @@ const PackageLabelPage: React.FC = () => {
   useEffect(() => {
     const fetchPackage = async () => {
       const token = localStorage.getItem('token');
-      try {
+      tryLoad(setError, async () => {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/packages/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setPkg(response.data);
         setLoading(false);
-      } catch (error) {
-        setError('Failed to fetch package.');
-        setLoading(false);
-      }
+      }, async () => setLoading(false));
     };
     fetchPackage();
   }, [id]);

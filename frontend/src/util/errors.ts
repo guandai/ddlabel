@@ -3,8 +3,7 @@ import { ResError } from "../types";
 
 type SetError = (value: React.SetStateAction<string | null>) => void;
 
-const tryError = (error: any, setError: SetError
-) => {
+const tryError = (setError: SetError, error: any ) => {
     const errorData = ((error as AxiosError).response?.data as ResError);
     let message = 'Failed to perform the operation.';
     const errors = errorData?.errors;
@@ -16,10 +15,11 @@ const tryError = (error: any, setError: SetError
       setError(message);
 }
 
-export const tryLoad = async (callback: () => Promise<void>, setError: SetError) => {
+export const tryLoad = async (setError: SetError, callback: () => Promise<void>, errorCallback?: () => Promise<void>) => {
     try {
-      await callback();
+      return await callback();
     } catch (error) {
-        tryError(error, setError);
+      tryError(setError, error);
+      return errorCallback ? await errorCallback() : '';
     }
 }

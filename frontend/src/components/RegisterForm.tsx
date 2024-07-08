@@ -28,10 +28,10 @@ const RegisterForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    tryLoad(async () => {
+    tryLoad(setError, async () => {
       await axios.post(`${process.env.REACT_APP_API_URL}/users/register`, formData);
       window.location.href = '/login';
-    }, setError)
+    })
   };
 
   return (
