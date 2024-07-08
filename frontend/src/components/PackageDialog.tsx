@@ -19,7 +19,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
         if (!selectedPackage) {
             return;
         }
-        return tryLoad(setError, async () => {
+        return tryLoad<number | '-', void>(setError, async () => {
             const proposal = await axios.get(`${ process.env.REACT_APP_API_URL}/postal_zones/get_proposal`, {
                 params: {
                     zip_code: selectedPackage.user.warehouseZip,
@@ -43,7 +43,10 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
         }
         tryLoad(setError, async () =>{
             const zone = await getZone();
-            console.log(`zone x`, zone);
+            if (!zone || zone === '-') {
+                setRate(null);
+                return;
+            }
             const response = await axios.get(`${ process.env.REACT_APP_API_URL}/shipping_rates/full-rate`, {
                 params: {
                     length: selectedPackage.length,
@@ -75,7 +78,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
             )}
                     <DialogContentText>
                         <strong>Id:</strong> {selectedPackage.id}<br />
-                        <strong>Shipping Rate: </strong>{rate === null ? '...' :  '$' + rate.toFixed(2) }
+                        <strong>Shipping Rate: </strong>{rate === null ? 'N/A' :  '$' + rate.toFixed(2) }
                         
                         <br />
                         <span style={{ fontSize: '0px' , paddingLeft: '100%', lineHeight: '30px', borderBottom: '1px solid black'}}>{' '}</span>
