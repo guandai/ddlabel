@@ -22,7 +22,6 @@ const createAddress = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             city,
             state,
             zip,
-            country,
             phone,
         });
         res.status(201).json(address);
@@ -71,7 +70,6 @@ const updateAddress = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         address.city = city;
         address.state = state;
         address.zip = zip;
-        address.country = country;
         address.phone = phone;
         yield address.save();
         res.json(address);

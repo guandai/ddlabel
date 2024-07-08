@@ -34,6 +34,10 @@ User.init({
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },
+    warehouseZip: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: false,
+    },
 }, {
     sequelize: database_1.sequelize,
     tableName: 'users',

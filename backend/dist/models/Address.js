@@ -37,9 +37,9 @@ Address.init({
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },
-    country: {
+    email: {
         type: sequelize_1.DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     phone: {
         type: sequelize_1.DataTypes.STRING,

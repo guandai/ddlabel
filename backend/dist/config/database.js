@@ -40,7 +40,7 @@ const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield sequelize.authenticate();
         console.log('Connection has been established successfully.');
-        yield sequelize.sync();
+        // sequelize.sync();
         console.log('Database synchronized successfully.');
     }
     catch (error) {

@@ -13,7 +13,7 @@ exports.getFullRate = exports.getSimpleRate = exports.getShippingRates = exports
 const ShippingRate_1 = require("../models/ShippingRate");
 const sequelize_1 = require("sequelize");
 // Function to calculate shipping rate
-const fullShippingRate = (length_1, width_1, height_1, weight_1, zone_1, ...args_1) => __awaiter(void 0, [length_1, width_1, height_1, weight_1, zone_1, ...args_1], void 0, function* (length, width, height, weight, zone, unit = "lbs") {
+const fullShippingRate = (length_1, width_1, height_1, weight_1, zoneNum_1, ...args_1) => __awaiter(void 0, [length_1, width_1, height_1, weight_1, zoneNum_1, ...args_1], void 0, function* (length, width, height, weight, zoneNum, unit = "lbs") {
     if (unit === "oz" && weight <= 1) {
         weight /= 16; // Convert pounds to ounces
         unit = "lbs"; // Change unit to ounces
@@ -29,7 +29,7 @@ const fullShippingRate = (length_1, width_1, height_1, weight_1, zone_1, ...args
     if (!shippingRates) {
         throw new Error(`No shipping rate found for the specified weight and zone ${weight} ${unit}`);
     }
-    const rate = Number(shippingRates[`zone${zone}`]); // Convert rate to a number
+    const rate = Number(shippingRates[`zone${zoneNum}`]); // Convert rate to a number
     const pickupCharge = Math.max(125, 0.065 * weight);
     const fuelSurcharge = 0.10 * rate; // Use the converted rate
     const totalCost = rate + pickupCharge + fuelSurcharge;

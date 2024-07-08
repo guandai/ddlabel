@@ -1,7 +1,22 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../config/database'; // Import your database configuration
 
-class SortCode extends Model {}
+interface SortCodeAttributes {
+  id: number;
+  port: string;
+  zipCode: string;
+  sortCode: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+export class SortCode extends Model<SortCodeAttributes> implements SortCodeAttributes{
+  public id!: number;
+  public port!: string;
+  public zipCode!: string;
+  public sortCode!: string;
+  public createdAt!: Date;
+  public updatedAt!: Date;
+}
 
 SortCode.init({
   id: {

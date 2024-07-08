@@ -17,10 +17,10 @@ const User_1 = require("../models/User");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, email, password, role, warehouseAddress } = req.body;
+    const { name, email, password, role, warehouseAddress, warehouseZip } = req.body;
     const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
     try {
-        const user = yield User_1.User.create({ name, email, password: hashedPassword, role, warehouseAddress });
+        const user = yield User_1.User.create({ name, email, password: hashedPassword, role, warehouseAddress, warehouseZip });
         res.status(201).json(user);
     }
     catch (error) {
