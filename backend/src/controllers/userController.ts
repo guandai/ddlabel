@@ -8,11 +8,11 @@ interface AuthRequest extends Request {
 }
 
 export const registerUser = async (req: Request, res: Response) => {
-  const { name, email, password, role, warehouseAddress } = req.body;
+  const { name, email, password, role, warehouseAddress, warehouseZip } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
-    const user = await User.create({ name, email, password: hashedPassword, role, warehouseAddress });
+    const user = await User.create({ name, email, password: hashedPassword, role, warehouseAddress, warehouseZip });
     res.status(201).json(user);
   } catch (error: any) {
     console.error(error); // Log the detailed error

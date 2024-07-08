@@ -8,7 +8,7 @@ import AddressForm, { AddressType } from './AddressForm';
 
 export type PackageType = {
   id: number;
-  userId: number;
+  user: User;
   shipFromAddress: AddressType;
   shipToAddress: AddressType;
   length: number;
@@ -17,11 +17,17 @@ export type PackageType = {
   weight: number;
   trackingNumber: string;
   reference?: string;
+  warehouse_zip?: string;
 };
 
 type User = {
   id: number;
   name: string;
+  email: string;
+  password: string;
+  role: string;
+  warehouseAddress: string;
+  warehouseZip: string;
 };
 
 type PackageFormProps = {
@@ -125,7 +131,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = {} }) => {
                   labelId="user-label"
                   id="userId"
                   name="userId"
-                  value={packageData.userId?.toString() || ''}
+                  value={packageData.user?.id.toString() || ''}
                   label="Assignee"
                   onChange={handleSelectChange}
                 >

@@ -3,9 +3,10 @@ import { Request, Response } from 'express';
 import { Package } from '../models/Package';
 import { Address } from '../models/Address';
 import { generateTrackingNumber } from '../utils/generateTrackingNumber';
+import { User } from '../models/User';
 
 export const addPackage = async (req: Request, res: Response) => {
-  const { userId, shipFromAddress, shipToAddress, length, width, height, weight, reference } = req.body;
+  const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference, warehouse_zip } = req.body;
   const trackingNumber = generateTrackingNumber();
 
   try {
@@ -13,7 +14,7 @@ export const addPackage = async (req: Request, res: Response) => {
     const toAddress = await Address.create(shipToAddress);
 
     const pkg = await Package.create({
-      userId,
+      userId: user.id,
       shipFromAddressId: fromAddress.id,
       shipToAddressId: toAddress.id,
       length,
@@ -22,6 +23,7 @@ export const addPackage = async (req: Request, res: Response) => {
       weight,
       trackingNumber,
       reference,
+      warehouse_zip,
     });
 
     res.status(201).json(pkg);
@@ -36,6 +38,7 @@ export const getPackages = async (req: Request, res: Response) => {
       include: [
         { model: Address, as: 'shipFromAddress' },
         { model: Address, as: 'shipToAddress' },
+        { model: User, as: 'owner' },
       ],
     });
     res.json(packages);
@@ -113,6 +116,7 @@ export const getPackageDetails = async (req: Request, res: Response) => {
       include: [
         { model: Address, as: 'shipFromAddress' },
         { model: Address, as: 'shipToAddress' },
+        { model: User, as: 'owner'},
       ],
     });
 

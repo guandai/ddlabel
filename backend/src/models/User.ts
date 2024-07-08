@@ -9,6 +9,7 @@ interface UserAttributes {
   password: string;
   role: string;
   warehouseAddress: string;
+  warehouseZip: string;
 }
 
 interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
@@ -20,6 +21,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public password!: string;
   public role!: string;
   public warehouseAddress!: string;
+  public warehouseZip!: string;
 }
 
 User.init(
@@ -47,6 +49,10 @@ User.init(
       allowNull: false,
     },
     warehouseAddress: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    warehouseZip: {
       type: DataTypes.STRING,
       allowNull: false,
     },
