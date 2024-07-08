@@ -12,7 +12,7 @@ type PackageDialogProps = {
 };
 
 const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, selectedPackage }) => {
-    const [rate, setRate] = useState<number | null>(null);
+    const [rate, setRate] = useState<number | string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const getZone = async () => {
@@ -44,7 +44,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
         tryLoad(setError, async () =>{
             const zone = await getZone();
             if (!zone || zone === '-') {
-                setRate(null);
+                setRate('Can not deliver');
                 return;
             }
             const response = await axios.get(`${ process.env.REACT_APP_API_URL}/shipping_rates/full-rate`, {
@@ -57,7 +57,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                     unit: 'lbs',
                 },
             });
-            setRate(response.data.totalCost);
+            setRate('$' + response.data.totalCost.toFixed(2));
         });
     };
 
@@ -78,7 +78,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
             )}
                     <DialogContentText>
                         <strong>Id:</strong> {selectedPackage.id}<br />
-                        <strong>Shipping Rate: </strong>{rate === null ? 'N/A' :  '$' + rate.toFixed(2) }
+                        <strong>Shipping Rate: </strong>{rate === null ? '...' :  rate }
                         
                         <br />
                         <span style={{ fontSize: '0px' , paddingLeft: '100%', lineHeight: '30px', borderBottom: '1px solid black'}}>{' '}</span>
