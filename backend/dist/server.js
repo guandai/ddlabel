@@ -25,7 +25,7 @@ const app = (0, express_1.default)();
 // Middleware
 app.use(express_1.default.json());
 const corsOptions = {
-    origin: process.env.FRONTEND_URL,
+    origin: /^https?:\/\/.*\.loadsmobile\.com(:[0-9]+)?$/,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
 };
