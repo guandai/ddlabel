@@ -27,6 +27,7 @@ app.use(express.json());
 const corsOptions = {
   origin: /^https?:\/\/.*\.loadsmobile\.com(:[0-9]+)?$/,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  port: "*",
   credentials: true,
 };
 app.use(cors(corsOptions));
