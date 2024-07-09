@@ -1,4 +1,4 @@
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 import { ResError } from "../types";
 
 type SetError = (value: React.SetStateAction<string | null>) => void;
@@ -23,3 +23,8 @@ export const tryLoad = async <T, P = void>(setError: SetError, callback: () => P
       return errorCallback ? await errorCallback() : '';
     }
 }
+
+export const loadApi = async<T>(setError: SetError, path: string, params: unknown) => tryLoad<T>(setError, async () => {
+  const responst = await axios.get<T>(`${ process.env.REACT_APP_API_URL}/${path}`, {params});
+  return responst.data;
+})
