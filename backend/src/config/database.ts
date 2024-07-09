@@ -3,7 +3,13 @@ import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
 
 // Load environment variables from .env file
-dotenv.config();
+const env = process.env.NODE_ENV || 'development';
+if (env === 'production') {
+  dotenv.config({ path: '.env.production' });
+} else {
+  dotenv.config({ path: '.env.development' });
+}
+
 
 // Create a new Sequelize instance
 const sequelize = new Sequelize({

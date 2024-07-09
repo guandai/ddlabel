@@ -13,11 +13,15 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors({
-  origin: 'http://localhost:3000',
+
+const env = process.env.NODE_ENV || 'development';
+
+const corsOptions = {
+  origin: process.env.FRONTEND_URL,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
-}));
+};
+app.use(cors(corsOptions));
 
 // Routes
 app.use('/api/users', userRoutes);

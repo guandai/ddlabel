@@ -17,7 +17,13 @@ exports.connectDB = exports.sequelize = void 0;
 const sequelize_1 = require("sequelize");
 const dotenv_1 = __importDefault(require("dotenv"));
 // Load environment variables from .env file
-dotenv_1.default.config();
+const env = process.env.NODE_ENV || 'development';
+if (env === 'production') {
+    dotenv_1.default.config({ path: '.env.production' });
+}
+else {
+    dotenv_1.default.config({ path: '.env.development' });
+}
 // Create a new Sequelize instance
 const sequelize = new sequelize_1.Sequelize({
     dialect: 'mysql',
