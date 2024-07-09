@@ -12,10 +12,18 @@ const packageRoutes_1 = __importDefault(require("./routes/packageRoutes"));
 const transactionRoutes_1 = __importDefault(require("./routes/transactionRoutes"));
 const shippingRateRoutes_1 = __importDefault(require("./routes/shippingRateRoutes"));
 const postalZoneRoutes_1 = __importDefault(require("./routes/postalZoneRoutes"));
+const dotenv_1 = __importDefault(require("dotenv"));
+// Load environment variables from .env file
+const env = process.env.NODE_ENV || 'development';
+if (env === 'production') {
+    dotenv_1.default.config({ path: '.env.production' });
+}
+else {
+    dotenv_1.default.config({ path: '.env.development' });
+}
 const app = (0, express_1.default)();
 // Middleware
 app.use(express_1.default.json());
-const env = process.env.NODE_ENV || 'development';
 const corsOptions = {
     origin: process.env.FRONTEND_URL,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
