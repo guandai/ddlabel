@@ -9,12 +9,20 @@ import transactionRoutes from './routes/transactionRoutes';
 import shippingRateRoutes from './routes/shippingRateRoutes';
 import postalZoneRoutes from './routes/postalZoneRoutes';
 
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+const env = process.env.NODE_ENV || 'development';
+if (env === 'production') {
+  dotenv.config({ path: '.env.production' });
+} else {
+  dotenv.config({ path: '.env.development' });
+}
+
 const app = express();
 
 // Middleware
 app.use(express.json());
-
-const env = process.env.NODE_ENV || 'development';
 
 const corsOptions = {
   origin: process.env.FRONTEND_URL,
