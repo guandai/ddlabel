@@ -10,7 +10,6 @@ if (env === 'production') {
   dotenv.config({ path: '.env.development' });
 }
 
-
 // Create a new Sequelize instance
 const sequelize = new Sequelize({
   dialect: 'mysql',
