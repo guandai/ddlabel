@@ -1,13 +1,23 @@
-// backend/src/routes/package.ts
+// backend/src/routes/packageRoutes.ts
 import { Router } from 'express';
-import { addPackage, deletePackage, editPackage, getPackageDetails, getPackages, updatePackage } from '../controllers/packageController';
+import {
+	addPackage,
+	getPackages,
+	updatePackage,
+	deletePackage,
+	getPackageDetails,
+	importPackages,
+	uploadMiddleware
+} from '../controllers/packageController';
+import { authenticate } from '../middleware/auth';
 
 const router = Router();
 
-router.post('/', addPackage);
-router.delete('/:id', deletePackage);
-router.put('/:id', updatePackage);
-router.get('/:id', getPackageDetails);
-router.get('/', getPackages);
+router.post('/', authenticate, addPackage);
+router.get('/', authenticate, getPackages);
+router.put('/:id', authenticate, updatePackage);
+router.delete('/:id', authenticate, deletePackage);
+router.get('/:id', authenticate, getPackageDetails);
+router.post('/import', authenticate, uploadMiddleware, importPackages);
 
 export default router;

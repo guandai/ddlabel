@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Alert, Typography, Box, Container, Button } from '@mui/material';
-import { Visibility, Edit, Delete, PictureAsPdf, Label, AddCircle } from '@mui/icons-material';
+import { Upload, Visibility, Edit, Delete, PictureAsPdf, Label, AddCircle } from '@mui/icons-material';
 import { PackageType } from './PackageForm';
 import { tryLoad } from '../util/errors';
 import { generatePDF } from './generatePDF';
 import PackageDialog from './PackageDialog';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import CSVReader from 'react-csv-reader';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
@@ -28,6 +29,24 @@ const PackageTable: React.FC = () => {
     };
     fetchPackages();
   }, []);
+
+  const handleFileUpload = async (data: any) => {
+    const token = localStorage.getItem('token');
+    try {
+      const formData = new FormData();
+      formData.append('file', data[0]);
+
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/packages/import`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setSuccess(response.data.message);
+    } catch (error: any) {
+      setError(error.response?.data?.message || 'Failed to import packages.');
+    }
+  };
 
   const handleDelete = async (id: number) => {
     const token = localStorage.getItem('token');
@@ -68,7 +87,24 @@ const PackageTable: React.FC = () => {
             startIcon={<AddCircle />} // Adds the plus icon to the button
           >
             Add
-          </Button></Typography>
+          </Button>
+          {' '}
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={<Upload />}
+            component="label"
+          >
+            Upload CSV
+            <CSVReader
+              cssClass="csv-input"
+              onFileLoaded={handleFileUpload}
+              parserOptions={{ header: true }}
+              inputId="csvFileInput"
+              inputStyle={{ display: 'none' }}
+            />
+          </Button>
+        </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
         <TableContainer component={Paper}>

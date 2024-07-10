@@ -1,8 +1,14 @@
+// backend/src/controllers/packageController.ts
 import { Request, Response } from 'express';
 import { Package } from '../models/Package';
 import { Address } from '../models/Address';
 import { generateTrackingNumber } from '../utils/generateTrackingNumber';
 import { User } from '../models/User';
+import multer from 'multer';
+import csv from 'csv-parser';
+import fs from 'fs';
+
+const upload = multer({ dest: 'uploads/' });
 
 export const addPackage = async (req: Request, res: Response) => {
   const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference, warehouseZip } = req.body;
@@ -128,3 +134,44 @@ export const getPackageDetails = async (req: Request, res: Response) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+export const importPackages = async (req: Request, res: Response) => {
+  console.log(req.file); // Log the file object
+  if (!req.file) {
+    return res.status(400).send({ message: 'No file uploaded' });
+  }
+
+  try {
+    const results: any[] = [];
+    fs.createReadStream(req.file.path)
+      .pipe(csv())
+      .on('data', (data) => results.push(data))
+      .on('end', async () => {
+        for (const pkgData of results) {
+          const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference, warehouseZip } = pkgData;
+          const trackingNumber = generateTrackingNumber();
+
+          const fromAddress = await Address.create(shipFromAddress);
+          const toAddress = await Address.create(shipToAddress);
+
+          await Package.create({
+            userId: user.id,
+            shipFromAddressId: fromAddress.id,
+            shipToAddressId: toAddress.id,
+            length,
+            width,
+            height,
+            weight,
+            trackingNumber,
+            reference,
+            warehouseZip,
+          });
+        }
+        res.status(200).send({ message: 'Packages imported successfully' });
+      });
+  } catch (error: any) {
+    res.status(500).send({ error: error.message });
+  }
+};
+
+export const uploadMiddleware = upload.single('file');
