@@ -7,8 +7,7 @@ import { User } from '../models/User';
 import multer from 'multer';
 import csv from 'csv-parser';
 import fs from 'fs';
-
-const upload = multer({ dest: 'uploads/' });
+import path from 'path';
 
 export const addPackage = async (req: Request, res: Response) => {
   const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference, warehouseZip } = req.body;
@@ -136,18 +135,20 @@ export const getPackageDetails = async (req: Request, res: Response) => {
 };
 
 export const importPackages = async (req: Request, res: Response) => {
-  console.log(req.file); // Log the file object
   if (!req.file) {
     return res.status(400).send({ message: 'No file uploaded' });
   }
 
   try {
+    const file = req.file;
     const results: any[] = [];
-    fs.createReadStream(req.file.path)
+
+    fs.createReadStream(file.path)
       .pipe(csv())
       .on('data', (data) => results.push(data))
       .on('end', async () => {
         for (const pkgData of results) {
+          console.log(`pkgData`, pkgData);
           const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference, warehouseZip } = pkgData;
           const trackingNumber = generateTrackingNumber();
 
@@ -174,4 +175,14 @@ export const importPackages = async (req: Request, res: Response) => {
   }
 };
 
-export const uploadMiddleware = upload.single('file');
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+  }
+});
+const upload = multer({ storage });
+
+export const uploadMiddleware = upload.single('packageCsvFile');  // the same as PackageTable.tsx

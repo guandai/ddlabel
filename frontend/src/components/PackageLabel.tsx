@@ -58,7 +58,7 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg }) => {
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Box sx={{ textAlign: 'left' }}>
-              <Typography sx={{ fontWeight: 'bold' }}>Return to:</Typography>
+              <Typography sx={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Return to:</Typography>
               <Typography sx={{ fontSize: '0.8rem' }}>{pkg.shipFromAddress.name}</Typography>
               <Typography sx={{ fontSize: '0.8rem' }}>{pkg.shipFromAddress.addressLine1}</Typography>
               <Typography sx={{ fontSize: '0.8rem' }}>{pkg.shipFromAddress.addressLine2}</Typography>
@@ -77,9 +77,8 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg }) => {
         <Box sx={{ position: 'relative', textAlign: 'right', mt: '1em', width: '40%' }}>
           <QRCode value={`${process.env.REACT_APP_URL}/packages/${pkg.id}`} size={136} /> {/* Increase QR code size */}
           <Typography sx={{ textAlign: 'center', fontSize: '3rem', fontWeight: 'bold', lineHeight: 1 }}>{ toProposal as string }</Typography> 
-          <Typography sx={{ textAlign: 'center', fontSize: '2rem', color: 'white', backgroundColor: 'black', lineHeight: 1 }}>{pkg.shipFromAddress.zip}</Typography>
-          <Typography sx={{ textAlign: 'center', fontSize: '1rem',  mt: '1em', lineHeight: 1 }}>Warehouse:</Typography> 
-          <Typography sx={{ textAlign: 'center', fontSize: '1rem',  mt: '0.5em', lineHeight: 1 }}>{ pkg.user.warehouseZip }  { fromProposal as string }</Typography> 
+          <Typography sx={{ textAlign: 'center', fontSize: '2rem', color: 'white', backgroundColor: 'black', lineHeight: 1 }}>{pkg.shipToAddress.zip}</Typography>
+
           <Box sx={{ mb: '-0.5em', textAlign: 'right' }}>
             <Typography sx={{ fontSize: '0.8rem', position: 'absolute', right: 0, bottom: 0 }}>{pkg.weight} lbs.</Typography>
           </Box>
@@ -91,10 +90,15 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg }) => {
       </Box>
 
 
-      <Box sx={{ width: "100%", position: "absolute", bottom: "0", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box sx={{ textAlign: 'left', fontWeight: 'bold', fontSize: '1.2rem' }}>
-          reference <br />{pkg.reference}
-        </Box>
+      <Box sx={{ position: "absolute", bottom: "0"  }}>
+        
+          <Box sx={{ fontSize: '0.8rem' }}>
+            Reference:
+          </Box>
+          <Box sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
+            {pkg.reference}
+          </Box>
+        
       </Box>
 
       <Box sx={{ position: "absolute", bottom: "0", right: '-1.2em'}}>
