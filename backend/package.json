@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "ts-node-dev src/server.ts",
-    "prod": "tsc && NODE_ENV=production pm2 start dist/server.js --name backend --watch --ignore-watch='node_modules' --watch-delay 1000",
+    "prod": "NODE_ENV=production npx pm2 start dist/server.js --name backend --watch --ignore-watch='node_modules' --watch-delay 1000",
     "build": "tsc"
   },
   "dependencies": {
