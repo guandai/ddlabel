@@ -34,7 +34,7 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = yield User_1.User.findOne({ where: { email } });
         if (user && (yield bcryptjs_1.default.compare(password, user.password))) {
-            const token = jsonwebtoken_1.default.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+            const token = jsonwebtoken_1.default.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
             res.json({ token });
         }
         else {

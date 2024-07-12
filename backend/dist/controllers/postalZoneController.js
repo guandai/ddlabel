@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getZoneByProposalAndZip = exports.getProposalByZip = exports.getPostalZoneById = exports.getPostalZones = void 0;
+exports.getZoneByProposalAndZip = exports.getProposalByZip = exports.getPostalZoneById = exports.getPostalZoneByZip = exports.getPostalZones = void 0;
 const PostalZone_1 = require("../models/PostalZone");
 const getPostalZones = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -21,6 +21,24 @@ const getPostalZones = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getPostalZones = getPostalZones;
+const getPostalZoneByZip = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { zip_code } = req.query;
+        const postalZone = yield PostalZone_1.PostalZone.findOne({
+            where: { zip_code },
+        });
+        if (postalZone) {
+            res.json(postalZone);
+        }
+        else {
+            res.status(404).json({ message: 'PostalZone not found' });
+        }
+    }
+    catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+exports.getPostalZoneByZip = getPostalZoneByZip;
 const getPostalZoneById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const postalZone = yield PostalZone_1.PostalZone.findByPk(req.params.id);
