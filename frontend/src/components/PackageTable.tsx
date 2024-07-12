@@ -7,7 +7,6 @@ import { tryLoad } from '../util/errors';
 import { generatePDF } from './generatePDF';
 import PackageDialog from './PackageDialog';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import CSVReader from 'react-csv-reader';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
@@ -30,11 +29,12 @@ const PackageTable: React.FC = () => {
     fetchPackages();
   }, []);
 
-  const handleFileUpload = async (data: any) => {
+  const handleFileUpload = async (e: any) => {
     const token = localStorage.getItem('token');
     try {
       const formData = new FormData();
-      formData.append('file', data[0]);
+      const packageCsvFile = e.target.files[0];
+      formData.append('packageCsvFile', packageCsvFile);  // the same as PackageController.ts
 
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/packages/import`, formData, {
         headers: {
@@ -96,12 +96,11 @@ const PackageTable: React.FC = () => {
             component="label"
           >
             Upload CSV
-            <CSVReader
-              cssClass="csv-input"
-              onFileLoaded={handleFileUpload}
-              parserOptions={{ header: true }}
-              inputId="csvFileInput"
-              inputStyle={{ display: 'none' }}
+            <input
+              type="file"
+              accept=".csv"
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
             />
           </Button>
         </Typography>
