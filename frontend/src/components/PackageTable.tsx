@@ -7,9 +7,11 @@ import { tryLoad } from '../util/errors';
 import { generatePDF } from './generatePDF';
 import PackageDialog from './PackageDialog';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { UserType } from './LoginForm';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
+  const [user, setUser] = useState<Partial<UserType>>();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(null);
@@ -19,6 +21,9 @@ const PackageTable: React.FC = () => {
   useEffect(() => {
     const fetchPackages = async () => {
       const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      setUser({ id: Number(userId) });
+
       tryLoad(setError, async () => {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/packages`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -31,10 +36,17 @@ const PackageTable: React.FC = () => {
 
   const handleFileUpload = async (e: any) => {
     const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+
+    if (!userId) {
+      return setError('Please login');
+    }
+
     try {
       const formData = new FormData();
       const packageCsvFile = e.target.files[0];
       formData.append('packageCsvFile', packageCsvFile);  // the same as PackageController.ts
+      formData.append('packageUserId', userId); 
 
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/packages/import`, formData, {
         headers: {

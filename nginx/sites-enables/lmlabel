@@ -1,11 +1,11 @@
 server {
-    if ($host = track.loadsmobile.com) {
+    if ($host = track.daidk.com) {
         return 301 https://$host$request_uri;
     } # managed by Certbot
 
 
     listen 80; # Listen on port 80 for HTTP
-    server_name track.loadsmobile.com; # Replace with your domain name
+    server_name track.daidk.com; # Replace with your domain name
 
     root /git/package-management-system/ ; # The root directory where your static files are located
     index index.html ; # The default file to serve
@@ -31,9 +31,9 @@ server {
 
 server {
     listen 443 ssl; # Listen on port 443 for HTTPS
-    server_name track.loadsmobile.com;
-    ssl_certificate /etc/letsencrypt/live/track.loadsmobile.com/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/track.loadsmobile.com/privkey.pem; # managed by Certbot
+    server_name track.daidk.com;
+    ssl_certificate /etc/letsencrypt/live/track.daidk.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/track.daidk.com/privkey.pem; # managed by Certbot
 
 
     location /api/packages {
