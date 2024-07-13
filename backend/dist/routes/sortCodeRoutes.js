@@ -8,4 +8,4 @@ router.get('/', auth_1.authenticate, sortCodeController.getAllSortCodes);
 router.post('/', auth_1.authenticate, sortCodeController.createSortCode);
 router.put('/:id', auth_1.authenticate, sortCodeController.updateSortCode);
 router.delete('/:id', auth_1.authenticate, sortCodeController.deleteSortCode);
-module.exports = router;
+exports.default = router;
