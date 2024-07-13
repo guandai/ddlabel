@@ -138,21 +138,36 @@ const importPackages = (req, res) => __awaiter(void 0, void 0, void 0, function*
     if (!req.file) {
         return res.status(400).send({ message: 'No file uploaded' });
     }
-    try {
-        const file = req.file;
-        const results = [];
-        fs_1.default.createReadStream(file.path)
-            .pipe((0, csv_parser_1.default)())
-            .on('data', (data) => results.push(data))
-            .on('end', () => __awaiter(void 0, void 0, void 0, function* () {
-            for (const pkgData of results) {
-                console.log(`pkgData`, pkgData);
-                const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference, warehouseZip } = pkgData;
-                const trackingNumber = (0, generateTrackingNumber_1.generateTrackingNumber)();
+    const file = req.file;
+    const { packageUserId } = req.body;
+    const results = [];
+    fs_1.default.createReadStream(file.path)
+        .pipe((0, csv_parser_1.default)())
+        .on('data', (data) => results.push(data))
+        .on('end', () => __awaiter(void 0, void 0, void 0, function* () {
+        for (const pkgData of results) {
+            console.log(`pkgData`, pkgData);
+            const { length, width, height, weight, reference, warehouseZip, shipFromName, shipFromAddressStreet, shipFromAddressCity, shipFromAddressState, shipFromAddressZip, shipToName, shipToAddressStreet, shipToAddressCity, shipToAddressState, shipToAddressZip } = pkgData;
+            const trackingNumber = (0, generateTrackingNumber_1.generateTrackingNumber)();
+            const shipFromAddress = {
+                name: shipFromName,
+                addressLine1: shipFromAddressStreet,
+                city: shipFromAddressCity,
+                state: shipFromAddressState,
+                zip: shipFromAddressZip,
+            };
+            const shipToAddress = {
+                name: shipToName,
+                addressLine1: shipToAddressStreet,
+                city: shipToAddressCity,
+                state: shipToAddressState,
+                zip: shipToAddressZip,
+            };
+            try {
                 const fromAddress = yield Address_1.Address.create(shipFromAddress);
                 const toAddress = yield Address_1.Address.create(shipToAddress);
                 yield Package_1.Package.create({
-                    userId: user.id,
+                    userId: packageUserId,
                     shipFromAddressId: fromAddress.id,
                     shipToAddressId: toAddress.id,
                     length,
@@ -164,12 +179,12 @@ const importPackages = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     warehouseZip,
                 });
             }
-            res.status(200).send({ message: 'Packages imported successfully' });
-        }));
-    }
-    catch (error) {
-        res.status(500).send({ error: error.message });
-    }
+            catch (error) {
+                return res.status(500).send({ error: error.message });
+            }
+        }
+        res.status(200).send({ message: 'Packages imported successfully' });
+    }));
 });
 exports.importPackages = importPackages;
 const storage = multer_1.default.diskStorage({

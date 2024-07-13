@@ -5,10 +5,11 @@ import { TextField, Button, Box, Typography, Container, Alert, Select, MenuItem,
 import { useNavigate, useParams } from 'react-router-dom';
 import { tryLoad } from '../util/errors';
 import AddressForm, { AddressType } from './AddressForm';
+import { UserType } from './LoginForm';
 
 export type PackageType = {
   id: number;
-  user: User;
+  user: UserType;
   shipFromAddress: AddressType;
   shipToAddress: AddressType;
   length: number;
@@ -18,16 +19,6 @@ export type PackageType = {
   trackingNumber: string;
   reference?: string;
   warehouseZip?: string;
-};
-
-type User = {
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-  role: string;
-  warehouseAddress: string;
-  warehouseZip: string;
 };
 
 type PackageFormProps = {
@@ -49,7 +40,7 @@ const defaultPackageData: PackageType = {
   id: 0
 };
 const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageData }) => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserType[]>([]);
   const [packageData, setPackageData] = useState<PackageType>(
     initialData,
   );
