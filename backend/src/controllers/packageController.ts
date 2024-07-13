@@ -137,10 +137,9 @@ export const getPackageDetails = async (req: Request, res: Response) => {
 export const importPackages = async (req: Request, res: Response) => {
   if (!req.file) {
     return res.status(400).send({ message: 'No file uploaded' });
-  }
-
-  try {
+  }  
     const file = req.file;
+    const { packageUserId } = req.body;
     const results: any[] = [];
 
     fs.createReadStream(file.path)
@@ -149,30 +148,65 @@ export const importPackages = async (req: Request, res: Response) => {
       .on('end', async () => {
         for (const pkgData of results) {
           console.log(`pkgData`, pkgData);
-          const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference, warehouseZip } = pkgData;
+          const {
+            length, 
+            width, 
+            height, 
+            weight, 
+            reference, 
+            warehouseZip, 
+            shipFromName,
+            shipFromAddressStreet, 
+            shipFromAddressCity, 
+            shipFromAddressState, 
+            shipFromAddressZip, 
+            shipToName,
+            shipToAddressStreet, 
+            shipToAddressCity, 
+            shipToAddressState, 
+            shipToAddressZip } = pkgData;
           const trackingNumber = generateTrackingNumber();
 
-          const fromAddress = await Address.create(shipFromAddress);
-          const toAddress = await Address.create(shipToAddress);
+          const shipFromAddress = {
+            name: shipFromName,
+            addressLine1: shipFromAddressStreet,
+            city: shipFromAddressCity,
+            state: shipFromAddressState,
+            zip: shipFromAddressZip,
+          };
+    
+          const shipToAddress = {
+            name: shipToName,
+            addressLine1: shipToAddressStreet,
+            city: shipToAddressCity,
+            state: shipToAddressState,
+            zip: shipToAddressZip,
+          };
 
-          await Package.create({
-            userId: user.id,
-            shipFromAddressId: fromAddress.id,
-            shipToAddressId: toAddress.id,
-            length,
-            width,
-            height,
-            weight,
-            trackingNumber,
-            reference,
-            warehouseZip,
-          });
+          try {
+
+            const fromAddress = await Address.create(shipFromAddress);
+            const toAddress = await Address.create(shipToAddress);
+          
+            await Package.create({
+              userId: packageUserId,
+              shipFromAddressId: fromAddress.id,
+              shipToAddressId: toAddress.id,
+              length,
+              width,
+              height,
+              weight,
+              trackingNumber,
+              reference,
+              warehouseZip,
+            });
+          } catch (error: any) {
+            return res.status(500).send({ error: error.message });
+          }
         }
         res.status(200).send({ message: 'Packages imported successfully' });
-      });
-  } catch (error: any) {
-    res.status(500).send({ error: error.message });
-  }
+      })
+  
 };
 
 const storage = multer.diskStorage({

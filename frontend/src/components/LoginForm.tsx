@@ -4,6 +4,16 @@ import axios from 'axios';
 import { TextField, Button, Box, Typography, Container, Alert } from '@mui/material';
 import { tryLoad } from '../util/errors';
 
+export type UserType = {
+  id: number;
+  name: string;
+  email: string;
+  password?: string;
+  role: string;
+  warehouseAddress: string;
+  warehouseZip: string;
+};
+
 const LoginForm: React.FC = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState<string | null>(null);
@@ -18,6 +28,7 @@ const LoginForm: React.FC = () => {
     tryLoad(setError, async () => {
         const response = await axios.post(`${process.env.REACT_APP_API_URL}/users/login`, formData);
         localStorage.setItem('token', response.data.token);
+        localStorage.setItem('userId', response.data.userId);
         window.location.href = '/packages';
         // handle success
       });
