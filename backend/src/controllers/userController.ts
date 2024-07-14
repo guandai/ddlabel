@@ -38,20 +38,16 @@ export const loginUser = async (req: Request, res: Response) => {
 };
 
 export const updateUser = async (req: Request, res: Response) => {
-  const { name, email, password, role, warehouseAddress } = req.body;
+  const user: User = req.body;
+  user.id = parseInt(req.params.id, 10)
+
   try {
-    const user = await User.findByPk(req.params.id);
-    if (!user) {
-      throw new Error('User not found');
+    if (user && user.password) {
+      user.password = await bcrypt.hash(user.password, 10);
     }
 
-    if (user && password) {
-      user.password = await bcrypt.hash(password, 10);
-    }
-
-    await Address.update(warehouseAddress, { where: { id: user.warehouseAddressId } });
-    
-    const response = await User.update(user, {where : { id: user.id }} );
+    await Address.update(user.warehouseAddress, { where: { id: user.warehouseAddressId } });
+    const response = await User.update(user, {where : { id: req.params.id }} );
     res.json(response);
   } catch (error: any) {
     res.status(400).json({ message: error.message });

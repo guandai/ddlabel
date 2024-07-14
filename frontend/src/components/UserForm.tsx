@@ -9,7 +9,7 @@ type ProfileType = {
   id: string;
   name: string;
   email: string;
-  password: string;
+  password?: string; // Password is optional
   role: string;
   warehouseAddress: AddressType;
 };
@@ -23,7 +23,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
     id: '',
     name: '',
     email: '',
-    password: '',
+    password: '', // Initialize password as an empty string
     role: 'worker',
     warehouseAddress: { name: '', addressLine1: '', city: '', state: '', zip: '' },
   };
@@ -32,6 +32,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [passwordChanged, setPasswordChanged] = useState(false); // Track if the password has been changed
 
   useEffect(() => {
     if (!isRegister) {
@@ -41,7 +42,12 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
           const profileRsp = await axios.get(`${process.env.REACT_APP_API_URL}/users/me`, {
             headers: { Authorization: `Bearer ${token}` }
           });
-          setProfile(profileRsp.data);
+          const profileData = profileRsp.data;
+          setProfile({
+            ...profileData,
+            password: '', // Ensure password is empty initially
+            warehouseAddress: profileData.warehouseAddress || initialProfile.warehouseAddress,
+          });
         });
       };
       fetchProfile();
@@ -52,6 +58,11 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setProfile({ ...profile, password: e.target.value });
+    setPasswordChanged(true); // Mark password as changed
+  };
+
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
     if (name) {
@@ -60,33 +71,38 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
   };
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setProfile({
-        ...profile,
-        warehouseAddress: {
-          ...profile.warehouseAddress,
-          [e.target.name]: e.target.value,
-        },
-      });
+    setProfile({
+      ...profile,
+      warehouseAddress: {
+        ...profile.warehouseAddress,
+        [e.target.name]: e.target.value,
+      },
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
-    if (profile.password && profile.password !== confirmPassword) {
+    if (passwordChanged && profile.password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
 
+    const profileToUpdate = { ...profile };
+    if (!passwordChanged) {
+      delete profileToUpdate.password; // Remove password if it hasn't been changed
+    }
+
     if (isRegister) {
       tryLoad(setError, async () => {
-        await axios.post(`${process.env.REACT_APP_API_URL}/users/register`, profile);
+        await axios.post(`${process.env.REACT_APP_API_URL}/users/register`, profileToUpdate);
         window.location.href = '/login';
       });
     } else {
       const token = localStorage.getItem('token');
       tryLoad(setError, async () => {
-        await axios.put(`${process.env.REACT_APP_API_URL}/users/${profile.id}`, profile, {
+        await axios.put(`${process.env.REACT_APP_API_URL}/users/${profile.id}`, profileToUpdate, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setSuccess('Profile updated successfully.');
@@ -110,7 +126,9 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
+        
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+          <Typography variant="h6">User Info:</Typography>
           <TextField
             margin="normal"
             required
@@ -143,7 +161,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
             id="password"
             autoComplete="new-password"
             value={profile.password}
-            onChange={handleChange}
+            onChange={handlePasswordChange}
           />
           <TextField
             margin="normal"
@@ -156,7 +174,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
-          <div>{ profile && JSON.stringify(profile.warehouseAddress) }</div>
+
           <AddressForm
             addressData={profile.warehouseAddress as AddressType}
             onChange={handleAddressChange}
