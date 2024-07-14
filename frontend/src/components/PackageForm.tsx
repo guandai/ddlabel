@@ -45,7 +45,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+  const { id: packageId } = useParams<{ id: string }>();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -59,17 +59,17 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
     };
     fetchUsers();
 
-    if (id) {
+    if (packageId) {
       const token = localStorage.getItem('token');
       tryLoad(setError, async () => {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/packages/${id}`, {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/packages/${packageId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         console.log(`response`, response);
         setPackageData(response.data);
       });
     }
-  }, [id]);
+  }, [packageId]);
 
   const onSubmit = async (data: Partial<PackageType>) => {
     const token = localStorage.getItem('token');
@@ -77,11 +77,14 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
       headers: { Authorization: `Bearer ${token}` }
     };
     tryLoad(setError, async () => {
-      id
-        ? await axios.put(`${process.env.REACT_APP_API_URL}/packages/${id}`, data, header)
-        : await axios.post(`${process.env.REACT_APP_API_URL}/packages`, data, header);
-      navigate('/packages');
-      setSuccess(id ? 'Package updated successfully' : 'Package added successfully');
+      if (packageId) {
+        await axios.put(`${process.env.REACT_APP_API_URL}/packages/${packageId}`, data, header)
+      } else{
+        await axios.post(`${process.env.REACT_APP_API_URL}/packages`, data, header);
+        navigate('/packages');
+      }
+      setSuccess(packageId ? 'Package updated successfully' : 'Package added successfully');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   };
 
@@ -126,7 +129,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
         }}
       >
         <Typography component="h1" variant="h5">
-          {id ? 'Edit Package' : 'Add Package'}
+          {packageId ? 'Edit Package' : 'Add Package'}
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
@@ -237,7 +240,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
                     variant="contained"
                     sx={{ mt: 3, mb: 2 }}
                   >
-                    {id ? 'Update Package' : 'Add Package'}
+                    {packageId ? 'Update Package' : 'Add Package'}
                   </Button>
                 </Grid>
               </Grid>

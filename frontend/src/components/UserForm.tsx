@@ -14,11 +14,11 @@ type ProfileType = {
   warehouseAddress: AddressType;
 };
 
-interface UserProfileProps {
+interface UserFormProps {
   isRegister?: boolean;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ isRegister = false }) => {
+const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
   const initialProfile = {
     id: '',
     name: '',
@@ -38,10 +38,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ isRegister = false }) => {
       const fetchProfile = async () => {
         const token = localStorage.getItem('token');
         tryLoad(setError, async () => {
-          const response = await axios.get(`${process.env.REACT_APP_API_URL}/users/me`, {
+          const profileRsp = await axios.get(`${process.env.REACT_APP_API_URL}/users/me`, {
             headers: { Authorization: `Bearer ${token}` }
           });
-          setProfile(response.data);
+          setProfile(profileRsp.data);
         });
       };
       fetchProfile();
@@ -59,7 +59,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isRegister = false }) => {
     }
   };
 
-  const handleAddressChange = () => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setProfile({
         ...profile,
         warehouseAddress: {
@@ -71,12 +71,12 @@ const UserProfile: React.FC<UserProfileProps> = ({ isRegister = false }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setSuccess(null);
     if (profile.password && profile.password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
-
-    setSuccess(null);
 
     if (isRegister) {
       tryLoad(setError, async () => {
@@ -90,6 +90,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isRegister = false }) => {
           headers: { Authorization: `Bearer ${token}` }
         });
         setSuccess('Profile updated successfully.');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     }
   };
@@ -155,6 +156,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ isRegister = false }) => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
+          <div>{ profile && JSON.stringify(profile.warehouseAddress) }</div>
           <AddressForm
             addressData={profile.warehouseAddress as AddressType}
             onChange={handleAddressChange}
@@ -188,4 +190,4 @@ const UserProfile: React.FC<UserProfileProps> = ({ isRegister = false }) => {
   );
 };
 
-export default UserProfile;
+export default UserForm;
