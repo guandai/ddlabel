@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { TextField, Button, Box, Typography, Container, Alert } from '@mui/material';
 import { tryLoad } from '../util/errors';
+import { AddressType } from './AddressForm';
 
 export type UserType = {
   id: number;
@@ -10,8 +11,7 @@ export type UserType = {
   email: string;
   password?: string;
   role: string;
-  warehouseAddress: string;
-  warehouseZip: string;
+  warehouseAddress: AddressType;
 };
 
 const LoginForm: React.FC = () => {

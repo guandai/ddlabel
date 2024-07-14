@@ -17,8 +17,7 @@ export type PackageType = {
   height: number;
   weight: number;
   trackingNumber: string;
-  reference?: string;
-  warehouseZip?: string;
+  reference: string;
 };
 
 type PackageFormProps = {
@@ -27,7 +26,7 @@ type PackageFormProps = {
 };
 
 const defaultPackageData: PackageType = {
-  user: { id: 0, name: '', email: '', password: '', role: '', warehouseAddress: '', warehouseZip: '' },
+  user: { id: 0, name: '', email: '', password: '', role: '', warehouseAddress: { name: '', addressLine1: '', city: '', state: '', zip: '' }},
   shipFromAddress: { name: '', addressLine1: '', city: '', state: '', zip: '' },
   shipToAddress: { name: '', addressLine1: '', city: '', state: '', zip: '' },
   length: 0,
@@ -36,7 +35,6 @@ const defaultPackageData: PackageType = {
   weight: 0,
   trackingNumber: '',
   reference: '',
-  warehouseZip: '',
   id: 0
 };
 const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageData }) => {
@@ -67,6 +65,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/packages/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        console.log(`response`, response);
         setPackageData(response.data);
       });
     }
@@ -82,6 +81,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
         ? await axios.put(`${process.env.REACT_APP_API_URL}/packages/${id}`, data, header)
         : await axios.post(`${process.env.REACT_APP_API_URL}/packages`, data, header);
       navigate('/packages');
+      setSuccess(id ? 'Package updated successfully' : 'Package added successfully');
     });
   };
 
@@ -90,7 +90,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
   };
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
-    const { name, value } = e.target;
+    const { value } = e.target;
     setPackageData({ 
       ...packageData, 
       user: { 
@@ -151,26 +151,15 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    id="warehouseZip"
-                    label="Warehouse Zip"
-                    name="warehouseZip"
-                    type="text"
-                    value={packageData.user?.warehouseZip || ''}
-                    onChange={handleChange}
-                  />
-              </Grid>
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} mt="2em">
               <AddressForm
                 addressData={packageData.shipFromAddress}
                 onChange={handleAddressChange('shipFromAddress')}
                 title="Ship From Address"
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} mt="2em">
               <AddressForm
                 addressData={packageData.shipToAddress}
                 onChange={handleAddressChange('shipToAddress')}
@@ -226,6 +215,18 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
                     name="weight"
                     type="number"
                     value={packageData.weight || ''}
+                    onChange={handleChange}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="reference"
+                    label="reference"
+                    name="Reference"
+                    type="text"
+                    value={packageData.reference || ''}
                     onChange={handleChange}
                   />
                 </Grid>

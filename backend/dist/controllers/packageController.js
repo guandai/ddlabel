@@ -22,7 +22,7 @@ const csv_parser_1 = __importDefault(require("csv-parser"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const addPackage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference, warehouseZip } = req.body;
+    const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference } = req.body;
     const trackingNumber = (0, generateTrackingNumber_1.generateTrackingNumber)();
     try {
         const fromAddress = yield Address_1.Address.create(shipFromAddress);
@@ -37,7 +37,6 @@ const addPackage = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             weight,
             trackingNumber,
             reference,
-            warehouseZip,
         });
         res.status(201).json(pkg);
     }
@@ -147,7 +146,7 @@ const importPackages = (req, res) => __awaiter(void 0, void 0, void 0, function*
         .on('end', () => __awaiter(void 0, void 0, void 0, function* () {
         for (const pkgData of results) {
             console.log(`pkgData`, pkgData);
-            const { length, width, height, weight, reference, warehouseZip, shipFromName, shipFromAddressStreet, shipFromAddressCity, shipFromAddressState, shipFromAddressZip, shipToName, shipToAddressStreet, shipToAddressCity, shipToAddressState, shipToAddressZip } = pkgData;
+            const { length, width, height, weight, reference, shipFromName, shipFromAddressStreet, shipFromAddressCity, shipFromAddressState, shipFromAddressZip, shipToName, shipToAddressStreet, shipToAddressCity, shipToAddressState, shipToAddressZip } = pkgData;
             const trackingNumber = (0, generateTrackingNumber_1.generateTrackingNumber)();
             const shipFromAddress = {
                 name: shipFromName,
@@ -176,7 +175,6 @@ const importPackages = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     weight,
                     trackingNumber,
                     reference,
-                    warehouseZip,
                 });
             }
             catch (error) {

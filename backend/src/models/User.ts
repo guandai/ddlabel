@@ -1,6 +1,7 @@
 // backend/src/models/User.ts
 import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
+import { Address } from './Address';
 
 interface UserAttributes {
   id: number;
@@ -8,8 +9,7 @@ interface UserAttributes {
   email: string;
   password: string;
   role: string;
-  warehouseAddress: string;
-  warehouseZip: string;
+  warehouseAddressId: number;
 }
 
 interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
@@ -20,8 +20,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public email!: string;
   public password!: string;
   public role!: string;
-  public warehouseAddress!: string;
-  public warehouseZip!: string;
+  public warehouseAddressId!: number;
 }
 
 User.init(
@@ -48,13 +47,13 @@ User.init(
       type: DataTypes.ENUM('admin', 'worker'),
       allowNull: false,
     },
-    warehouseAddress: {
-      type: DataTypes.STRING,
+    warehouseAddressId: {
+      type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
-    },
-    warehouseZip: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      references: {
+        model: Address,
+        key: 'id',
+      },
     },
   },
   {
@@ -62,5 +61,8 @@ User.init(
     tableName: 'users',
   }
 );
+
+
+User.belongsTo(Address, { as: 'warehouseAddress', foreignKey: 'warehouseAddressId', onDelete: 'CASCADE' });
 
 export { User, UserCreationAttributes };
