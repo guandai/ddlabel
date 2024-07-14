@@ -3,7 +3,6 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import Home from './components/Home';
 import LoginForm from './components/LoginForm';
-import RegisterForm from './components/RegisterForm';
 import UserProfile from './components/UserProfile';
 import PackageForm from './components/PackageForm';
 import PackageTable from './components/PackageTable';
@@ -24,7 +23,7 @@ const AppContent: React.FC = () => {
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
         <Route path="/login" element={<LoginForm />} />
-        <Route path="/register" element={<RegisterForm />} />
+        <Route path="/register" element={<UserProfile isRegister={true} />} />
         <Route path="/profile" element={<PrivateRoute component={UserProfile} />} />
         <Route path="/packages/create" element={<PrivateRoute component={PackageForm} />} />
         <Route path="/packages/edit/:id" element={<PrivateRoute component={PackageForm} />} />

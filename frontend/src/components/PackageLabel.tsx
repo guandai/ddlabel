@@ -22,7 +22,7 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg }) => {
     const fetchData = async () => {
       try {
         const response = await axios.get(path, {
-          params: { zip_code: pkg.user.warehouseZip },
+          params: { zip_code: pkg.shipFromAddress.zip },
         });
         const data = response.data;
         setFromProposal(data.proposal as ZonesType);
@@ -62,7 +62,7 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg }) => {
               <Typography sx={{ fontSize: '0.8rem' }}>{pkg.shipFromAddress.name}</Typography>
               <Typography sx={{ fontSize: '0.8rem' }}>{pkg.shipFromAddress.addressLine1}</Typography>
               <Typography sx={{ fontSize: '0.8rem' }}>{pkg.shipFromAddress.addressLine2}</Typography>
-              <Typography sx={{ fontSize: '0.8rem' }}>{pkg.shipFromAddress.state} {pkg.shipFromAddress.zip}</Typography>
+              <Typography sx={{ fontSize: '0.8rem' }}>{pkg.shipFromAddress.state} {pkg.shipFromAddress.zip} { fromProposal as string }</Typography>
             </Box>
           </Box>
           <hr style={{ height: '0.125em', backgroundColor: '#000' }} />

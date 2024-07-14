@@ -14,7 +14,6 @@ interface PackageAttributes {
   weight: number;
   trackingNumber: string;
   reference?: string;
-  warehouseZip?: string;
 }
 
 interface PackageCreationAttributes extends Optional<PackageAttributes, 'id'> {}
@@ -30,7 +29,6 @@ class Package extends Model<PackageAttributes, PackageCreationAttributes> implem
   public weight!: number;
   public trackingNumber!: string;
   public reference!: string;
-  public warehouseZip!: string;
 }
 
 Package.init(
@@ -89,10 +87,6 @@ Package.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    warehouseZip: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
   },
   {
     sequelize,
@@ -100,8 +94,8 @@ Package.init(
   }
 );
 
-Package.belongsTo(Address, { as: 'shipFromAddress', foreignKey: 'shipFromAddressId' });
-Package.belongsTo(Address, { as: 'shipToAddress', foreignKey: 'shipToAddressId' });
+Package.belongsTo(Address, { as: 'shipFromAddress', foreignKey: 'shipFromAddressId', onDelete: 'CASCADE' });
+Package.belongsTo(Address, { as: 'shipToAddress', foreignKey: 'shipToAddressId', onDelete: 'CASCADE' });
 Package.belongsTo(User, { as: 'user', foreignKey: 'userId' }); // Ensure alias 'owner' is defined here
 
 export { Package, PackageAttributes, PackageCreationAttributes };
