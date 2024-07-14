@@ -1,5 +1,5 @@
 // frontend/src/components/Header.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AppBar, Toolbar, Button, Typography } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import MonkeyLogo from '../assets/svg/monkey_logo.svg';
@@ -13,6 +13,13 @@ const Header: React.FC = () => {
     localStorage.removeItem('userId');
     navigate('/login');
   };
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+    
+  }, [isAuthenticated, navigate]);
 
   return (
     <AppBar position="static">

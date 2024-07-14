@@ -1,17 +1,25 @@
 // frontend/src/components/AddressForm.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { TextField, Grid, Typography } from '@mui/material';
+import axios from 'axios';
+import styled from 'styled-components';
+
+const StyledTextField = styled(TextField)`
+  .Mui-readOnly.MuiInputBase-readOnly {
+    color: rgba(10, 10, 10, 0.5); 
+  }
+`;
 
 export type AddressType = {
-	name: string;
-	addressLine1: string;
-	addressLine2?: string;
-	city: string;
-	state: string;
-	zip: string;
-	email?: string;
-	phone?: string;
-  }
+  name: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  zip: string;
+  email?: string;
+  phone?: string;
+}
 
 interface AddressFormProps {
   addressData?: AddressType;
@@ -20,6 +28,23 @@ interface AddressFormProps {
 }
 
 const AddressForm: React.FC<AddressFormProps> = ({ addressData, onChange, title }) => {
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+
+  useEffect(() => {
+    if (addressData?.zip) {
+      axios.get(`https://api.zippopotam.us/us/${addressData.zip}`)
+        .then(response => {
+          const place = response.data.places[0];
+          setCity(place['place name']);
+          setState(place['state abbreviation']);
+        })
+        .catch(error => {
+          console.error('Error fetching city/state data:', error);
+        });
+    }
+  }, [addressData?.zip]);
+
   return (
     <>
       <Typography variant="h6">{title}</Typography>
@@ -63,30 +88,6 @@ const AddressForm: React.FC<AddressFormProps> = ({ addressData, onChange, title 
           <TextField
             required
             fullWidth
-            id="city"
-            label="City"
-            name="city"
-            autoComplete="address-level2"
-            value={addressData?.city || ''}
-            onChange={onChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            required
-            fullWidth
-            id="state"
-            label="State"
-            name="state"
-            autoComplete="address-level1"
-            value={addressData?.state || ''}
-            onChange={onChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            required
-            fullWidth
             id="zip"
             label="Zip Code"
             name="zip"
@@ -95,9 +96,38 @@ const AddressForm: React.FC<AddressFormProps> = ({ addressData, onChange, title 
             onChange={onChange}
           />
         </Grid>
+        <Grid item xs={12} sm={6}>
+          <StyledTextField
+            required
+            fullWidth
+            id="city"
+            label="City"
+            name="city"
+            autoComplete="address-level2"
+            value={addressData?.city || city}
+            onChange={onChange}
+            InputProps={{
+              readOnly: true,
+            }}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <StyledTextField
+            required
+            fullWidth
+            id="state"
+            label="State"
+            name="state"
+            autoComplete="address-level1"
+            value={addressData?.state || state}
+            onChange={onChange}
+            InputProps={{
+              readOnly: true,
+            }}
+          />
+        </Grid>
         <Grid item xs={12}>
           <TextField
-            required
             fullWidth
             id="phone"
             label="Phone"
@@ -109,7 +139,6 @@ const AddressForm: React.FC<AddressFormProps> = ({ addressData, onChange, title 
         </Grid>
         <Grid item xs={12}>
           <TextField
-            required
             fullWidth
             id="email"
             label="Email"

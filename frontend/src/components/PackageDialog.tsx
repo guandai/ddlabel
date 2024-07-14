@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Typography } from '@mui/material';
 import axios from 'axios';
 import { PackageType } from './PackageForm';
@@ -18,29 +18,29 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
     const [error, setError] = useState<string | null>(null);
 
     const Line = () => <>
-        <br />
-        <div style={{ fontSize: '0px' , paddingLeft: '100%', lineHeight: '30px', borderBottom: '1px solid black'}}>{' '}</div>
+        <div style={{ fontSize: '0px' , paddingLeft: '100%', height: '12px', borderBottom: '1px solid black'}}>{' '}</div>
     </>
 
-    const getPostalZone = async (): Promise<PostalZoneType | null> => {
+    const getPostalZone = useCallback( async (): Promise<PostalZoneType | null> => {
         if (!selectedPackage) {
             return null;
         }
-        const postZone = await loadApi<PostalZoneType>(setError, 'postal_zones/get_post_zone', { zip_code: selectedPackage.user.warehouseZip });
+        const postZone = await loadApi<PostalZoneType>(
+            setError, 'postal_zones/get_post_zone', { zip_code: selectedPackage.shipFromAddress.zip });
         if (!postZone) {
             return null;
         }
 
         setSortCode(postZone.new_sort_code);
         return postZone;
-    }
+    }, [selectedPackage]);
 
-    const getZone = async (selectedPackage: PackageType, proposal: ZonesType) => {
+    const getZone = useCallback( async (selectedPackage: PackageType, proposal: ZonesType) => {
         const zone = await loadApi<string | '-'>(setError, 'postal_zones/get_zone', { zip_code: selectedPackage.shipToAddress.zip, proposal });
         return zone?.replace('Zone ', '');
-    }
+    }, []);
 
-    const handleGetData = async () => {
+    const handleGetData = useCallback( async () => {
         if (!selectedPackage) {
             return;
         }
@@ -64,14 +64,14 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
             });
             setRate('$' + response.data.totalCost.toFixed(2));
         });
-    };
+    }, [getPostalZone, getZone, selectedPackage]);
 
     useEffect(() => {
         setRate(null);
         setError(null);
         handleGetData();
     }
-    , [selectedPackage]);
+    , [selectedPackage, handleGetData]);
 
     return (
         <Dialog open={open} onClose={handleClose} aria-labelledby="package-details-title">
@@ -88,13 +88,23 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                         
                         <Line />
                         <strong>Tracking Number:</strong> {selectedPackage.trackingNumber}<br />
-                        <strong>Reference Number:</strong> {selectedPackage.reference}<br />
-                        <strong>Warehouse Zip:</strong> {selectedPackage.user.warehouseZip}<br />
-                        
+                        <strong>Reference Number:</strong> {selectedPackage.reference}<br />                        
                         <Line />
-                        <strong>Name:</strong> {selectedPackage.shipToAddress.name}<br />
+                        From: <br />
+                        <strong>Name:</strong> {selectedPackage.shipFromAddress.name}<br />
                         <strong>Address1:</strong> {selectedPackage.shipFromAddress.addressLine1}<br />
                         <strong>Address2:</strong> {selectedPackage.shipFromAddress.addressLine2}<br />
+                        <strong>City:</strong> {selectedPackage.shipFromAddress.city}<br />
+                        <strong>Zip:</strong> {selectedPackage.shipFromAddress.zip}<br />
+                        <strong>State:</strong> {selectedPackage.shipFromAddress.state}<br />
+                        <strong>Phone:</strong> {selectedPackage.shipFromAddress.phone}<br />
+                        <strong>Email:</strong> {selectedPackage.shipFromAddress.email}<br />
+                        
+                        <Line />
+                        To: <br />
+                        <strong>Name:</strong> {selectedPackage.shipToAddress.name}<br />
+                        <strong>Address1:</strong> {selectedPackage.shipToAddress.addressLine1}<br />
+                        <strong>Address2:</strong> {selectedPackage.shipToAddress.addressLine2}<br />
                         <strong>City:</strong> {selectedPackage.shipToAddress.city}<br />
                         <strong>Zip:</strong> {selectedPackage.shipToAddress.zip}<br />
                         <strong>State:</strong> {selectedPackage.shipToAddress.state}<br />

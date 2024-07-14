@@ -2,17 +2,18 @@ import { Request, Response } from 'express';
 import { User } from '../models/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { Address } from '../models/Address';
 
 interface AuthRequest extends Request {
   user?: User;
 }
 
 export const registerUser = async (req: Request, res: Response) => {
-  const { name, email, password, role, warehouseAddress, warehouseZip } = req.body;
+  const { name, email, password, role, warehouseAddressId } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
-    const user = await User.create({ name, email, password: hashedPassword, role, warehouseAddress, warehouseZip });
+    const user = await User.create({ name, email, password: hashedPassword, role, warehouseAddressId });
     res.status(201).json(user);
   } catch (error: any) {
     console.error(error); // Log the detailed error
@@ -35,15 +36,24 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
-export const editUser = async (req: Request, res: Response) => {
+export const updateUser = async (req: Request, res: Response) => {
   const { name, email, password, role, warehouseAddress } = req.body;
   try {
-    const updates: Partial<User> = { name, email, role, warehouseAddress };
-    if (password) {
-      updates.password = await bcrypt.hash(password, 10);
+    
+    const user = await User.findByPk(req.params.id);
+    if (!user) {
+      throw new Error('User not found');
     }
-    const [rows, user] = await User.update(updates, { where: { id: req.params.id }, returning: true });
-    res.json(user);
+
+    if (user && password) {
+      user.password = await bcrypt.hash(password, 10);
+    }
+
+
+    await Address.update(warehouseAddress, { where: { id: user.warehouseAddressId } });
+
+    const response = await user.update({ name, email, password, role });
+    res.json(response);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
@@ -53,12 +63,20 @@ export const getCurrentUser = (req: AuthRequest, res: Response) => {
   if (!req.user) {
     return res.status(404).json({ message: 'User not found' });
   }
-  res.json(req.user);
+  
+  const { name, id, email, role, warehouseAddressId } = req.user;
+  const filteredUser = { name, id, email, role, warehouseAddressId };
+  
+  res.json(filteredUser);
 };
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    const users = await User.findAll({ attributes: ['id', 'name', 'email', 'role', 'warehouseAddress'] }); // Fetch selected attributes
+    const users = await User.findAll({ attributes: ['id', 'name', 'email', 'role'], 
+      include: [
+        { model: Address, as: 'warehouseAddress' },
+      ],
+     }); // Fetch selected attributes
     res.json(users);
   } catch (error: any) {
     res.status(400).json({ message: error.message });

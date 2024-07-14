@@ -3,6 +3,7 @@ import axios from 'axios';
 import { TextField, Button, Box, Typography, Container, Alert, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material';
 import { tryLoad } from '../util/errors';
+import AddressForm, { AddressType } from './AddressForm';
 
 type ProfileType = {
   id: string;
@@ -10,35 +11,42 @@ type ProfileType = {
   email: string;
   password: string;
   role: string;
-  warehouseAddress: string;
-  warehouseZip: string;
+  warehouseAddress: AddressType;
 };
-const UserProfile: React.FC = () => {
-  const [profile, setProfile] = useState<ProfileType>({
+
+interface UserProfileProps {
+  isRegister?: boolean;
+}
+
+const UserProfile: React.FC<UserProfileProps> = ({ isRegister = false }) => {
+  const initialProfile = {
     id: '',
     name: '',
     email: '',
     password: '',
-    role: '',
-    warehouseAddress: '',
-    warehouseZip: ''
-  });
+    role: 'worker',
+    warehouseAddress: { name: '', addressLine1: '', city: '', state: '', zip: '' },
+  };
+
+  const [profile, setProfile] = useState<ProfileType>(initialProfile);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const token = localStorage.getItem('token');
-      tryLoad(setError, async () => {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/users/me`, {
-          headers: { Authorization: `Bearer ${token}` }
+    if (!isRegister) {
+      const fetchProfile = async () => {
+        const token = localStorage.getItem('token');
+        tryLoad(setError, async () => {
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/users/me`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setProfile(response.data);
         });
-        setProfile(response.data);
-      });
-    };
-    fetchProfile();
-  }, []);
+      };
+      fetchProfile();
+    }
+  }, [isRegister]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
@@ -51,21 +59,39 @@ const UserProfile: React.FC = () => {
     }
   };
 
+  const handleAddressChange = () => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setProfile({
+        ...profile,
+        warehouseAddress: {
+          ...profile.warehouseAddress,
+          [e.target.name]: e.target.value,
+        },
+      });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (profile.password && profile.password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
-    const token = localStorage.getItem('token');
 
     setSuccess(null);
-    tryLoad(setError, async () => {
-      await axios.put(`${process.env.REACT_APP_API_URL}/users/${profile.id}`, profile, {
-        headers: { Authorization: `Bearer ${token}` }
+
+    if (isRegister) {
+      tryLoad(setError, async () => {
+        await axios.post(`${process.env.REACT_APP_API_URL}/users/register`, profile);
+        window.location.href = '/login';
       });
-      setSuccess('Profile updated successfully.');
-    });
+    } else {
+      const token = localStorage.getItem('token');
+      tryLoad(setError, async () => {
+        await axios.put(`${process.env.REACT_APP_API_URL}/users/${profile.id}`, profile, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setSuccess('Profile updated successfully.');
+      });
+    }
   };
 
   return (
@@ -79,7 +105,7 @@ const UserProfile: React.FC = () => {
         }}
       >
         <Typography component="h1" variant="h5">
-          User Profile
+          {isRegister ? 'Register' : 'User Profile'}
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
@@ -129,27 +155,10 @@ const UserProfile: React.FC = () => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="warehouseAddress"
-            label="Warehouse Address"
-            name="warehouseAddress"
-            autoComplete="warehouseAddress"
-            value={profile.warehouseAddress}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="warehouseZip"
-            label="Warehouse Zip"
-            name="warehouseZip"
-            autoComplete="warehouseZip"
-            value={profile.warehouseZip}
-            onChange={handleChange}
+          <AddressForm
+            addressData={profile.warehouseAddress as AddressType}
+            onChange={handleAddressChange}
+            title="Warehouse Address"
           />
           <FormControl fullWidth margin="normal">
             <InputLabel id="role-label">Role</InputLabel>
@@ -171,7 +180,7 @@ const UserProfile: React.FC = () => {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            Update Profile
+            {isRegister ? 'Register' : 'Update Profile'}
           </Button>
         </Box>
       </Box>

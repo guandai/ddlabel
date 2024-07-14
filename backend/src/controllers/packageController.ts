@@ -10,7 +10,7 @@ import fs from 'fs';
 import path from 'path';
 
 export const addPackage = async (req: Request, res: Response) => {
-  const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference, warehouseZip } = req.body;
+  const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference } = req.body;
   const trackingNumber = generateTrackingNumber();
 
   try {
@@ -27,7 +27,6 @@ export const addPackage = async (req: Request, res: Response) => {
       weight,
       trackingNumber,
       reference,
-      warehouseZip,
     });
 
     res.status(201).json(pkg);
@@ -153,11 +152,10 @@ export const importPackages = async (req: Request, res: Response) => {
             width, 
             height, 
             weight, 
-            reference, 
-            warehouseZip, 
+            reference,
             shipFromName,
             shipFromAddressStreet, 
-            shipFromAddressCity, 
+            shipFromAddressCity,
             shipFromAddressState, 
             shipFromAddressZip, 
             shipToName,
@@ -198,7 +196,6 @@ export const importPackages = async (req: Request, res: Response) => {
               weight,
               trackingNumber,
               reference,
-              warehouseZip,
             });
           } catch (error: any) {
             return res.status(500).send({ error: error.message });
