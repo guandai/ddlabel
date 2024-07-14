@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import Home from './components/Home';
 import LoginForm from './components/LoginForm';
-import UserProfile from './components/UserProfile';
+import UserForm from './components/UserForm';
 import PackageForm from './components/PackageForm';
 import PackageTable from './components/PackageTable';
 import TransactionTable from './components/TransactionTable';
@@ -23,8 +23,8 @@ const AppContent: React.FC = () => {
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
         <Route path="/login" element={<LoginForm />} />
-        <Route path="/register" element={<UserProfile isRegister={true} />} />
-        <Route path="/profile" element={<PrivateRoute component={UserProfile} />} />
+        <Route path="/register" element={<UserForm isRegister={true} />} />
+        <Route path="/profile" element={<PrivateRoute component={UserForm} />} />
         <Route path="/packages/create" element={<PrivateRoute component={PackageForm} />} />
         <Route path="/packages/edit/:id" element={<PrivateRoute component={PackageForm} />} />
         <Route path="/packages" element={<PrivateRoute component={PackageTable} />} />
