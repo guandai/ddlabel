@@ -29,6 +29,9 @@ class Package extends Model<PackageAttributes, PackageCreationAttributes> implem
   public weight!: number;
   public trackingNumber!: string;
   public reference!: string;
+  public shipFromAddress!: Address;
+  public shipToAddress!: Address;
+  public User!: User;
 }
 
 Package.init(

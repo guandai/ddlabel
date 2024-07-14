@@ -9,10 +9,11 @@ interface AuthRequest extends Request {
 }
 
 export const registerUser = async (req: Request, res: Response) => {
-  const { name, email, password, role, warehouseAddressId } = req.body;
+  const { name, email, password, role, warehouseAddress } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
+    const warehouseAddressId = (await Address.create(warehouseAddress)).id;
     const user = await User.create({ name, email, password: hashedPassword, role, warehouseAddressId });
     res.status(201).json(user);
   } catch (error: any) {
@@ -39,7 +40,6 @@ export const loginUser = async (req: Request, res: Response) => {
 export const updateUser = async (req: Request, res: Response) => {
   const { name, email, password, role, warehouseAddress } = req.body;
   try {
-    
     const user = await User.findByPk(req.params.id);
     if (!user) {
       throw new Error('User not found');
@@ -49,23 +49,33 @@ export const updateUser = async (req: Request, res: Response) => {
       user.password = await bcrypt.hash(password, 10);
     }
 
-
     await Address.update(warehouseAddress, { where: { id: user.warehouseAddressId } });
-
-    const response = await user.update({ name, email, password, role });
+    
+    const response = await User.update(user, {where : { id: user.id }} );
     res.json(response);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 };
 
-export const getCurrentUser = (req: AuthRequest, res: Response) => {
+export const getCurrentUser = async (req: AuthRequest, res: Response) => {
   if (!req.user) {
     return res.status(404).json({ message: 'User not found' });
   }
-  
-  const { name, id, email, role, warehouseAddressId } = req.user;
-  const filteredUser = { name, id, email, role, warehouseAddressId };
+
+  const user = await User.findOne({
+    where: { id: req.user.id },
+    include: [
+      { model: Address, as: 'warehouseAddress' },
+    ],
+  });
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  const { name, id, email, role, warehouseAddressId, warehouseAddress } = user;
+  const filteredUser = { name, id, email, role, warehouseAddressId, warehouseAddress };
   
   res.json(filteredUser);
 };

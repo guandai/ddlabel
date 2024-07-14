@@ -21,6 +21,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public password!: string;
   public role!: string;
   public warehouseAddressId!: number;
+  public warehouseAddress!: Address;
 }
 
 User.init(
