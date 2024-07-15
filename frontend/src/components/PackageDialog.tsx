@@ -18,7 +18,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
     const [error, setError] = useState<string | null>(null);
 
     const Line = () => <>
-        <div style={{ fontSize: '0px' , paddingLeft: '100%', height: '12px', borderBottom: '1px solid black'}}>{' '}</div>
+        <i style={{ display: 'block', fontSize: '0px' , paddingLeft: '100%', height: '12px', borderBottom: '1px solid black'}}>{' '}</i>
     </>
 
     const getPostalZone = useCallback( async (): Promise<PostalZoneType | null> => {
@@ -79,8 +79,8 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
             {selectedPackage && (
                 <DialogContent>
                     {error && (
-                <Typography color="error">{error}</Typography>
-            )}
+                        <Typography color="error">{error}</Typography>
+                    )}
                     <DialogContentText>
                         <strong>Id:</strong> {selectedPackage.id}<br />
                         <strong>Shipping Rate: </strong>{rate === null ? '...' :  rate }<br />
