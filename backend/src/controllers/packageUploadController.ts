@@ -8,123 +8,140 @@ import csv from 'csv-parser';
 import fs from 'fs';
 import path from 'path';
 
-const DEFAULT_BATCH_SIZE = 500; // Start with a moderate batch size
-const MAX_BATCH_SIZE = 1000; // Maximum batch size for tuning
-const MIN_BATCH_SIZE = 100; // Minimum batch size for tuning
+const BATCH_SIZE = 500; // You can adjust this batch size as needed
 
 export const importPackages = async (req: Request, res: Response) => {
-    if (!req.file) {
-        return res.status(400).send({ message: 'No file uploaded' });
-    }
-    const file = req.file;
-    const { packageUserId } = req.body;
-    const results: any[] = [];
+	if (!req.file) {
+		return res.status(400).send({ message: 'No file uploaded' });
+	}
+	const file = req.file;
+	const { packageUserId } = req.body;
+	const results: any[] = [];
+	const io = req.io;
+	const socketId = req.headers['socket-id'] || 'no-id';
 
-    fs.createReadStream(file.path)
-        .pipe(csv())
-        .on('data', (data) => results.push(data))
-        .on('end', async () => {
-            let packageBatch: any[] = [];
-            let fromAddressBatch: any[] = [];
-            let toAddressBatch: any[] = [];
-            let batchSize = DEFAULT_BATCH_SIZE;
+	fs.createReadStream(file.path)
+		.pipe(csv())
+		.on('data', (data) => results.push(data))
+		.on('end', async () => {
+			let packageBatch: any[] = [];
+			let fromAddressBatch: any[] = [];
+			let toAddressBatch: any[] = [];
+			let processedCount = 0;
 
-            for (const pkgData of results) {
-                console.log(`pkgData`, pkgData);
-                const {
-                    length,
-                    width,
-                    height,
-                    weight,
-                    reference,
-                    shipFromName,
-                    shipFromAddressStreet,
-                    shipFromAddressCity,
-                    shipFromAddressState,
-                    shipFromAddressZip,
-                    shipToName,
-                    shipToAddressStreet,
-                    shipToAddressCity,
-                    shipToAddressState,
-                    shipToAddressZip
-                } = pkgData;
-                const trackingNumber = generateTrackingNumber();
+			for (const pkgData of results) {
+				const {
+					length,
+					width,
+					height,
+					weight,
+					reference,
+					shipFromName,
+					shipFromAddressStreet,
+					shipFromAddressCity,
+					shipFromAddressState,
+					shipFromAddressZip,
+					shipToName,
+					shipToAddressStreet,
+					shipToAddressCity,
+					shipToAddressState,
+					shipToAddressZip
+				} = pkgData;
+				const trackingNumber = generateTrackingNumber();
 
-                const shipFromAddress = {
-                    name: shipFromName,
-                    addressLine1: shipFromAddressStreet,
-                    city: shipFromAddressCity,
-                    state: shipFromAddressState,
-                    zip: shipFromAddressZip,
-                };
+				const shipFromAddress = {
+					name: shipFromName,
+					addressLine1: shipFromAddressStreet,
+					city: shipFromAddressCity,
+					state: shipFromAddressState,
+					zip: shipFromAddressZip,
+				};
 
-                const shipToAddress = {
-                    name: shipToName,
-                    addressLine1: shipToAddressStreet,
-                    city: shipToAddressCity,
-                    state: shipToAddressState,
-                    zip: shipToAddressZip,
-                };
+				const shipToAddress = {
+					name: shipToName,
+					addressLine1: shipToAddressStreet,
+					city: shipToAddressCity,
+					state: shipToAddressState,
+					zip: shipToAddressZip,
+				};
 
-                fromAddressBatch.push(shipFromAddress);
-                toAddressBatch.push(shipToAddress);
-                packageBatch.push({
-                    userId: packageUserId,
-                    shipFromAddress,
-                    shipToAddress,
-                    length,
-                    width,
-                    height,
-                    weight,
-                    trackingNumber,
-                    reference,
-                });
+				fromAddressBatch.push(shipFromAddress);
+				toAddressBatch.push(shipToAddress);
+				packageBatch.push({
+					userId: packageUserId,
+					shipFromAddress,
+					shipToAddress,
+					length,
+					width,
+					height,
+					weight,
+					trackingNumber,
+					reference,
+				});
 
-                if (packageBatch.length >= batchSize) {
-                    await processBatch(packageBatch, fromAddressBatch, toAddressBatch);
-                    packageBatch = [];
-                    fromAddressBatch = [];
-                    toAddressBatch = [];
+				if (packageBatch.length >= BATCH_SIZE) {
+					
+						await processBatch(packageBatch, fromAddressBatch, toAddressBatch);
+						packageBatch = [];
+						fromAddressBatch = [];
+						toAddressBatch = [];
 
-                    // Adjust batch size based on monitoring feedback (pseudo-code)
-                    // Example: batchSize = adjustBatchSize(batchSize, monitoringFeedback);
-                }
-            }
+						processedCount += BATCH_SIZE;
+						io.to(socketId).emit('progress', {
+							processed: processedCount,
+							total: results.length
+						});
+					
+				}
+			}
 
-            // Process any remaining data
-            if (packageBatch.length > 0) {
-                await processBatch(packageBatch, fromAddressBatch, toAddressBatch);
-            }
+			// Process any remaining data
+			if (packageBatch.length > 0) {
+				try {
+					await processBatch(packageBatch, fromAddressBatch, toAddressBatch);
+					processedCount += packageBatch.length;
+					io.to(socketId).emit('progress', {
+						processed: processedCount,
+						total: results.length
+					});
+				} catch (error) {
+					console.error('Error processing batch', error);
+					return res.status(500).send({ message: 'Error processBatch' });
+				}
+			}
 
-            res.status(200).send({ message: 'Packages imported successfully' });
-        });
+			res.status(200).send({ message: 'Packages imported successfully' });
+		}).on('error', (err) => {
+			console.error('Error parsing CSV:', err);
+			res.status(500).send({ message: 'Error importing packages' });
+		});
 };
 
 const processBatch = async (packageBatch: any[], fromAddressBatch: any[], toAddressBatch: any[]) => {
-    try {
-        const fromAddresses = await Address.bulkCreate(fromAddressBatch);
-        const toAddresses = await Address.bulkCreate(toAddressBatch);
+	try {
+		const fromAddresses = await Address.bulkCreate(fromAddressBatch);
+		const toAddresses = await Address.bulkCreate(toAddressBatch);
 
-        const packages = packageBatch.map((pkg, index) => ({
-            ...pkg,
-            shipFromAddressId: fromAddresses[index].id,
-            shipToAddressId: toAddresses[index].id
-        }));
+		const packages = packageBatch.map((pkg, index) => ({
+			...pkg,
+			shipFromAddressId: fromAddresses[index].id,
+			shipToAddressId: toAddresses[index].id
+		}));
 
-        await Package.bulkCreate(packages);
-    } catch (error: any) {
-        console.error('Error processing batch', error);
-        throw new Error('Batch processing failed');
-    }
+		await Package.bulkCreate(packages);
+	} catch (error: any) {
+		console.error('Error processing batch', error);
+		throw new Error('Batch processing failed');
+	}
 };
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-    }
+	destination: function (req, file, cb) {
+		cb(null, './uploads/');
+	},
+	filename: function (req, file, cb) {
+		cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+	}
 });
 const upload = multer({ storage });
 
