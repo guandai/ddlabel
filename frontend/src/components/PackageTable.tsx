@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, IconButton, Alert, Typography, Box, Container, Button,
-  TablePagination
+  TablePagination, LinearProgress
 } from '@mui/material';
 import { Upload, Visibility, Edit, Delete, PictureAsPdf, Label, AddCircle } from '@mui/icons-material';
 import { PackageType } from './PackageForm';
@@ -11,17 +11,21 @@ import { tryLoad } from '../util/errors';
 import { generatePDF } from './generatePDF';
 import PackageDialog from './PackageDialog';
 import { useNavigate } from 'react-router-dom';
+import { io } from 'socket.io-client';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
   const [totalPackages, setTotalPackages] = useState(0); // Track the total number of packages
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(null);
   const [open, setOpen] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const navigate = useNavigate();
+
+  const socket = io(`${process.env.REACT_APP_API_URL}` || 'http://localhost:5100/api');
 
   useEffect(() => {
     const fetchPackages = async () => {
@@ -43,6 +47,24 @@ const PackageTable: React.FC = () => {
     fetchPackages();
   }, [page, rowsPerPage]);
 
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log('Socket connected:', socket.id);
+    });
+    socket.on('progress', (data) => {
+      console.log('progress', data);
+      const percentage = (data.processed / data.total) * 100;
+      setUploadProgress(percentage);
+    });
+    socket.on('disconnect', () => {
+      console.log('Socket disconnected');
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
   const handleFileUpload = async (e: any) => {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
@@ -61,11 +83,17 @@ const PackageTable: React.FC = () => {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
+          'socket-id': socket.id  // Use the socket id here
         },
       });
+
       setSuccess(response.data.message);
+      
+      setUploadProgress(null); // Reset progress after success
     } catch (error: any) {
       setError(error.response?.data?.message || 'Failed to import packages.');
+      
+      setUploadProgress(null); // Reset progress on error
     }
   };
 
@@ -134,6 +162,13 @@ const PackageTable: React.FC = () => {
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
+        {uploadProgress ? <Typography>OK</Typography> : <Typography>N/A</Typography>}
+        {uploadProgress !== null && (
+          <Box sx={{ width: '100%', mt: 2 }}>
+            <LinearProgress variant="determinate" value={uploadProgress} />
+            <Typography variant="body2" color="textSecondary">{`${Math.round(uploadProgress)}%`}</Typography>
+          </Box>
+        )}
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
@@ -164,7 +199,7 @@ const PackageTable: React.FC = () => {
             </TableBody>
           </Table>
           <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
+            rowsPerPageOptions={[25, 50, 100]}
             component="div"
             count={totalPackages} // Total number of packages
             rowsPerPage={rowsPerPage}
