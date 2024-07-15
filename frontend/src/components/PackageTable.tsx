@@ -1,35 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Alert, Typography, Box, Container, Button } from '@mui/material';
+import {
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, IconButton, Alert, Typography, Box, Container, Button,
+  TablePagination
+} from '@mui/material';
 import { Upload, Visibility, Edit, Delete, PictureAsPdf, Label, AddCircle } from '@mui/icons-material';
 import { PackageType } from './PackageForm';
 import { tryLoad } from '../util/errors';
 import { generatePDF } from './generatePDF';
 import PackageDialog from './PackageDialog';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
-
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [totalPackages, setTotalPackages] = useState(0); // Track the total number of packages
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(null);
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPackages = async () => {
       const token = localStorage.getItem('token');
+      const offset = page * rowsPerPage;
 
       tryLoad(setError, async () => {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/packages`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
+          params: {
+            limit: rowsPerPage,
+            offset,
+          }
         });
-        setPackages(response.data);
+        setPackages(response.data.packages);
+        setTotalPackages(response.data.total); // Set the total number of packages
       });
     };
     fetchPackages();
-  }, []);
+  }, [page, rowsPerPage]);
 
   const handleFileUpload = async (e: any) => {
     const token = localStorage.getItem('token');
@@ -42,8 +54,8 @@ const PackageTable: React.FC = () => {
     try {
       const formData = new FormData();
       const packageCsvFile = e.target.files[0];
-      formData.append('packageCsvFile', packageCsvFile);  // the same as PackageController.ts
-      formData.append('packageUserId', userId); 
+      formData.append('packageCsvFile', packageCsvFile);
+      formData.append('packageUserId', userId);
 
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/packages/import`, formData, {
         headers: {
@@ -72,8 +84,6 @@ const PackageTable: React.FC = () => {
     navigate(`/packages/edit/${pkg.id}`);
   };
 
-  // Pass handleFormSubmit as a prop in PackageForm component call if directly used
-
   const handleViewDetails = (pkg: PackageType) => {
     setSelectedPackage(pkg);
     setOpen(true);
@@ -82,6 +92,15 @@ const PackageTable: React.FC = () => {
   const handleClose = () => {
     setOpen(false);
     setSelectedPackage(null);
+  };
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   return (
@@ -93,7 +112,7 @@ const PackageTable: React.FC = () => {
             color="primary"
             sx={{ ml: 2 }}
             onClick={() => navigate('/packages/create')}
-            startIcon={<AddCircle />} // Adds the plus icon to the button
+            startIcon={<AddCircle />}
           >
             Add
           </Button>
@@ -144,6 +163,17 @@ const PackageTable: React.FC = () => {
               ))}
             </TableBody>
           </Table>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={totalPackages} // Total number of packages
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            showFirstButton // Show the first page button
+            showLastButton // Show the last page button
+          />
         </TableContainer>
         <PackageDialog open={open} handleClose={handleClose} selectedPackage={selectedPackage} />
       </Box>

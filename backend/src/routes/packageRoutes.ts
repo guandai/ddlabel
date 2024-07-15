@@ -6,10 +6,9 @@ import {
 	updatePackage,
 	deletePackage,
 	getPackageDetails,
-	importPackages,
-	uploadMiddleware
 } from '../controllers/packageController';
 import { authenticate } from '../middleware/auth';
+import { importPackages, uploadMiddleware } from '../controllers/packageUploadController';
 
 const router = Router();
 

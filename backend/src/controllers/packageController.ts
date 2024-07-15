@@ -4,10 +4,6 @@ import { Package } from '../models/Package';
 import { Address } from '../models/Address';
 import { generateTrackingNumber } from '../utils/generateTrackingNumber';
 import { User } from '../models/User';
-import multer from 'multer';
-import csv from 'csv-parser';
-import fs from 'fs';
-import path from 'path';
 
 export const addPackage = async (req: Request, res: Response) => {
   const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference } = req.body;
@@ -36,15 +32,19 @@ export const addPackage = async (req: Request, res: Response) => {
 };
 
 export const getPackages = async (req: Request, res: Response) => {
+  const limit = parseInt(req.query.limit as string) || 100; // Default limit to 20 if not provided
+  const offset = parseInt(req.query.offset as string) || 0; // 
   try {
-    const packages = await Package.findAll({
+    const { count, rows: packages } = await Package.findAndCountAll({
       include: [
         { model: Address, as: 'shipFromAddress' },
         { model: Address, as: 'shipToAddress' },
         { model: User, as: 'user' },
       ],
+      limit,
+      offset,
     });
-    res.json(packages);
+    res.json({ total: count, packages });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
@@ -132,88 +132,3 @@ export const getPackageDetails = async (req: Request, res: Response) => {
     res.status(400).json({ message: error.message });
   }
 };
-
-export const importPackages = async (req: Request, res: Response) => {
-  if (!req.file) {
-    return res.status(400).send({ message: 'No file uploaded' });
-  }  
-    const file = req.file;
-    const { packageUserId } = req.body;
-    const results: any[] = [];
-
-    fs.createReadStream(file.path)
-      .pipe(csv())
-      .on('data', (data) => results.push(data))
-      .on('end', async () => {
-        for (const pkgData of results) {
-          console.log(`pkgData`, pkgData);
-          const {
-            length, 
-            width, 
-            height, 
-            weight, 
-            reference,
-            shipFromName,
-            shipFromAddressStreet, 
-            shipFromAddressCity,
-            shipFromAddressState, 
-            shipFromAddressZip, 
-            shipToName,
-            shipToAddressStreet, 
-            shipToAddressCity, 
-            shipToAddressState, 
-            shipToAddressZip } = pkgData;
-          const trackingNumber = generateTrackingNumber();
-
-          const shipFromAddress = {
-            name: shipFromName,
-            addressLine1: shipFromAddressStreet,
-            city: shipFromAddressCity,
-            state: shipFromAddressState,
-            zip: shipFromAddressZip,
-          };
-    
-          const shipToAddress = {
-            name: shipToName,
-            addressLine1: shipToAddressStreet,
-            city: shipToAddressCity,
-            state: shipToAddressState,
-            zip: shipToAddressZip,
-          };
-
-          try {
-
-            const fromAddress = await Address.create(shipFromAddress);
-            const toAddress = await Address.create(shipToAddress);
-          
-            await Package.create({
-              userId: packageUserId,
-              shipFromAddressId: fromAddress.id,
-              shipToAddressId: toAddress.id,
-              length,
-              width,
-              height,
-              weight,
-              trackingNumber,
-              reference,
-            });
-          } catch (error: any) {
-            return res.status(500).send({ error: error.message });
-          }
-        }
-        res.status(200).send({ message: 'Packages imported successfully' });
-      })
-  
-};
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, './uploads/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-  }
-});
-const upload = multer({ storage });
-
-export const uploadMiddleware = upload.single('packageCsvFile');  // the same as PackageTable.tsx
