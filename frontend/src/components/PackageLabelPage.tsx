@@ -17,7 +17,7 @@ const PackageLabelPage: React.FC = () => {
     const fetchPackage = async () => {
       const token = localStorage.getItem('token');
       tryLoad(setError, async () => {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/packages/${id}`, {
+        const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setPkg(response.data);

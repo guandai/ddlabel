@@ -32,10 +32,12 @@ if (env === 'production') {
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
+  path: '/api/socket.io',
   cors: {
     origin: '*', methods: ['GET', 'POST'], allowedHeaders: ['Content-Type', 'Authorization', 'socket-id'],
   },
 });
+
 
 // Middleware
 app.use(express.json());

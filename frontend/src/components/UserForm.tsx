@@ -39,7 +39,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
       const fetchProfile = async () => {
         const token = localStorage.getItem('token');
         tryLoad(setError, async () => {
-          const profileRsp = await axios.get(`${process.env.REACT_APP_API_URL}/users/me`, {
+          const profileRsp = await axios.get(`${process.env.REACT_APP_BE_URL}/users/me`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           const profileData = profileRsp.data;
@@ -96,13 +96,13 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
 
     if (isRegister) {
       tryLoad(setError, async () => {
-        await axios.post(`${process.env.REACT_APP_API_URL}/users/register`, profileToUpdate);
+        await axios.post(`${process.env.REACT_APP_BE_URL}/users/register`, profileToUpdate);
         window.location.href = '/login';
       });
     } else {
       const token = localStorage.getItem('token');
       tryLoad(setError, async () => {
-        await axios.put(`${process.env.REACT_APP_API_URL}/users/${profile.id}`, profileToUpdate, {
+        await axios.put(`${process.env.REACT_APP_BE_URL}/users/${profile.id}`, profileToUpdate, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setSuccess('Profile updated successfully.');

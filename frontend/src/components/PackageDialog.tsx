@@ -52,7 +52,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                 setRate('Can not deliver');
                 return;
             }
-            const response = await axios.get(`${ process.env.REACT_APP_API_URL}/shipping_rates/full-rate`, {
+            const response = await axios.get(`${ process.env.REACT_APP_BE_URL}/shipping_rates/full-rate`, {
                 params: {
                     length: selectedPackage.length,
                     width: selectedPackage.width,

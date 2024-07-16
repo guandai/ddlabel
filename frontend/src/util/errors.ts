@@ -25,6 +25,6 @@ export const tryLoad = async <T, P = void>(setError: SetError, callback: () => P
 }
 
 export const loadApi = async<T>(setError: SetError, path: string, params: unknown) => tryLoad<T>(setError, async () => {
-  const responst = await axios.get<T>(`${ process.env.REACT_APP_API_URL}/${path}`, {params});
+  const responst = await axios.get<T>(`${ process.env.REACT_APP_BE_URL}/${path}`, {params});
   return responst.data;
 })

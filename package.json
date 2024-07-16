@@ -12,6 +12,7 @@
     "build": "yarn workspace frontend build && yarn workspace backend build"
   },
   "devDependencies": {
+    "@types/papaparse": "^5.3.14",
     "concurrently": "^6.0.0",
     "pm2": "^5.4.1"
   }

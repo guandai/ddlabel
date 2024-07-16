@@ -11,7 +11,7 @@ const TransactionTable: React.FC = () => {
     const fetchTransactions = async () => {
       const token = localStorage.getItem('token');
       tryLoad(setError, async () => {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/transactions`, {
+        const response = await axios.get(`${process.env.REACT_APP_BE_URL}/transactions`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         setTransactions(response.data);
