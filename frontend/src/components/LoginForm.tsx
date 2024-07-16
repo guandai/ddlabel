@@ -29,7 +29,9 @@ const LoginForm: React.FC = () => {
         const response = await axios.post(`${process.env.REACT_APP_BE_URL}/users/login`, formData);
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userId', response.data.userId);
-        // window.location.href = '/packages';
+        setTimeout(() => {
+          window.location.href = '/packages';
+        }, 100);
         // handle success
       });
   };
