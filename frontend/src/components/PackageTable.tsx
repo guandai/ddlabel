@@ -13,10 +13,8 @@ import PackageDialog from './PackageDialog';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 
-// const socket = io(`${process.env.REACT_APP_BE_URL}` || `http://localhost:5100/api`);
-const socket = io('http://localhost:5100', {
-  path: '/api/socket.io'
-});
+const socket = io(`${process.env.REACT_APP_SOCKET_IO_HOST}`, { path: '/api/socket.io' });
+
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
