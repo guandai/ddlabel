@@ -51,7 +51,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
     const fetchUsers = async () => {
       const token = localStorage.getItem('token');
       tryLoad(setError, async () => {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/users`, {
+        const response = await axios.get(`${process.env.REACT_APP_BE_URL}/users`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUsers(response.data);
@@ -62,7 +62,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
     if (packageId) {
       const token = localStorage.getItem('token');
       tryLoad(setError, async () => {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/packages/${packageId}`, {
+        const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages/${packageId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         console.log(`response`, response);
@@ -78,9 +78,9 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
     };
     tryLoad(setError, async () => {
       if (packageId) {
-        await axios.put(`${process.env.REACT_APP_API_URL}/packages/${packageId}`, data, header)
+        await axios.put(`${process.env.REACT_APP_BE_URL}/packages/${packageId}`, data, header)
       } else{
-        await axios.post(`${process.env.REACT_APP_API_URL}/packages`, data, header);
+        await axios.post(`${process.env.REACT_APP_BE_URL}/packages`, data, header);
         navigate('/packages');
       }
       setSuccess(packageId ? 'Package updated successfully' : 'Package added successfully');

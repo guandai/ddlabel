@@ -18,7 +18,7 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg }) => {
   const [toProposal, setToProposal] = useState<ZonesType | 'N/A' >('N/A');
   const [fromProposal, setFromProposal] = useState<ZonesType | 'N/A' >('N/A');
   useEffect(() => {
-    const path = `${process.env.REACT_APP_API_URL}/postal_zones/get_post_zone`;
+    const path = `${process.env.REACT_APP_BE_URL}/postal_zones/get_post_zone`;
     const fetchData = async () => {
       try {
         const response = await axios.get(path, {
@@ -75,7 +75,7 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg }) => {
           </Box>
         </Box>
         <Box sx={{ position: 'relative', textAlign: 'right', mt: '1em', width: '40%' }}>
-          <QRCode value={`${process.env.REACT_APP_URL}/packages/${pkg.id}`} size={136} /> {/* Increase QR code size */}
+          <QRCode value={`${process.env.REACT_APP_FE_URL}/packages/${pkg.id}`} size={136} /> {/* Increase QR code size */}
           <Typography sx={{ textAlign: 'center', fontSize: '3rem', fontWeight: 'bold', lineHeight: 1 }}>{ toProposal as string }</Typography> 
           <Typography sx={{ textAlign: 'center', fontSize: '2rem', color: 'white', backgroundColor: 'black', lineHeight: 1 }}>{pkg.shipToAddress.zip}</Typography>
 

@@ -13,6 +13,11 @@ import PackageDialog from './PackageDialog';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 
+// const socket = io(`${process.env.REACT_APP_BE_URL}` || `http://localhost:5100/api`);
+const socket = io('http://localhost:5100', {
+  path: '/api/socket.io'
+});
+
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
   const [page, setPage] = useState(0);
@@ -25,7 +30,17 @@ const PackageTable: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const navigate = useNavigate();
 
-  const socket = io(`${process.env.REACT_APP_API_URL}` || 'http://localhost:5100/api');
+  useEffect(() => {
+    socket.on('progress', (data: { processed: number; total: number }) => {
+      const progressPercentage = Math.round((data.processed / data.total) * 100);
+      setUploadProgress(progressPercentage);
+    });
+
+    return () => {
+      socket.off('progress');
+    };
+  }, []);
+
 
   useEffect(() => {
     const fetchPackages = async () => {
@@ -33,7 +48,7 @@ const PackageTable: React.FC = () => {
       const offset = page * rowsPerPage;
 
       tryLoad(setError, async () => {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/packages`, {
+        const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages`, {
           headers: { Authorization: `Bearer ${token}` },
           params: {
             limit: rowsPerPage,
@@ -47,31 +62,10 @@ const PackageTable: React.FC = () => {
     fetchPackages();
   }, [page, rowsPerPage]);
 
-  useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Socket connected:', socket.id);
-    });
-    socket.on('progress', (data) => {
-      console.log('progress', data);
-      const percentage = (data.processed / data.total) * 100;
-      setUploadProgress(percentage);
-    });
-    socket.on('disconnect', () => {
-      console.log('Socket disconnected');
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
   const handleFileUpload = async (e: any) => {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
-
-    if (!userId) {
-      return setError('Please login');
-    }
+    if (!userId) { return setError('Please login'); }
 
     try {
       const formData = new FormData();
@@ -79,28 +73,32 @@ const PackageTable: React.FC = () => {
       formData.append('packageCsvFile', packageCsvFile);
       formData.append('packageUserId', userId);
 
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/packages/import`, formData, {
+      const response = await axios.post(`${process.env.REACT_APP_BE_URL}/packages/import`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
-          'socket-id': socket.id  // Use the socket id here
+          'socket-id': socket.id,
+        },
+        onUploadProgress: (progressEvent) => {
+          const total = progressEvent.total;
+          if (total) {
+            setUploadProgress(Math.round((progressEvent.loaded * 100) / total));
+          }
         },
       });
 
+      setUploadProgress(100);
       setSuccess(response.data.message);
       
-      setUploadProgress(null); // Reset progress after success
     } catch (error: any) {
       setError(error.response?.data?.message || 'Failed to import packages.');
-      
-      setUploadProgress(null); // Reset progress on error
     }
   };
 
   const handleDelete = async (id: number) => {
     const token = localStorage.getItem('token');
     tryLoad(setError, async () => {
-      await axios.delete(`${process.env.REACT_APP_API_URL}/packages/${id}`, {
+      await axios.delete(`${process.env.REACT_APP_BE_URL}/packages/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPackages(packages.filter(pkg => pkg.id !== id));
@@ -135,34 +133,17 @@ const PackageTable: React.FC = () => {
     <Container component="main" maxWidth="lg">
       <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography component="h1" variant="h5">Packages
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ ml: 2 }}
-            onClick={() => navigate('/packages/create')}
-            startIcon={<AddCircle />}
-          >
+          <Button variant="contained" color="primary" sx={{ ml: 2 }} onClick={() => navigate('/packages/create')} startIcon={<AddCircle />} >
             Add
           </Button>
           {' '}
-          <Button
-            variant="contained"
-            color="secondary"
-            startIcon={<Upload />}
-            component="label"
-          >
+          <Button variant="contained" color="secondary" startIcon={<Upload />} component="label" >
             Upload CSV
-            <input
-              type="file"
-              accept=".csv"
-              style={{ display: 'none' }}
-              onChange={handleFileUpload}
-            />
+            <input type="file" accept=".csv" style={{ display: 'none' }} onChange={handleFileUpload} />
           </Button>
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
-        {uploadProgress ? <Typography>OK</Typography> : <Typography>N/A</Typography>}
         {uploadProgress !== null && (
           <Box sx={{ width: '100%', mt: 2 }}>
             <LinearProgress variant="determinate" value={uploadProgress} />
