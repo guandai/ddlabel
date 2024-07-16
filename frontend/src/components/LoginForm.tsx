@@ -26,7 +26,7 @@ const LoginForm: React.FC = () => {
     e.preventDefault();
     setError(null);
     tryLoad(setError, async () => {
-        const response = await axios.post(`${process.env.REACT_APP_API_URL}/users/login`, formData);
+        const response = await axios.post(`${process.env.REACT_APP_BE_URL}/users/login`, formData);
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userId', response.data.userId);
         window.location.href = '/packages';
