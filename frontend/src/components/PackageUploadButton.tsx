@@ -53,7 +53,7 @@ const PackageUploadButton: React.FC<Prop> = ({setError, setSuccess}: Prop) => {
           }
         },
       });
-
+      setUploadProgress(100);
       setSuccess(response.data.message);
       
     } catch (error: any) {
