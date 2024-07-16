@@ -5,15 +5,14 @@ import {
   Paper, IconButton, Alert, Typography, Box, Container, Button,
   TablePagination, LinearProgress
 } from '@mui/material';
-import { Upload, Visibility, Edit, Delete, PictureAsPdf, Label, AddCircle } from '@mui/icons-material';
+import { Visibility, Edit, Delete, PictureAsPdf, Label, AddCircle } from '@mui/icons-material';
 import { PackageType } from './PackageForm';
 import { tryLoad } from '../util/errors';
 import { generatePDF } from './generatePDF';
 import PackageDialog from './PackageDialog';
 import { useNavigate } from 'react-router-dom';
-import { io } from 'socket.io-client';
+import PackageUploadButton from './PackageUploadButton';
 
-const socket = io(`${process.env.REACT_APP_SOCKET_IO_HOST}`, { path: '/api/socket.io' });
 
 
 const PackageTable: React.FC = () => {
@@ -25,20 +24,7 @@ const PackageTable: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(null);
   const [open, setOpen] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    socket.on('progress', (data: { processed: number; total: number }) => {
-      const progressPercentage = Math.round((data.processed / data.total) * 100);
-      setUploadProgress(progressPercentage);
-    });
-
-    return () => {
-      socket.off('progress');
-    };
-  }, []);
-
 
   useEffect(() => {
     const fetchPackages = async () => {
@@ -59,39 +45,6 @@ const PackageTable: React.FC = () => {
     };
     fetchPackages();
   }, [page, rowsPerPage]);
-
-  const handleFileUpload = async (e: any) => {
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
-    if (!userId) { return setError('Please login'); }
-
-    try {
-      const formData = new FormData();
-      const packageCsvFile = e.target.files[0];
-      formData.append('packageCsvFile', packageCsvFile);
-      formData.append('packageUserId', userId);
-
-      const response = await axios.post(`${process.env.REACT_APP_BE_URL}/packages/import`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`,
-          'socket-id': socket.id,
-        },
-        onUploadProgress: (progressEvent) => {
-          const total = progressEvent.total;
-          if (total) {
-            setUploadProgress(Math.round((progressEvent.loaded * 100) / total));
-          }
-        },
-      });
-
-      setUploadProgress(100);
-      setSuccess(response.data.message);
-      
-    } catch (error: any) {
-      setError(error.response?.data?.message || 'Failed to import packages.');
-    }
-  };
 
   const handleDelete = async (id: number) => {
     const token = localStorage.getItem('token');
@@ -135,19 +88,10 @@ const PackageTable: React.FC = () => {
             Add
           </Button>
           {' '}
-          <Button variant="contained" color="secondary" startIcon={<Upload />} component="label" >
-            Upload CSV
-            <input type="file" accept=".csv" style={{ display: 'none' }} onChange={handleFileUpload} />
-          </Button>
+          <PackageUploadButton setError={setError} setSuccess={setSuccess}/>
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
-        {uploadProgress !== null && (
-          <Box sx={{ width: '100%', mt: 2 }}>
-            <LinearProgress variant="determinate" value={uploadProgress} />
-            <Typography variant="body2" color="textSecondary">{`${Math.round(uploadProgress)}%`}</Typography>
-          </Box>
-        )}
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
