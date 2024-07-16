@@ -8,19 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadMiddleware = exports.importPackages = exports.getPackageDetails = exports.editPackage = exports.deletePackage = exports.updatePackage = exports.getPackages = exports.addPackage = void 0;
+exports.getPackageDetails = exports.editPackage = exports.deletePackage = exports.updatePackage = exports.getPackages = exports.addPackage = void 0;
 const Package_1 = require("../models/Package");
 const Address_1 = require("../models/Address");
 const generateTrackingNumber_1 = require("../utils/generateTrackingNumber");
 const User_1 = require("../models/User");
-const multer_1 = __importDefault(require("multer"));
-const csv_parser_1 = __importDefault(require("csv-parser"));
-const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
 const addPackage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference } = req.body;
     const trackingNumber = (0, generateTrackingNumber_1.generateTrackingNumber)();
@@ -46,15 +39,19 @@ const addPackage = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 });
 exports.addPackage = addPackage;
 const getPackages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const limit = parseInt(req.query.limit) || 100; // Default limit to 20 if not provided
+    const offset = parseInt(req.query.offset) || 0; // 
     try {
-        const packages = yield Package_1.Package.findAll({
+        const { count, rows: packages } = yield Package_1.Package.findAndCountAll({
             include: [
                 { model: Address_1.Address, as: 'shipFromAddress' },
                 { model: Address_1.Address, as: 'shipToAddress' },
                 { model: User_1.User, as: 'user' },
             ],
+            limit,
+            offset,
         });
-        res.json(packages);
+        res.json({ total: count, packages });
     }
     catch (error) {
         res.status(400).json({ message: error.message });
@@ -133,65 +130,3 @@ const getPackageDetails = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.getPackageDetails = getPackageDetails;
-const importPackages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req.file) {
-        return res.status(400).send({ message: 'No file uploaded' });
-    }
-    const file = req.file;
-    const { packageUserId } = req.body;
-    const results = [];
-    fs_1.default.createReadStream(file.path)
-        .pipe((0, csv_parser_1.default)())
-        .on('data', (data) => results.push(data))
-        .on('end', () => __awaiter(void 0, void 0, void 0, function* () {
-        for (const pkgData of results) {
-            console.log(`pkgData`, pkgData);
-            const { length, width, height, weight, reference, shipFromName, shipFromAddressStreet, shipFromAddressCity, shipFromAddressState, shipFromAddressZip, shipToName, shipToAddressStreet, shipToAddressCity, shipToAddressState, shipToAddressZip } = pkgData;
-            const trackingNumber = (0, generateTrackingNumber_1.generateTrackingNumber)();
-            const shipFromAddress = {
-                name: shipFromName,
-                addressLine1: shipFromAddressStreet,
-                city: shipFromAddressCity,
-                state: shipFromAddressState,
-                zip: shipFromAddressZip,
-            };
-            const shipToAddress = {
-                name: shipToName,
-                addressLine1: shipToAddressStreet,
-                city: shipToAddressCity,
-                state: shipToAddressState,
-                zip: shipToAddressZip,
-            };
-            try {
-                const fromAddress = yield Address_1.Address.create(shipFromAddress);
-                const toAddress = yield Address_1.Address.create(shipToAddress);
-                yield Package_1.Package.create({
-                    userId: packageUserId,
-                    shipFromAddressId: fromAddress.id,
-                    shipToAddressId: toAddress.id,
-                    length,
-                    width,
-                    height,
-                    weight,
-                    trackingNumber,
-                    reference,
-                });
-            }
-            catch (error) {
-                return res.status(500).send({ error: error.message });
-            }
-        }
-        res.status(200).send({ message: 'Packages imported successfully' });
-    }));
-});
-exports.importPackages = importPackages;
-const storage = multer_1.default.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, `${file.fieldname}-${Date.now()}${path_1.default.extname(file.originalname)}`);
-    }
-});
-const upload = (0, multer_1.default)({ storage });
-exports.uploadMiddleware = upload.single('packageCsvFile'); // the same as PackageTable.tsx

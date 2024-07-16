@@ -24,9 +24,11 @@ exports.getPostalZones = getPostalZones;
 const getPostalZoneByZip = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { zip_code } = req.query;
+        console.log(`zip_code`, zip_code);
         const postalZone = yield PostalZone_1.PostalZone.findOne({
             where: { zip_code },
         });
+        console.log(`postalZone`, postalZone);
         if (postalZone) {
             res.json(postalZone);
         }

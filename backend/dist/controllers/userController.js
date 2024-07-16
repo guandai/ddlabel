@@ -12,14 +12,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUsers = exports.getCurrentUser = exports.editUser = exports.loginUser = exports.registerUser = void 0;
+exports.getUsers = exports.getCurrentUser = exports.updateUser = exports.loginUser = exports.registerUser = void 0;
 const User_1 = require("../models/User");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const Address_1 = require("../models/Address");
 const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, email, password, role, warehouseAddressId } = req.body;
+    const { name, email, password, role, warehouseAddress } = req.body;
     const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
     try {
+        const warehouseAddressId = (yield Address_1.Address.create(warehouseAddress)).id;
         const user = yield User_1.User.create({ name, email, password: hashedPassword, role, warehouseAddressId });
         res.status(201).json(user);
     }
@@ -46,31 +48,47 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.loginUser = loginUser;
-const editUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, email, password, role, warehouseAddress } = req.body;
+const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = req.body;
+    user.id = parseInt(req.params.id, 10);
     try {
-        const updates = { name, email, role, warehouseAddress };
-        if (password) {
-            updates.password = yield bcryptjs_1.default.hash(password, 10);
+        if (user && user.password) {
+            user.password = yield bcryptjs_1.default.hash(user.password, 10);
         }
-        const [rows, user] = yield User_1.User.update(updates, { where: { id: req.params.id }, returning: true });
-        res.json(user);
+        yield Address_1.Address.update(user.warehouseAddress, { where: { id: user.warehouseAddressId } });
+        const response = yield User_1.User.update(user, { where: { id: req.params.id } });
+        res.json(response);
     }
     catch (error) {
         res.status(400).json({ message: error.message });
     }
 });
-exports.editUser = editUser;
-const getCurrentUser = (req, res) => {
+exports.updateUser = updateUser;
+const getCurrentUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.user) {
         return res.status(404).json({ message: 'User not found' });
     }
-    res.json(req.user);
-};
+    const user = yield User_1.User.findOne({
+        where: { id: req.user.id },
+        include: [
+            { model: Address_1.Address, as: 'warehouseAddress' },
+        ],
+    });
+    if (!user) {
+        throw new Error('User not found');
+    }
+    const { name, id, email, role, warehouseAddressId, warehouseAddress } = user;
+    const filteredUser = { name, id, email, role, warehouseAddressId, warehouseAddress };
+    res.json(filteredUser);
+});
 exports.getCurrentUser = getCurrentUser;
 const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const users = yield User_1.User.findAll({ attributes: ['id', 'name', 'email', 'role', 'warehouseAddress'] }); // Fetch selected attributes
+        const users = yield User_1.User.findAll({ attributes: ['id', 'name', 'email', 'role'],
+            include: [
+                { model: Address_1.Address, as: 'warehouseAddress' },
+            ],
+        }); // Fetch selected attributes
         res.json(users);
     }
     catch (error) {

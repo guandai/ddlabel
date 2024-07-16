@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // backend/src/server.ts
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+const http_1 = __importDefault(require("http"));
+const socket_io_1 = require("socket.io");
 const database_1 = require("./config/database");
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const packageRoutes_1 = __importDefault(require("./routes/packageRoutes"));
@@ -22,19 +24,35 @@ else {
     dotenv_1.default.config({ path: '.env.development' });
 }
 const app = (0, express_1.default)();
+const server = http_1.default.createServer(app);
+const io = new socket_io_1.Server(server, {
+    path: '/api/socket.io/',
+    cors: {
+        origin: '*', methods: ['GET', 'POST'], allowedHeaders: ['Content-Type', 'Authorization', 'socket-id'],
+    },
+});
 // Middleware
 app.use(express_1.default.json());
 app.use((0, cors_1.default)()); // Allow all requests
 // Routes
 app.use('/api/users', userRoutes_1.default);
-app.use('/api/packages', packageRoutes_1.default);
 app.use('/api/transactions', transactionRoutes_1.default);
-app.use('/api/shipping_rates', shippingRateRoutes_1.default); // Add this line
+app.use('/api/shipping_rates', shippingRateRoutes_1.default);
 app.use('/api/postal_zones', postalZoneRoutes_1.default);
+app.use('/api/packages', (req, _res, next) => {
+    req.io = io;
+    next();
+}, packageRoutes_1.default);
 // Connect to the database and start the server
 (0, database_1.connectDB)().then(() => {
     const PORT = process.env.PORT || 5100;
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
+    });
+});
+io.on('connection', (socket) => {
+    console.log('a user connected');
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
     });
 });

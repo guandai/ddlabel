@@ -63,14 +63,10 @@ Package.init({
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },
-    warehouseZip: {
-        type: sequelize_1.DataTypes.STRING,
-        allowNull: false,
-    },
 }, {
     sequelize: database_1.sequelize,
     tableName: 'packages',
 });
-Package.belongsTo(Address_1.Address, { as: 'shipFromAddress', foreignKey: 'shipFromAddressId' });
-Package.belongsTo(Address_1.Address, { as: 'shipToAddress', foreignKey: 'shipToAddressId' });
+Package.belongsTo(Address_1.Address, { as: 'shipFromAddress', foreignKey: 'shipFromAddressId', onDelete: 'CASCADE' });
+Package.belongsTo(Address_1.Address, { as: 'shipToAddress', foreignKey: 'shipToAddressId', onDelete: 'CASCADE' });
 Package.belongsTo(User_1.User, { as: 'user', foreignKey: 'userId' }); // Ensure alias 'owner' is defined here
