@@ -1,6 +1,7 @@
 // backend/src/controllers/postalZoneController.ts
 import { Request, Response } from 'express';
 import { PostalZone } from '../models/PostalZone';
+import logger from '../config/logger';
 
 export const getPostalZones = async (req: Request, res: Response) => {
   try {
@@ -14,11 +15,11 @@ export const getPostalZones = async (req: Request, res: Response) => {
 export const getPostalZoneByZip = async (req: Request, res: Response) => {
   try {
     const { zip_code } = req.query as { zip_code: string };
-    console.log(`zip_code`, zip_code);
+    logger.log(`zip_code`, zip_code);
     const postalZone = await PostalZone.findOne({
       where: { zip_code },
     });
-    console.log(`postalZone`, postalZone);
+    logger.log(`postalZone`, postalZone);
     if (postalZone) {
       res.json(postalZone);
     } else {

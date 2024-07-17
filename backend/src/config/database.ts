@@ -17,27 +17,33 @@ const sequelize = new Sequelize({
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
-  logging: console.log,
+  logging: (msg) => logger.info(msg), // Use logger for logging
+  pool: {
+    max: 10,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
+  },
 });
 
 // Import models
 import { User } from '../models/User';
 import { Package } from '../models/Package';
 import { Transaction } from '../models/Transaction';
+import logger from './logger';
 
 // Initialize model relationships if needed
-Package.belongsTo(User, { foreignKey: 'userId' });
 Transaction.belongsTo(Package, { foreignKey: 'packageId' });
 
 // Connect to the database and synchronize models
 const connectDB = async () => {
   try {
     await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
+    logger.info('Connection has been established successfully.');
     // sequelize.sync();
-    console.log('Database synchronized successfully.');
+    logger.info('Database synchronized successfully.');
   } catch (error) {
-    console.error('Unable to connect to the database:', error);
+    logger.error('Unable to connect to the database:', error);
   }
 };
 

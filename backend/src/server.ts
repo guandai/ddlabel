@@ -9,9 +9,11 @@ import packageRoutes from './routes/packageRoutes';
 import transactionRoutes from './routes/transactionRoutes';
 import shippingRateRoutes from './routes/shippingRateRoutes';
 import postalZoneRoutes from './routes/postalZoneRoutes';
+import compression from 'compression';
 
 import dotenv from 'dotenv';
 import { Request } from 'express';
+import logger from './config/logger';
 
 declare global {
   namespace Express {
@@ -42,6 +44,7 @@ const io = new Server(server, {
 // Middleware
 app.use(express.json());
 app.use(cors()); // Allow all requests
+app.use(compression());
 
 // Routes
 app.use('/api/users', userRoutes);
@@ -53,18 +56,17 @@ app.use('/api/packages', (req: Request, _res, next) => {
   next();
 }, packageRoutes);
 
-
 // Connect to the database and start the server
 connectDB().then(() => {
   const PORT = process.env.PORT || 5100;
   server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    logger.info(`Server running on port ${PORT}`);
   });
 });
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
+  logger.info('a user connected');
   socket.on('disconnect', () => {
-    console.log('user disconnected');
+    logger.info('user disconnected');
   });
 });

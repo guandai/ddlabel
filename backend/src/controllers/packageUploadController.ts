@@ -8,21 +8,40 @@ import csv from 'csv-parser';
 import fs from 'fs';
 import path from 'path';
 
-const BATCH_SIZE = 500; // You can adjust this batch size as needed
+const BATCH_SIZE = 500;
 
 export const importPackages = async (req: Request, res: Response) => {
 	if (!req.file) {
 		return res.status(400).send({ message: 'No file uploaded' });
 	}
 	const file = req.file;
-	const { packageUserId } = req.body;
+	const { packageUserId, headerMapping } = req.body;
+	type Mapping = { [key: string]: string };
+	const mapping: Mapping = JSON.parse(headerMapping);
+
 	const results: any[] = [];
 	const io = req.io;
 	const socketId = req.headers['socket-id'] || 'no-id';
 
 	fs.createReadStream(file.path)
 		.pipe(csv())
-		.on('data', (data) => results.push(data))
+		.on('data', (data) => {
+			
+			type CsvData = { [key: string]: string | number | undefined};
+
+			const fields = [
+				'length', 'width', 'height', 'weight', 'reference',
+				'shipFromName', 'shipFromAddressStreet', 'shipFromAddressCity', 'shipFromAddressState', 'shipFromAddressZip',
+				'shipToName', 'shipToAddressStreet', 'shipToAddressCity', 'shipToAddressState', 'shipToAddressZip'
+			];
+
+			const mappedData = fields.reduce((acc: CsvData, field: string) => {
+				acc[field] = data[mapping[field]];
+				return acc;
+			}, {});
+			results.push(mappedData);
+			return results;
+		})
 		.on('end', async () => {
 			let packageBatch: any[] = [];
 			let fromAddressBatch: any[] = [];
@@ -67,6 +86,7 @@ export const importPackages = async (req: Request, res: Response) => {
 
 				fromAddressBatch.push(shipFromAddress);
 				toAddressBatch.push(shipToAddress);
+
 				packageBatch.push({
 					userId: packageUserId,
 					shipFromAddress,
@@ -80,7 +100,7 @@ export const importPackages = async (req: Request, res: Response) => {
 				});
 
 				if (packageBatch.length >= BATCH_SIZE) {
-					
+
 						await processBatch(packageBatch, fromAddressBatch, toAddressBatch);
 						packageBatch = [];
 						fromAddressBatch = [];
@@ -106,12 +126,13 @@ export const importPackages = async (req: Request, res: Response) => {
 					});
 				} catch (error) {
 					console.error('Error processing batch', error);
-					return res.status(500).send({ message: 'Error processBatch' });
+					return res.status(500).send({ message: 'Error processing batch' });
 				}
 			}
 
 			res.status(200).send({ message: 'Packages imported successfully' });
-		}).on('error', (err) => {
+		})
+		.on('error', (err) => {
 			console.error('Error parsing CSV:', err);
 			res.status(500).send({ message: 'Error importing packages' });
 		});
@@ -143,6 +164,7 @@ const storage = multer.diskStorage({
 		cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
 	}
 });
+
 const upload = multer({ storage });
 
 export const uploadMiddleware = upload.single('packageCsvFile');
