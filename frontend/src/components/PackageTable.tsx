@@ -27,6 +27,7 @@ const PackageTable: React.FC = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
     const offset = page * rowsPerPage;
 
     tryLoad(setError, async () => {
@@ -35,10 +36,12 @@ const PackageTable: React.FC = () => {
         params: {
           limit: rowsPerPage,
           offset,
+          userId,
         }
       });
       setPackages(response.data.packages);
-      setTotalPackages(response.data.total); // Set the total number of packages
+      setTotalPackages(response
+        .data.total); // Set the total number of packages
     });
     
   }, [page, rowsPerPage]);

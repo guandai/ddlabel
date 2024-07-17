@@ -34,8 +34,11 @@ export const addPackage = async (req: Request, res: Response) => {
 export const getPackages = async (req: Request, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 100; // Default limit to 20 if not provided
   const offset = parseInt(req.query.offset as string) || 0; // 
+  const userId = parseInt(req.query.userId as string); 
   try {
-    const { count, rows: packages } = await Package.findAndCountAll({
+    const total = await Package.count({ where: { userId } });
+
+    const packages = await Package.findAll({
       include: [
         { model: Address, as: 'shipFromAddress' },
         { model: Address, as: 'shipToAddress' },
@@ -44,7 +47,7 @@ export const getPackages = async (req: Request, res: Response) => {
       limit,
       offset,
     });
-    res.json({ total: count, packages });
+    res.json({ total, packages });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }

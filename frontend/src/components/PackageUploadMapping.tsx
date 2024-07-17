@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import Papa, { ParseResult } from 'papaparse';
 import { Box, Button, Container, Select, MenuItem, Typography, Grid, FormControl } from '@mui/material';
+import { io } from 'socket.io-client';
+
+const socket = io(`${process.env.REACT_APP_SOCKET_IO_HOST}`, { path: '/api/socket.io' });
+
+type Prop = {
+	setError: (message: string) => void;
+	setSuccess: (message: string) => void;
+};
 
 const fields = [
   'length', 'width', 'height', 'weight', 'reference',
