@@ -12,13 +12,12 @@ import { generatePDF } from './generatePDF';
 import PackageDialog from './PackageDialog';
 import { useNavigate } from 'react-router-dom';
 import PackageUploadButton from './PackageUploadButton';
-
-
+import PackageUploadMapping from './PackageUploadMapping';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalPackages, setTotalPackages] = useState(0); // Track the total number of packages
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -27,23 +26,21 @@ const PackageTable: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchPackages = async () => {
-      const token = localStorage.getItem('token');
-      const offset = page * rowsPerPage;
+    const token = localStorage.getItem('token');
+    const offset = page * rowsPerPage;
 
-      tryLoad(setError, async () => {
-        const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages`, {
-          headers: { Authorization: `Bearer ${token}` },
-          params: {
-            limit: rowsPerPage,
-            offset,
-          }
-        });
-        setPackages(response.data.packages);
-        setTotalPackages(response.data.total); // Set the total number of packages
+    tryLoad(setError, async () => {
+      const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          limit: rowsPerPage,
+          offset,
+        }
       });
-    };
-    fetchPackages();
+      setPackages(response.data.packages);
+      setTotalPackages(response.data.total); // Set the total number of packages
+    });
+    
   }, [page, rowsPerPage]);
 
   const handleDelete = async (id: number) => {
@@ -92,6 +89,7 @@ const PackageTable: React.FC = () => {
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
+        <PackageUploadMapping />
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
@@ -122,7 +120,7 @@ const PackageTable: React.FC = () => {
             </TableBody>
           </Table>
           <TablePagination
-            rowsPerPageOptions={[25, 50, 100]}
+            rowsPerPageOptions={[5, 25, 50, 100]}
             component="div"
             count={totalPackages} // Total number of packages
             rowsPerPage={rowsPerPage}

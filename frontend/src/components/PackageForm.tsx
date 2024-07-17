@@ -65,7 +65,6 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
         const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages/${packageId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        console.log(`response`, response);
         setPackageData(response.data);
       });
     }
