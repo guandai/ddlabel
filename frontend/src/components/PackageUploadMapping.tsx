@@ -1,5 +1,5 @@
-import Papa, { ParseResult } from 'papaparse';
 import React, { useState } from 'react';
+import Papa, { ParseResult } from 'papaparse';
 import { Box, Button, Container, Select, MenuItem, Typography, Grid, FormControl } from '@mui/material';
 
 const fields = [
@@ -21,7 +21,17 @@ const PackageUploadMapping: React.FC = () => {
         complete: (results: ParseResult<object>) => {
           const firstRow = results.data[0];
           if (firstRow) {
-            setCsvHeaders(Object.keys(firstRow));
+            const headers = Object.keys(firstRow);
+            setCsvHeaders(headers);
+
+            // Set initial mapping if field name matches CSV header name
+            const initialMapping: { [key: string]: string } = {};
+            fields.forEach(field => {
+              if (headers.includes(field)) {
+                initialMapping[field] = field;
+              }
+            });
+            setHeaderMapping(initialMapping);
           }
         },
       });
@@ -46,14 +56,14 @@ const PackageUploadMapping: React.FC = () => {
   const lastThird = fields.slice(third * 2);
 
   return (
-    <Container sx={{width: '2000px'}}>
+    <Container>
       <Box my={4}>
         <input type="file" onChange={handleFileChange} />
         {csvHeaders.length > 0 && (
           <Box mt={4}>
-            <Typography variant="h6">Map CSV Headers - Required fields map to csv headers:</Typography>
+            <Typography variant="h6">Map CSV Headers</Typography>
             <Grid container spacing={2}>
-              <Grid item sx={{flexDirection: 'row'}} xs={4}>
+              <Grid item xs={4}>
                 {firstThird.map((field) => (
                   <Box key={field} mb={2}>
                     <Typography variant="body2">{field}</Typography>
