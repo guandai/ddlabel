@@ -36,7 +36,7 @@ export const getPackages = async (req: Request, res: Response) => {
   const offset = parseInt(req.query.offset as string) || 0; // 
   const userId = parseInt(req.query.userId as string); 
   try {
-    const total = await Package.count({ where: { userId } });
+    const total = (await Package.count({ where: { userId } })) || 0;
 
     const packages = await Package.findAll({
       include: [

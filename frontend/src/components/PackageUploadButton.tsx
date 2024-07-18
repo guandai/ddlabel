@@ -12,9 +12,10 @@ const socket = io(`${process.env.REACT_APP_SOCKET_IO_HOST}`, { path: '/api/socke
 type Prop = {
 	setError: (message: string) => void;
 	setSuccess: (message: string) => void;
+  title?: string;
 };
 
-const PackageUploadButton: React.FC<Prop> = ({setError, setSuccess}: Prop) => {
+const PackageUploadButton: React.FC<Prop> = ({setError, setSuccess, title}: Prop) => {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [insertProgress, setInsertProgress] = useState<number | null>(null);
 
@@ -51,9 +52,12 @@ const PackageUploadButton: React.FC<Prop> = ({setError, setSuccess}: Prop) => {
           if (total) {
             setUploadProgress(Math.round((progressEvent.loaded * 100) / total));
           }
+          if (progressEvent.loaded === total) {
+            setUploadProgress(100);
+            setSuccess('Upload Done. Processing data...');
+          }
         },
       });
-      setUploadProgress(100);
       setSuccess(response.data.message);
       
     } catch (error: any) {
@@ -64,7 +68,7 @@ const PackageUploadButton: React.FC<Prop> = ({setError, setSuccess}: Prop) => {
   return (
 	<span>
 		<Button variant="contained" color="secondary" startIcon={<Upload />} component="label" >
-			Upload CSV
+     { title || 'Upload CSV'}
 			<input type="file" accept=".csv" style={{ display: 'none' }} onChange={handleFileUpload} />
 		</Button>
 
