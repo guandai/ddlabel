@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
 import Papa, { ParseResult } from 'papaparse';
 import { Box, Button, Container, Select, MenuItem, Typography, Grid, FormControl } from '@mui/material';
-import { io } from 'socket.io-client';
-
-const socket = io(`${process.env.REACT_APP_SOCKET_IO_HOST}`, { path: '/api/socket.io' });
-
-type Prop = {
-	setError: (message: string) => void;
-	setSuccess: (message: string) => void;
-};
+import PackageUploadButton from './PackageUploadButton';
 
 const fields = [
   'length', 'width', 'height', 'weight', 'reference',
@@ -17,6 +10,9 @@ const fields = [
 ];
 
 const PackageUploadMapping: React.FC = () => {
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
   const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
   const [headerMapping, setHeaderMapping] = useState<{ [key: string]: string }>({});
 
@@ -66,7 +62,7 @@ const PackageUploadMapping: React.FC = () => {
   return (
     <Container>
       <Box my={4}>
-        <input type="file" onChange={handleFileChange} />
+        <PackageUploadButton setError={setError} setSuccess={setSuccess} title="Map Csv Header" />
         {csvHeaders.length > 0 && (
           <Box mt={4}>
             <Typography variant="h6">Map CSV Headers</Typography>

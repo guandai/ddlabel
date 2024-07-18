@@ -7,143 +7,185 @@ import multer from 'multer';
 import csv from 'csv-parser';
 import fs from 'fs';
 import path from 'path';
+import getZipInfo from '../utils/getZipInfo';
+import reportToIo from '../utils/reportIo';
+
+type BaseData = {
+	length: number,
+	width: number,
+	height: number,
+	weight: number,
+	reference: string,
+	shipFromName: string,
+	shipFromAddressStreet: string,
+	shipFromAddressZip: string,
+	shipToName: string,
+	shipToAddressStreet: string,
+	shipToAddressZip: string,
+}
+
+type ExtryData = {
+	shipFromAddressCity: string,
+	shipFromAddressState: string,
+	shipToAddressCity: string,
+	shipToAddressState: string,
+}
+
+type PkgData = {
+	shipFromAddress: AddressData,
+	shipToAddress: AddressData,
+	packageSelf: PackageSelf,
+}
+
+type BatchDataType = {
+	pkgBatch: PackageSelf[],
+	fromBatch: AddressData[],
+	toBatch: AddressData[],
+	processed: number,
+}
+
+type PackageSelf = {
+	userId: number,
+	length: number,
+	width: number,
+	height: number,
+	weight: number,
+	trackingNumber: string,
+	reference: string,
+}
+
+type AddressData = {
+	name: string,
+	addressLine1: string,
+	city: string,
+	state: string,
+	zip: string,
+}
+
+type CsvKeys = string[];
+type CsvData = { [K in KeyOfCsvHeaders]: string | number };
+type Mapping = { [K in KeyOfBaseData]: KeyOfCsvHeaders }; // KeyOfCsvHeaders is csv arbitrary header names
+
+type KeyOfBaseData = keyof BaseData;
+type KeyOfExtraData = keyof ExtryData;
+type KeyOfPkgData = keyof PkgData;
+type KeyOfCsvHeaders = keyof CsvKeys;
 
 const BATCH_SIZE = 500;
+const FIELDS: KeyOfBaseData[] = [
+	'length', 'width', 'height', 'weight', 'reference',
+	'shipFromName', 'shipFromAddressStreet', 'shipFromAddressZip',
+	'shipToName', 'shipToAddressStreet', 'shipToAddressZip'
+];
+
+const ExtraFields: KeyOfExtraData[] = ['shipFromAddressCity', 'shipFromAddressState', 'shipToAddressCity', 'shipToAddressState'];
+
+const defaultMapping = FIELDS.reduce((acc: Mapping, field: KeyOfBaseData) => {
+	Object.assign(acc, { [field]: field });
+	return acc;
+}, {} as Mapping);
+
+
+const getMappingData = (data: CsvData, mapping: Mapping) => {
+	return FIELDS.reduce((acc: BaseData, field: KeyOfBaseData) => {
+		const csvHeader = mapping[field];
+		return Object.assign(acc, { [field]: data[csvHeader] });
+	}, {} as BaseData);
+}
+
+const onData = (req:Request,  data: CsvData, pkgDatas: PackageSelf[], addFrom:AddressData[], addTo: AddressData[]) => {
+	console.log(`333`);
+	const { packageUserId, headerMapping } = req.body;
+	const mapping: Mapping = headerMapping ? JSON.parse(headerMapping) : defaultMapping;
+
+	const mappedData = getMappingData(data, mapping);
+	const addressFrom = getZipInfo(mappedData['shipFromAddressZip'] );
+	const addressTo = getZipInfo(mappedData['shipToAddressZip'] );
+	if (!addressFrom || !addressTo) { 
+		return null;
+	}
+	pkgDatas.push({
+		userId: packageUserId,
+		length: mappedData['length'],
+		width: mappedData['width'],
+		height: mappedData['height'],
+		weight: mappedData['weight'],
+		trackingNumber: generateTrackingNumber(),
+		reference: mappedData['reference'],
+	});
+	addFrom.push({
+		...addressFrom,
+		name: mappedData['shipFromName'],
+		addressLine1: mappedData['shipFromAddressStreet'],
+		zip: mappedData['shipFromAddressZip'],
+	});
+	addTo.push({
+		...addressTo,
+		name: mappedData['shipToName'],
+		addressLine1: mappedData['shipToAddressStreet'],
+		zip: mappedData['shipToAddressZip'],
+	})
+};
 
 export const importPackages = async (req: Request, res: Response) => {
 	if (!req.file) {
 		return res.status(400).send({ message: 'No file uploaded' });
 	}
-	const file = req.file;
-	const { packageUserId, headerMapping } = req.body;
-	type Mapping = { [key: string]: string };
-	const mapping: Mapping = JSON.parse(headerMapping);
 
-	const results: any[] = [];
-	const io = req.io;
-	const socketId = req.headers['socket-id'] || 'no-id';
+	const file = req.file;
+	const pkgDatas: PackageSelf[] = [];
+	const addFrom: AddressData[] = [];
+	const addTo: AddressData[] = [];
 
 	fs.createReadStream(file.path)
 		.pipe(csv())
-		.on('data', (data) => {
-			
-			type CsvData = { [key: string]: string | number | undefined};
-
-			const fields = [
-				'length', 'width', 'height', 'weight', 'reference',
-				'shipFromName', 'shipFromAddressStreet', 'shipFromAddressCity', 'shipFromAddressState', 'shipFromAddressZip',
-				'shipToName', 'shipToAddressStreet', 'shipToAddressCity', 'shipToAddressState', 'shipToAddressZip'
-			];
-
-			const mappedData = fields.reduce((acc: CsvData, field: string) => {
-				acc[field] = data[mapping[field]];
-				return acc;
-			}, {});
-			results.push(mappedData);
-			return results;
-		})
+		.on('data', (data: CsvData) => onData(req, data, pkgDatas, addFrom, addTo))
 		.on('end', async () => {
-			let packageBatch: any[] = [];
-			let fromAddressBatch: any[] = [];
-			let toAddressBatch: any[] = [];
-			let processedCount = 0;
-
-			for (const pkgData of results) {
-				const {
-					length,
-					width,
-					height,
-					weight,
-					reference,
-					shipFromName,
-					shipFromAddressStreet,
-					shipFromAddressCity,
-					shipFromAddressState,
-					shipFromAddressZip,
-					shipToName,
-					shipToAddressStreet,
-					shipToAddressCity,
-					shipToAddressState,
-					shipToAddressZip
-				} = pkgData;
-				const trackingNumber = generateTrackingNumber();
-
-				const shipFromAddress = {
-					name: shipFromName,
-					addressLine1: shipFromAddressStreet,
-					city: shipFromAddressCity,
-					state: shipFromAddressState,
-					zip: shipFromAddressZip,
-				};
-
-				const shipToAddress = {
-					name: shipToName,
-					addressLine1: shipToAddressStreet,
-					city: shipToAddressCity,
-					state: shipToAddressState,
-					zip: shipToAddressZip,
-				};
-
-				fromAddressBatch.push(shipFromAddress);
-				toAddressBatch.push(shipToAddress);
-
-				packageBatch.push({
-					userId: packageUserId,
-					shipFromAddress,
-					shipToAddress,
-					length,
-					width,
-					height,
-					weight,
-					trackingNumber,
-					reference,
-				});
-
-				if (packageBatch.length >= BATCH_SIZE) {
-
-						await processBatch(packageBatch, fromAddressBatch, toAddressBatch);
-						packageBatch = [];
-						fromAddressBatch = [];
-						toAddressBatch = [];
-
-						processedCount += BATCH_SIZE;
-						io.to(socketId).emit('progress', {
-							processed: processedCount,
-							total: results.length
-						});
-					
-				}
+			const batchData: BatchDataType = {
+				pkgBatch: [],
+				fromBatch: [],
+				toBatch: [],
+				processed: 0,
 			}
 
-			// Process any remaining data
-			if (packageBatch.length > 0) {
+			const turns = Math.ceil(pkgDatas.length / BATCH_SIZE);
+
+			for (let i = 0; i < turns; i++) {
+				const start = i * BATCH_SIZE;
+				const pkgDataSlice = pkgDatas.slice(start, start + BATCH_SIZE);
+				const shipFromSlice = addFrom.slice(start, start + BATCH_SIZE);
+				const shipToSlice = addTo.slice(start, start + BATCH_SIZE);
+
+				batchData.fromBatch = shipFromSlice;
+				batchData.toBatch = shipToSlice;
+				batchData.pkgBatch = pkgDataSlice;
+
 				try {
-					await processBatch(packageBatch, fromAddressBatch, toAddressBatch);
-					processedCount += packageBatch.length;
-					io.to(socketId).emit('progress', {
-						processed: processedCount,
-						total: results.length
-					});
+					await processBatch(batchData.pkgBatch, batchData.fromBatch, batchData.toBatch);
+					batchData.pkgBatch = [];
+					batchData.fromBatch = [];
+					batchData.toBatch = [];
+					batchData.processed += pkgDataSlice.length;
+					reportToIo(req, batchData.processed, pkgDatas.length);
 				} catch (error) {
 					console.error('Error processing batch', error);
 					return res.status(500).send({ message: 'Error processing batch' });
 				}
 			}
 
-			res.status(200).send({ message: 'Packages imported successfully' });
+			res.status(200).send({ message: 'PkgBatch imported successfully' });
 		})
 		.on('error', (err) => {
 			console.error('Error parsing CSV:', err);
-			res.status(500).send({ message: 'Error importing packages' });
+			res.status(500).send({ message: 'Error importing pkgBatch' });
 		});
 };
 
-const processBatch = async (packageBatch: any[], fromAddressBatch: any[], toAddressBatch: any[]) => {
+const processBatch = async (pkgBatch: PackageSelf[], fromBatch: AddressData[], toBatch: AddressData[]) => {
 	try {
-		const fromAddresses = await Address.bulkCreate(fromAddressBatch);
-		const toAddresses = await Address.bulkCreate(toAddressBatch);
-
-		const packages = packageBatch.map((pkg, index) => ({
+		const fromAddresses = await Address.bulkCreate(fromBatch);
+		const toAddresses = await Address.bulkCreate(toBatch);
+		const packages = pkgBatch.map((pkg: PackageSelf, index: number) => ({
 			...pkg,
 			shipFromAddressId: fromAddresses[index].id,
 			shipToAddressId: toAddresses[index].id
