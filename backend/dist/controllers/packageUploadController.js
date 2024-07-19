@@ -20,93 +20,124 @@ const multer_1 = __importDefault(require("multer"));
 const csv_parser_1 = __importDefault(require("csv-parser"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
-const BATCH_SIZE = 500; // You can adjust this batch size as needed
+const getZipInfo_1 = __importDefault(require("../utils/getZipInfo"));
+const reportIo_1 = require("../utils/reportIo");
+const errors_1 = require("../utils/errors");
+const BATCH_SIZE = 500;
+const FIELDS = [
+    'length', 'width', 'height', 'weight', 'reference',
+    'shipFromName', 'shipFromAddressStreet', 'shipFromAddressZip',
+    'shipToName', 'shipToAddressStreet', 'shipToAddressZip'
+];
+const ExtraFields = ['shipFromAddressCity', 'shipFromAddressState', 'shipToAddressCity', 'shipToAddressState'];
+const defaultMapping = FIELDS.reduce((acc, field) => {
+    Object.assign(acc, { [field]: field });
+    return acc;
+}, {});
+const getMappingData = (data, mapping) => {
+    return FIELDS.reduce((acc, field) => {
+        const csvHeader = mapping[field];
+        return Object.assign(acc, { [field]: data[csvHeader] });
+    }, {});
+};
+const onEndData = (req, res, pkgAll) => __awaiter(void 0, void 0, void 0, function* () {
+    const { pkgBatch, fromBatch, toBatch } = pkgAll;
+    let processed = 0;
+    const batchData = {
+        pkgBatch: [],
+        fromBatch: [],
+        toBatch: [],
+    };
+    const turns = Math.ceil(pkgBatch.length / BATCH_SIZE);
+    for (let i = 0; i < turns; i++) {
+        const start = i * BATCH_SIZE;
+        const pkgDataSlice = pkgBatch.slice(start, start + BATCH_SIZE);
+        const shipFromSlice = fromBatch.slice(start, start + BATCH_SIZE);
+        const shipToSlice = toBatch.slice(start, start + BATCH_SIZE);
+        batchData.fromBatch = shipFromSlice;
+        batchData.toBatch = shipToSlice;
+        batchData.pkgBatch = pkgDataSlice;
+        try {
+            yield processBatch(batchData);
+            batchData.pkgBatch = [];
+            batchData.fromBatch = [];
+            batchData.toBatch = [];
+            processed += pkgDataSlice.length;
+            (0, reportIo_1.reportIoSocket)('insert', req, processed, pkgBatch.length);
+        }
+        catch (error) {
+            console.error('Error processing batch', error);
+            return res.status(500).send({ message: 'Error processing batch' });
+        }
+    }
+    res.status(200).send({ message: 'PkgBatch imported successfully' });
+});
+const getPreparedData = (packageCsvMap, data) => {
+    const mapping = (0, errors_1.isValidJSON)(packageCsvMap) ? JSON.parse(packageCsvMap) : defaultMapping;
+    const mappedData = getMappingData(data, mapping);
+    const addressFrom = (0, getZipInfo_1.default)(mappedData['shipFromAddressZip']);
+    const addressTo = (0, getZipInfo_1.default)(mappedData['shipToAddressZip']);
+    if (!addressFrom) {
+        console.error(`has no From ZipInfo for ${mappedData['shipFromAddressZip']}`);
+        return;
+    }
+    if (!addressTo) {
+        console.error(`has no To ZipInfo for ${mappedData['shipToAddressZip']}`);
+        return;
+    }
+    return {
+        mappedData,
+        addressFrom,
+        addressTo,
+    };
+};
+const onData = (OnDataParams) => {
+    const { req, csvData, pkgAll } = OnDataParams;
+    const { packageCsvLength, packageUserId, packageCsvMap } = req.body;
+    const prepared = getPreparedData(packageCsvMap, csvData);
+    if (!prepared)
+        return;
+    const { mappedData, addressFrom, addressTo } = prepared;
+    pkgAll.pkgBatch.push({
+        userId: packageUserId,
+        length: mappedData['length'],
+        width: mappedData['width'],
+        height: mappedData['height'],
+        weight: mappedData['weight'],
+        trackingNumber: (0, generateTrackingNumber_1.generateTrackingNumber)(),
+        reference: mappedData['reference'],
+    });
+    pkgAll.fromBatch.push(Object.assign(Object.assign({}, addressFrom), { name: mappedData['shipFromName'], addressLine1: mappedData['shipFromAddressStreet'], zip: mappedData['shipFromAddressZip'] }));
+    pkgAll.toBatch.push(Object.assign(Object.assign({}, addressTo), { name: mappedData['shipToName'], addressLine1: mappedData['shipToAddressStreet'], zip: mappedData['shipToAddressZip'] }));
+    (0, reportIo_1.reportIoSocket)('generate', req, pkgAll.pkgBatch.length, packageCsvLength);
+    return;
+};
 const importPackages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req.file) {
+    const { body, file } = req;
+    if (!file) {
         return res.status(400).send({ message: 'No file uploaded' });
     }
-    const file = req.file;
-    const { packageUserId } = req.body;
-    const results = [];
-    const io = req.io;
-    const socketId = req.headers['socket-id'] || 'no-id';
+    const pkgAll = {
+        pkgBatch: [],
+        fromBatch: [],
+        toBatch: [],
+    };
     fs_1.default.createReadStream(file.path)
         .pipe((0, csv_parser_1.default)())
-        .on('data', (data) => results.push(data))
-        .on('end', () => __awaiter(void 0, void 0, void 0, function* () {
-        let packageBatch = [];
-        let fromAddressBatch = [];
-        let toAddressBatch = [];
-        let processedCount = 0;
-        for (const pkgData of results) {
-            const { length, width, height, weight, reference, shipFromName, shipFromAddressStreet, shipFromAddressCity, shipFromAddressState, shipFromAddressZip, shipToName, shipToAddressStreet, shipToAddressCity, shipToAddressState, shipToAddressZip } = pkgData;
-            const trackingNumber = (0, generateTrackingNumber_1.generateTrackingNumber)();
-            const shipFromAddress = {
-                name: shipFromName,
-                addressLine1: shipFromAddressStreet,
-                city: shipFromAddressCity,
-                state: shipFromAddressState,
-                zip: shipFromAddressZip,
-            };
-            const shipToAddress = {
-                name: shipToName,
-                addressLine1: shipToAddressStreet,
-                city: shipToAddressCity,
-                state: shipToAddressState,
-                zip: shipToAddressZip,
-            };
-            fromAddressBatch.push(shipFromAddress);
-            toAddressBatch.push(shipToAddress);
-            packageBatch.push({
-                userId: packageUserId,
-                shipFromAddress,
-                shipToAddress,
-                length,
-                width,
-                height,
-                weight,
-                trackingNumber,
-                reference,
-            });
-            if (packageBatch.length >= BATCH_SIZE) {
-                yield processBatch(packageBatch, fromAddressBatch, toAddressBatch);
-                packageBatch = [];
-                fromAddressBatch = [];
-                toAddressBatch = [];
-                processedCount += BATCH_SIZE;
-                io.to(socketId).emit('progress', {
-                    processed: processedCount,
-                    total: results.length
-                });
-            }
-        }
-        // Process any remaining data
-        if (packageBatch.length > 0) {
-            try {
-                yield processBatch(packageBatch, fromAddressBatch, toAddressBatch);
-                processedCount += packageBatch.length;
-                io.to(socketId).emit('progress', {
-                    processed: processedCount,
-                    total: results.length
-                });
-            }
-            catch (error) {
-                console.error('Error processing batch', error);
-                return res.status(500).send({ message: 'Error processBatch' });
-            }
-        }
-        res.status(200).send({ message: 'Packages imported successfully' });
-    })).on('error', (err) => {
+        .on('data', (csvData) => onData({ req, csvData, pkgAll }))
+        .on('end', () => __awaiter(void 0, void 0, void 0, function* () { return onEndData(req, res, pkgAll); }))
+        .on('error', (err) => {
         console.error('Error parsing CSV:', err);
-        res.status(500).send({ message: 'Error importing packages' });
+        res.status(500).send({ message: 'Error importing pkgBatch' });
     });
 });
 exports.importPackages = importPackages;
-const processBatch = (packageBatch, fromAddressBatch, toAddressBatch) => __awaiter(void 0, void 0, void 0, function* () {
+const processBatch = (batchData) => __awaiter(void 0, void 0, void 0, function* () {
+    const { pkgBatch, fromBatch, toBatch } = batchData;
     try {
-        const fromAddresses = yield Address_1.Address.bulkCreate(fromAddressBatch);
-        const toAddresses = yield Address_1.Address.bulkCreate(toAddressBatch);
-        const packages = packageBatch.map((pkg, index) => (Object.assign(Object.assign({}, pkg), { shipFromAddressId: fromAddresses[index].id, shipToAddressId: toAddresses[index].id })));
+        const fromAddresses = yield Address_1.Address.bulkCreate(fromBatch);
+        const toAddresses = yield Address_1.Address.bulkCreate(toBatch);
+        const packages = pkgBatch.map((pkg, index) => (Object.assign(Object.assign({}, pkg), { shipFromAddressId: fromAddresses[index].id, shipToAddressId: toAddresses[index].id })));
         yield Package_1.Package.bulkCreate(packages);
     }
     catch (error) {

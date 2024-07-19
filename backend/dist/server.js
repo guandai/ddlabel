@@ -14,7 +14,9 @@ const packageRoutes_1 = __importDefault(require("./routes/packageRoutes"));
 const transactionRoutes_1 = __importDefault(require("./routes/transactionRoutes"));
 const shippingRateRoutes_1 = __importDefault(require("./routes/shippingRateRoutes"));
 const postalZoneRoutes_1 = __importDefault(require("./routes/postalZoneRoutes"));
+const compression_1 = __importDefault(require("compression"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const logger_1 = __importDefault(require("./config/logger"));
 // Load environment variables from .env file
 const env = process.env.NODE_ENV || 'development';
 if (env === 'production') {
@@ -34,6 +36,7 @@ const io = new socket_io_1.Server(server, {
 // Middleware
 app.use(express_1.default.json());
 app.use((0, cors_1.default)()); // Allow all requests
+app.use((0, compression_1.default)());
 // Routes
 app.use('/api/users', userRoutes_1.default);
 app.use('/api/transactions', transactionRoutes_1.default);
@@ -47,12 +50,12 @@ app.use('/api/packages', (req, _res, next) => {
 (0, database_1.connectDB)().then(() => {
     const PORT = process.env.PORT || 5100;
     server.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
+        logger_1.default.info(`Server running on port ${PORT}`);
     });
 });
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    logger_1.default.info('a user connected');
     socket.on('disconnect', () => {
-        console.log('user disconnected');
+        logger_1.default.info('user disconnected');
     });
 });

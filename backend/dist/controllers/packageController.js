@@ -41,8 +41,10 @@ exports.addPackage = addPackage;
 const getPackages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const limit = parseInt(req.query.limit) || 100; // Default limit to 20 if not provided
     const offset = parseInt(req.query.offset) || 0; // 
+    const userId = parseInt(req.query.userId);
     try {
-        const { count, rows: packages } = yield Package_1.Package.findAndCountAll({
+        const total = (yield Package_1.Package.count({ where: { userId } })) || 0;
+        const packages = yield Package_1.Package.findAll({
             include: [
                 { model: Address_1.Address, as: 'shipFromAddress' },
                 { model: Address_1.Address, as: 'shipToAddress' },
@@ -51,7 +53,7 @@ const getPackages = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             limit,
             offset,
         });
-        res.json({ total: count, packages });
+        res.json({ total, packages });
     }
     catch (error) {
         res.status(400).json({ message: error.message });

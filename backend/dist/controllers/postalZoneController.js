@@ -8,9 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getZoneByProposalAndZip = exports.getProposalByZip = exports.getPostalZoneById = exports.getPostalZoneByZip = exports.getPostalZones = void 0;
 const PostalZone_1 = require("../models/PostalZone");
+const logger_1 = __importDefault(require("../config/logger"));
 const getPostalZones = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const postalZones = yield PostalZone_1.PostalZone.findAll();
@@ -24,11 +28,11 @@ exports.getPostalZones = getPostalZones;
 const getPostalZoneByZip = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { zip_code } = req.query;
-        console.log(`zip_code`, zip_code);
+        logger_1.default.log(`zip_code`, zip_code);
         const postalZone = yield PostalZone_1.PostalZone.findOne({
             where: { zip_code },
         });
-        console.log(`postalZone`, postalZone);
+        logger_1.default.log(`postalZone`, postalZone);
         if (postalZone) {
             res.json(postalZone);
         }
