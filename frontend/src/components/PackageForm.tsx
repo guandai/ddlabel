@@ -42,8 +42,8 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
   const [packageData, setPackageData] = useState<PackageType>(
     initialData,
   );
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
   const navigate = useNavigate();
   const { id: packageId } = useParams<{ id: string }>();
 

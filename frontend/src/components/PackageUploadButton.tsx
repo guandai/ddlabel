@@ -13,23 +13,23 @@ const socket = io(`${process.env.REACT_APP_SOCKET_IO_HOST}`, { path: '/api/socke
 type Prop = {
   setError: (message: string) => void;
   setSuccess: (message: string) => void;
-  headerMapping?: HeaderMapping;
-  uploadFile?: File;
-  title?: string;
+  setSubmited: (value: boolean) => void;
+  submited: boolean;
+  setUploadDone: (value: boolean) => void;
+  headerMapping: HeaderMapping;
+  uploadFile: File;
+  validateForm: () => boolean;
+  csvLength: number;
 };
 
-const PackageUploadButton: React.FC<Prop> = ({ setError, setSuccess, title, headerMapping, uploadFile }: Prop) => {
-  const [submited, setSubmited] = useState<boolean>(false);
+const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
+  const { submited, setUploadDone, setSubmited, setError, setSuccess, headerMapping, uploadFile, validateForm, csvLength } = prop;
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [generateProgress, setGenerateProgress] = useState<number | null>(null);
   const [insertProgress, setInsertProgress] = useState<number | null>(null);
 
   useEffect(() => {
-    setSubmited(false);
-  }, [uploadFile]);
-  
-  useEffect(() => {
-    socket.on('progress', (data: { processed: number; total: number }) => {
+    socket.on('insert', (data: { processed: number; total: number }) => {
       const progressPercentage = Math.round((data.processed / data.total) * 100);
       setInsertProgress(progressPercentage);
     });
@@ -40,34 +40,42 @@ const PackageUploadButton: React.FC<Prop> = ({ setError, setSuccess, title, head
     });
 
     return () => {
-      socket.off('progress');
+      socket.off('generate');
+      socket.off('insert');
     };
   }, []);
 
+  const onUploadProgress = (progressEvent: AxiosProgressEvent) => {
+    const total = progressEvent.total;
+    if (total) {
+      setUploadProgress(Math.round((progressEvent.loaded * 100) / total));
+    }
+
+    if (progressEvent.loaded === total) {
+      setUploadProgress(100);
+      setSuccess('Upload Done. Processing data...');
+    }
+  };
+
   const handleFileUpload = async (e: any) => {
-    setSubmited(true);
+    if (validateForm && !validateForm()) {
+      setError("Please complete the required fields.");
+      return;
+    }
+
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
     if (!userId) { return setError('Please login'); }
 
     try {
       const formData = new FormData();
-      const packageCsvFile = uploadFile || e.target.files[0];
+      const packageCsvFile = uploadFile;
       formData.append('packageCsvFile', packageCsvFile);
       formData.append('packageUserId', userId);
+      formData.append('packageCsvLength', csvLength?.toString() || '0');
       formData.append('packageCsvMap', JSON.stringify(headerMapping));
 
-      const onUploadProgress = (progressEvent: AxiosProgressEvent) => {
-        const total = progressEvent.total;
-        if (total) {
-          setUploadProgress(Math.round((progressEvent.loaded * 100) / total));
-        }
-        if (progressEvent.loaded === total) {
-          setUploadProgress(100);
-          setSuccess('Upload Done. Processing data...');
-        }
-      };
-
+      setSubmited(true);
       const response = await axios.post(`${process.env.REACT_APP_BE_URL}/packages/import`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -76,7 +84,9 @@ const PackageUploadButton: React.FC<Prop> = ({ setError, setSuccess, title, head
         },
         onUploadProgress,
       });
-      setSuccess(response.data.message);
+
+      setUploadDone(true);
+      setSuccess(`Import Done - ${response.data.message}`);
       
     } catch (error: any) {
       setError(error.response?.data?.message || 'Failed to import packages.');
@@ -86,36 +96,31 @@ const PackageUploadButton: React.FC<Prop> = ({ setError, setSuccess, title, head
   // Calculate the buffer value based on some logic or placeholder value
   const valueBuffer = insertProgress !== null ? Math.min(insertProgress + 20, 100) : 0;
   return (
-  <span>
-    <Button variant="contained" disabled={submited} color="secondary" startIcon={<Upload />} component="label" >
-     { title || 'Upload CSV'}
-     { uploadFile ? 
+  <>
+    {!submited && <Button variant="contained" color="secondary" startIcon={<Upload />} component="label" >
+      Submit File
      <button type="button" style={{ display: 'none' }} onClick={handleFileUpload} />
-     :
-     <input type="file" accept=".csv" style={{ display: 'none' }} onChange={handleFileUpload} />
-     }
-      
-    </Button>
+    </Button>}
 
-    {uploadProgress !== null && uploadProgress !== 100 && (
+    {uploadProgress !== null && (
       <Box sx={{ width: '100%', mt: 2 }}>
       <LinearProgress color="success" variant="determinate" value={uploadProgress} />
       <Typography variant="body2" color="textSecondary">Uploading: {`${Math.round(uploadProgress)}%`}</Typography>
       </Box>
     )}
-    {generateProgress !== null && uploadProgress !== 100 && (
+    {generateProgress !== null && (
       <Box sx={{ width: '100%', mt: 2 }}>
       <LinearProgress color="warning" variant="determinate" value={generateProgress} />
       <Typography variant="body2" color="textSecondary">Generating: {`${Math.round(generateProgress)}%`}</Typography>
       </Box>
     )}
-    {insertProgress !== null && insertProgress !== 100  && (
+    {insertProgress !== null && (
       <Box sx={{ width: '100%', mt: 2 }}>
       <LinearProgress variant="buffer" value={insertProgress} valueBuffer={valueBuffer} />
       <Typography variant="body2" color="textSecondary">Inserting: {`${Math.round(insertProgress)}%`}</Typography>
       </Box>
     )}
-  </span>
+  </>
   );
 };
 

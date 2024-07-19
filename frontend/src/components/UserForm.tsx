@@ -30,8 +30,8 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
 
   const [profile, setProfile] = useState<ProfileType>(initialProfile);
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>();
   const [passwordChanged, setPasswordChanged] = useState(false); // Track if the password has been changed
 
   useEffect(() => {
@@ -52,7 +52,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
       };
       fetchProfile();
     }
-  }, [isRegister]);
+  }, [isRegister, initialProfile.warehouseAddress]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
@@ -82,8 +82,8 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
+    setError('');
+    setSuccess('');
     if (passwordChanged && profile.password !== confirmPassword) {
       setError('Passwords do not match.');
       return;

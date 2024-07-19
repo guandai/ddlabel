@@ -16,7 +16,7 @@ export type UserType = {
 
 const LoginForm: React.FC = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string>('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,7 +24,7 @@ const LoginForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setError('');
     tryLoad(setError, async () => {
         const response = await axios.post(`${process.env.REACT_APP_BE_URL}/users/login`, formData);
         localStorage.setItem('token', response.data.token);
