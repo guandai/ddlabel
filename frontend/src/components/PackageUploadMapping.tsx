@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import Papa, { ParseResult } from 'papaparse';
-import { Box, Container, Select, MenuItem, Typography, Grid, FormControl, Alert } from '@mui/material';
+import { Box, Typography, Grid, Button, Modal, Alert } from '@mui/material';
 import PackageUploadButton from './PackageUploadButton';
-import { HeaderMapping, KeyOfBaseData, KeyOfCsvHeaders } from '../types';
+import { HeaderMapping, KeyOfBaseData } from '../types';
+import { Upload } from '@mui/icons-material';
+import CloseButton from './CloseButton';
+import CsvHeaderList from './CsvHeaderList';
 
 const fields = [
   'length', 'width', 'height', 'weight', 'reference',
@@ -16,27 +19,28 @@ const defaultMapping = fields.reduce((acc: HeaderMapping, field: KeyOfBaseData) 
 }, {} as HeaderMapping);
 
 const PackageUploadMapping: React.FC = () => {
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [uploadDone, setUploadDone] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
+  const [submited, setSubmited] = useState<boolean>(false);
   const [uploadFile, setUploadFile] = useState<File>();
 
+  const [csvLength, setCsvLength] = useState<number>(0);
   const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
-  const [headerMapping, setHeaderMapping] = useState<HeaderMapping>();
+  const [headerMapping, setHeaderMapping] = useState<HeaderMapping>(defaultMapping);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   const getAutoMapping = (headers: string[]): HeaderMapping => {
     const autoMapping: HeaderMapping = defaultMapping;
     fields.forEach(field => {
-      if (!headers.includes(field)) {
-        autoMapping[field] = null;
-      } else {
-        autoMapping[field] = field;
-      }
+      if (headers.includes(field)) { autoMapping[field] = field }
     });
     return autoMapping;
   };
 
   const complete = (csvResults: ParseResult<object>) => {
     const firstRow = csvResults.data[0];
+    const length = csvResults.data.length;
     if (!firstRow) {
       return;
     }
@@ -45,11 +49,14 @@ const PackageUploadMapping: React.FC = () => {
 
     const initialMapping = getAutoMapping(headers);
     setHeaderMapping(initialMapping);
+    setCsvLength(length);
+    setModalOpen(true); // Open the modal when the CSV is parsed
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setError('');
     if (!event.target.files) {
-      return
+      return;
     }
     const file = event.target.files[0];
     setUploadFile(file);
@@ -61,65 +68,78 @@ const PackageUploadMapping: React.FC = () => {
   };
 
   const handleMappingChange = (requiredField: KeyOfBaseData, csvHeader: string) => {
-    setHeaderMapping((prevMapping?: HeaderMapping): HeaderMapping => 
-      !prevMapping ? defaultMapping : ({
+    setError('');
+    setHeaderMapping((prevMapping) => ({
       ...prevMapping,
       [requiredField]: csvHeader
     }));
   };
 
-  const third = Math.ceil(fields.length / 3);
-  const firstThird = fields.slice(0, third);
-  const secondThird = fields.slice(third, third * 2);
-  const lastThird = fields.slice(third * 2);
+  const validateForm = () => {
+    const missingFields = fields.filter(field => !headerMapping[field]);
+    if (missingFields.length > 0) {
+      setError(`The following fields are missing: ${missingFields.join(', ')}`);
+      return false;
+    }
+    setError('');
+    return true;
+  };
 
-  const renderField = (fieldRows: KeyOfBaseData[][]) => fieldRows.map((fieldRow, idx) => (
-    <Grid key={idx} item xs={4}>
-      {fieldRow.map((field) => (
-        <Box key={field} mb={2}>
-          <Typography variant="body2">{field}</Typography>
-          <FormControl fullWidth>
-            <Select
-              variant="standard"
-              required
-              value={headerMapping ? headerMapping[field] : null}
-              onChange={e => handleMappingChange(field, String(e.target.value))}
-            >
-              <MenuItem value=""><em>None</em></MenuItem>
-              {csvHeaders.map((header) => (
-                <MenuItem key={header} value={header}>
-                  {header}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
-      ))}
-    </Grid>
-  ));
+  const handleModalClose = () => {
+    if (uploadDone) {
+      setModalOpen(false);
+      setUploadDone(false);
+      setSubmited(false);
+      setSuccess('');
+      setError('');
+    };
+  };
 
   return (
-    <Container>
-      <Box my={4}>
-        <input type="file" accept=".csv" onChange={handleFileChange} />
-        {csvHeaders.length > 0 && (
-          <Box mt={4}>
-            <Typography variant="h6">Map CSV Headers</Typography>
-            {error && <Alert severity="error">{error}</Alert>}
-            {success && <Alert severity="success">{success}</Alert>}
-            <Grid container spacing={2}>
-              {renderField([firstThird, secondThird, lastThird])}
-            </Grid>
-            <PackageUploadButton
-              setError={setError}
-              setSuccess={setSuccess}
-              uploadFile={uploadFile}
-              headerMapping={headerMapping}
-              title="Submit File" />
-          </Box>
-        )}
-      </Box>
-    </Container>
+    <>
+      <Button variant="contained" disabled={submited} color="secondary" startIcon={<Upload />} component="label" >
+        {'Upload CSV'}
+        <input type="file" accept=".csv" style={{ display: 'none' }} onChange={handleFileChange} />
+      </Button>
+      <Modal
+        open={modalOpen}
+        onClose={handleModalClose}
+      >
+        <Box sx={{
+          position: 'absolute', p: 4, width: 600,
+          top: '50%',left: '50%', transform: 'translate(-50%, -50%)',
+          bgcolor: 'background.paper', boxShadow: 24,
+        }}>
+          {csvHeaders.length > 0 && (
+            <>
+              <Typography variant="h6" id="modal-title">Map CSV Headers</Typography>
+              {uploadDone && <CloseButton handleModalClose={handleModalClose} />}
+              {error && <Alert severity="error">{error}</Alert>}
+              {success && <Alert severity="success">{success}</Alert>}
+              {!submited && <Grid container spacing={2}>
+                <CsvHeaderList
+                  fields={fields}
+                  csvHeaders={csvHeaders}
+                  headerMapping={headerMapping}
+                  handleMappingChange={handleMappingChange}
+                />
+              </Grid>}
+              {uploadFile && <PackageUploadButton
+                setError={setError}
+                setSuccess={setSuccess}
+                uploadFile={uploadFile}
+                setUploadDone={setUploadDone}
+                headerMapping={headerMapping}
+                setSubmited={setSubmited}
+                submited={submited}
+                csvLength={csvLength}
+                validateForm={validateForm} // Pass the validation function to the button
+              />}
+            </>
+          )}
+        </Box>
+      </Modal>
+    </>
   );
 };
 

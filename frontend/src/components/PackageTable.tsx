@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, IconButton, Alert, Typography, Box, Container, Button,
-  TablePagination, LinearProgress
+  TablePagination
 } from '@mui/material';
 import { Visibility, Edit, Delete, PictureAsPdf, Label, AddCircle } from '@mui/icons-material';
 import { PackageType } from './PackageForm';
@@ -11,7 +11,6 @@ import { tryLoad } from '../util/errors';
 import { generatePDF } from './generatePDF';
 import PackageDialog from './PackageDialog';
 import { useNavigate } from 'react-router-dom';
-import PackageUploadButton from './PackageUploadButton';
 import PackageUploadMapping from './PackageUploadMapping';
 
 const PackageTable: React.FC = () => {
@@ -19,8 +18,8 @@ const PackageTable: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalPackages, setTotalPackages] = useState(0); // Track the total number of packages
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
   const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(null);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
@@ -83,16 +82,16 @@ const PackageTable: React.FC = () => {
   return (
     <Container component="main" maxWidth="lg">
       <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography component="h1" variant="h5">Packages
-          <Button variant="contained" color="primary" sx={{ ml: 2 }} onClick={() => navigate('/packages/create')} startIcon={<AddCircle />} >
-            Add
-          </Button>
-          {' '}
-          <PackageUploadButton setError={setError} setSuccess={setSuccess}/>
-        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '400px' }}>
+          <Typography component="h1" variant="h5">Packages</Typography>
+          <Button variant="contained" color="primary" onClick={() => navigate('/packages/create')} startIcon={<AddCircle />} >
+              Add
+            </Button>
+          <PackageUploadMapping />
+        </Box>
+
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
-        <PackageUploadMapping />
         <TableContainer component={Paper}>
           <Table>
             <TableHead>

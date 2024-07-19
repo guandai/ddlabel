@@ -15,7 +15,7 @@ type PackageDialogProps = {
 const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, selectedPackage }) => {
     const [rate, setRate] = useState<number | string | null>(null);
     const [sortCode, setSortCode] = useState<string | null>(null);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string>('');
 
     const Line = () => <>
         <i style={{ display: 'block', fontSize: '0px' , paddingLeft: '100%', height: '12px', borderBottom: '1px solid black'}}>{' '}</i>
@@ -68,7 +68,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
 
     useEffect(() => {
         setRate(null);
-        setError(null);
+        setError('');
         handleGetData();
     }
     , [selectedPackage, handleGetData]);
