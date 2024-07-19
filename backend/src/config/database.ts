@@ -17,7 +17,8 @@ const sequelize = new Sequelize({
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
-  logging: (msg) => logger.info(msg), // Use logger for logging
+  // logging: (msg) => logger.info(msg), // Use logger for logging
+  logging: false,
   pool: {
     max: 10,
     min: 0,
@@ -27,7 +28,6 @@ const sequelize = new Sequelize({
 });
 
 // Import models
-import { User } from '../models/User';
 import { Package } from '../models/Package';
 import { Transaction } from '../models/Transaction';
 import logger from './logger';
