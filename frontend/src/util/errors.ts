@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { ResError } from "../types";
 
-export type SetError = (value: React.SetStateAction<string | null>) => void;
+export type SetError = (value: React.SetStateAction<string>) => void;
 
 const tryError = (setError: SetError, error: any ) => {
     const errorData = ((error as AxiosError).response?.data as ResError);

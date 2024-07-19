@@ -5,7 +5,7 @@ import { tryLoad } from '../util/errors';
 
 const TransactionTable: React.FC = () => {
   const [transactions, setTransactions] = useState([]);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
     const fetchTransactions = async () => {

@@ -8,7 +8,7 @@ import csv from 'csv-parser';
 import fs from 'fs';
 import path from 'path';
 import getZipInfo from '../utils/getZipInfo';
-import { reportIoInsert , reportIoGenerate} from '../utils/reportIo';
+import { reportIoSocket } from '../utils/reportIo';
 import { isValidJSON } from '../utils/errors';
 
 type BaseData = {
@@ -48,6 +48,7 @@ type PackageSelf = {
 	userId: number,
 	length: number,
 	width: number,
+
 	height: number,
 	weight: number,
 	trackingNumber: string,
@@ -120,7 +121,7 @@ const onEndData = async (req: Request, res: Response, pkgAll: BatchDataType) => 
 			batchData.fromBatch = [];
 			batchData.toBatch = [];
 			processed += pkgDataSlice.length;
-			reportIoInsert(req, processed, pkgBatch.length);
+			reportIoSocket( 'insert', req, processed, pkgBatch.length );
 		} catch (error) {
 			console.error('Error processing batch', error);
 			return res.status(500).send({ message: 'Error processing batch' });
@@ -130,18 +131,17 @@ const onEndData = async (req: Request, res: Response, pkgAll: BatchDataType) => 
 	res.status(200).send({ message: 'PkgBatch imported successfully' });
 };
 
-const getPreparedData = (req: Request, data: CsvData) => {
-	const { packageCsvMap } = req.body;
+const getPreparedData = (packageCsvMap: string, data: CsvData) => {
 	const mapping: Mapping = isValidJSON(packageCsvMap) ? JSON.parse(packageCsvMap) : defaultMapping;
 	const mappedData = getMappingData(data, mapping);
 	const addressFrom = getZipInfo(mappedData['shipFromAddressZip'] );
 	const addressTo = getZipInfo(mappedData['shipToAddressZip'] );
 	if (!addressFrom) { 
-		console.error(`has no ZipInfo for ${mappedData['shipFromAddressZip']}`);
+		console.error(`has no From ZipInfo for ${mappedData['shipFromAddressZip']}`);
 		return;
 	}
 	if (!addressTo) { 
-		console.error(`has no ZipInfo for ${mappedData['shipToAddressZip']}`);
+		console.error(`has no To ZipInfo for ${mappedData['shipToAddressZip']}`);
 		return;
 	}
 	return {
@@ -151,13 +151,28 @@ const getPreparedData = (req: Request, data: CsvData) => {
 	};
 }
 
-const onData = (req:Request,  csvData: CsvData, pkgAll: BatchDataType) => {
-	const prepared = getPreparedData(req, csvData);
+type ReqBody = {
+	packageCsvLength: number,
+	packageUserId: number,
+	packageCsvMap: string,
+}
+
+type OnDataParams = {
+	req: Request, 
+	csvData: CsvData,
+	pkgAll: BatchDataType,
+
+}
+const onData = (OnDataParams: OnDataParams) => {
+	const { req, csvData, pkgAll } = OnDataParams;
+	const {packageCsvLength , packageUserId, packageCsvMap} = req.body;
+
+	const prepared = getPreparedData(packageCsvMap, csvData);
 	if (!prepared) return;
 
 	const { mappedData, addressFrom, addressTo } = prepared;
 	pkgAll.pkgBatch.push({
-		userId: req.body.packageUserId,
+		userId: packageUserId,
 		length: mappedData['length'],
 		width: mappedData['width'],
 		height: mappedData['height'],
@@ -177,16 +192,17 @@ const onData = (req:Request,  csvData: CsvData, pkgAll: BatchDataType) => {
 		addressLine1: mappedData['shipToAddressStreet'],
 		zip: mappedData['shipToAddressZip'],
 	})
-	reportIoGenerate(req, pkgAll.pkgBatch.length, 400);
+	reportIoSocket( 'generate', req, pkgAll.pkgBatch.length, packageCsvLength);
 	return;
 };
 
 export const importPackages = async (req: Request, res: Response) => {
-	if (!req.file) {
+	const { body, file } = req;
+
+	if (!file) {
 		return res.status(400).send({ message: 'No file uploaded' });
 	}
 
-	const file = req.file;
 	const pkgAll: BatchDataType = {
 		pkgBatch: [],
 		fromBatch: [],
@@ -195,7 +211,7 @@ export const importPackages = async (req: Request, res: Response) => {
 
 	fs.createReadStream(file.path)
 		.pipe(csv())
-		.on('data', (data: CsvData) => onData(req, data, pkgAll))
+		.on('data', (csvData: CsvData) => onData({ req, csvData, pkgAll }))
 		.on('end', async () =>  onEndData(req, res, pkgAll))
 		.on('error', (err) => {
 			console.error('Error parsing CSV:', err);

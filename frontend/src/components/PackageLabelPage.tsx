@@ -10,7 +10,7 @@ import { tryLoad } from '../util/errors';
 const PackageLabelPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [pkg, setPkg] = useState<PackageType | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
