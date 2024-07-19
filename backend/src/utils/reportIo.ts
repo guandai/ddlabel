@@ -1,6 +1,6 @@
-import { Request, Response } from 'express';
+import { Request } from 'express';
 
-const reportToIo = (req: Request, processed: number, total: number) => {
+export const reportIoInsert = (req: Request, processed: number, total: number) => {
 	const io = req.io;
 	const socketId = req.headers['socket-id'] || 'no-id';
 	io.to(socketId).emit('progress', {
@@ -9,4 +9,13 @@ const reportToIo = (req: Request, processed: number, total: number) => {
 	});
 };
 
-export default reportToIo;
+export const reportIoGenerate = (req: Request, processed: number, total: number) => {
+	const io = req.io;
+	const socketId = req.headers['socket-id'] || 'no-id';
+	io.to(socketId).emit('generate', {
+		processed,
+		total
+	});
+};
+
+export default reportIoInsert;
