@@ -6,15 +6,18 @@ import {
 } from '@mui/material';
 import { Upload } from '@mui/icons-material';
 import { io } from 'socket.io-client';
-import { HeaderMapping } from '../types';
+import { AlertMessage, HeaderMapping, MessageLevel } from '../types.d';
 
 const socket = io(`${process.env.REACT_APP_SOCKET_IO_HOST}`, { path: '/api/socket.io' });
 
+export enum RunStatus {
+  'ready' , 'running' , 'done'
+} ;
+
 type Prop = {
-  setError: (message: string) => void;
-  setSuccess: (message: string) => void;
-  processing: boolean;
-  setProcessing: (value: boolean) => void;
+  setMessage: (message: AlertMessage) => void;
+  runStatus: RunStatus;
+  setRunStatus: (status: RunStatus) => void;
   headerMapping: HeaderMapping;
   uploadFile: File;
   validateForm: () => boolean;
@@ -22,10 +25,13 @@ type Prop = {
 };
 
 const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
-  const { processing, setProcessing, setError, setSuccess, headerMapping, uploadFile, validateForm, csvLength } = prop;
+  const { runStatus, setRunStatus, setMessage, headerMapping, uploadFile, validateForm, csvLength } = prop;
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [generateProgress, setGenerateProgress] = useState<number | null>(null);
   const [insertProgress, setInsertProgress] = useState<number | null>(null);
+  const setError = (text: string) => setMessage({ text, level: MessageLevel.error });
+  const setInfo = (text: string) => setMessage({ text, level: MessageLevel.info });
+  const setSuccess = (text: string) => setMessage({ text, level: MessageLevel.success });
 
   useEffect(() => {
     socket.on('insert', (data: { processed: number; total: number }) => {
@@ -52,7 +58,7 @@ const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
 
     if (progressEvent.loaded === total) {
       setUploadProgress(100);
-      setSuccess('Upload Done. Processing data...');
+      setInfo('Upload Done. preparing data...');
     }
   };
 
@@ -64,7 +70,7 @@ const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
 
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
-    if (!userId) { return setError('Please login'); }
+    if (!userId) { return setInfo('Please login'); }
 
     try {
       const formData = new FormData();
@@ -74,7 +80,7 @@ const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
       formData.append('packageCsvLength', csvLength?.toString() || '0');
       formData.append('packageCsvMap', JSON.stringify(headerMapping));
 
-      setProcessing(true);
+      setRunStatus(RunStatus.running);
       const response = await axios.post(`${process.env.REACT_APP_BE_URL}/packages/import`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -84,7 +90,7 @@ const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
         onUploadProgress,
       });
 
-      setProcessing(false);
+      setRunStatus(RunStatus.done);
       setSuccess(`Import Done - ${response.data.message}`);
       
     } catch (error: any) {
@@ -96,7 +102,7 @@ const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
   const valueBuffer = insertProgress !== null ? Math.min(insertProgress + 20, 100) : 0;
   return (
   <>
-    {!processing && <Button variant="contained" color="secondary" startIcon={<Upload />} component="label" >
+    {runStatus === RunStatus.ready && <Button variant="contained" color="secondary" startIcon={<Upload />} component="label" >
       Submit File
      <button type="button" style={{ display: 'none' }} onClick={handleFileUpload} />
     </Button>}
