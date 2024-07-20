@@ -13,9 +13,8 @@ const socket = io(`${process.env.REACT_APP_SOCKET_IO_HOST}`, { path: '/api/socke
 type Prop = {
   setError: (message: string) => void;
   setSuccess: (message: string) => void;
-  setSubmited: (value: boolean) => void;
-  submited: boolean;
-  setUploadDone: (value: boolean) => void;
+  processing: boolean;
+  setProcessing: (value: boolean) => void;
   headerMapping: HeaderMapping;
   uploadFile: File;
   validateForm: () => boolean;
@@ -23,7 +22,7 @@ type Prop = {
 };
 
 const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
-  const { submited, setUploadDone, setSubmited, setError, setSuccess, headerMapping, uploadFile, validateForm, csvLength } = prop;
+  const { processing, setProcessing, setError, setSuccess, headerMapping, uploadFile, validateForm, csvLength } = prop;
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [generateProgress, setGenerateProgress] = useState<number | null>(null);
   const [insertProgress, setInsertProgress] = useState<number | null>(null);
@@ -75,7 +74,7 @@ const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
       formData.append('packageCsvLength', csvLength?.toString() || '0');
       formData.append('packageCsvMap', JSON.stringify(headerMapping));
 
-      setSubmited(true);
+      setProcessing(true);
       const response = await axios.post(`${process.env.REACT_APP_BE_URL}/packages/import`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -85,7 +84,7 @@ const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
         onUploadProgress,
       });
 
-      setUploadDone(true);
+      setProcessing(false);
       setSuccess(`Import Done - ${response.data.message}`);
       
     } catch (error: any) {
@@ -97,7 +96,7 @@ const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
   const valueBuffer = insertProgress !== null ? Math.min(insertProgress + 20, 100) : 0;
   return (
   <>
-    {!submited && <Button variant="contained" color="secondary" startIcon={<Upload />} component="label" >
+    {!processing && <Button variant="contained" color="secondary" startIcon={<Upload />} component="label" >
       Submit File
      <button type="button" style={{ display: 'none' }} onClick={handleFileUpload} />
     </Button>}
