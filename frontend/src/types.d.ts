@@ -11,8 +11,8 @@ type ErrorDetail = {
         "password": string,
         "role": "admin" | 'worker',
         "warehouseAddress": string,
-        "updatedAt": date,
-        "createdAt": date
+        "updatedAt": Date,
+        "createdAt": Date
     },
     "validatorKey": "not_unique" | string,
     "validatorName": null | string,
@@ -77,3 +77,15 @@ export type CsvHeaders = string[];
 export type KeyOfCsvHeaders = keyof CsvHeaders;
 export type KeyOfBaseData = keyof BaseData;
 export type HeaderMapping = { [k in KeyOfBaseData]: KeyOfCsvHeaders | KeyOfBaseData | null }
+
+export enum MessageLevel {
+    error ='error',
+    success ='success',
+    info ='info',
+    warning ='warning'
+}
+
+export type AlertMessage = {
+    text: string,
+    level: MessageLevel
+} | null;

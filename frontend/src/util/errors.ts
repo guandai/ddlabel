@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { ResError } from "../types";
+import { MessageLevel, ResError } from "../types";
 
 export type SetError = (value: React.SetStateAction<string>) => void;
 

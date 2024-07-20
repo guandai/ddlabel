@@ -17,7 +17,7 @@ const CsvHeaderList: React.FC<Prop> = (prop) => {
 	const lastThird = fields.slice(third * 2);
 	const fieldsRows = [firstThird, secondThird, lastThird];
 
-	return (<>{fieldsRows.map((fieldRow, idx) => (
+	return (<Grid container spacing={2}>{fieldsRows.map((fieldRow, idx) => (
 		<Grid key={idx} item xs={4}>
 			{fieldRow.map((field) => (
 				<Box key={field} mb={2}>
@@ -41,6 +41,6 @@ const CsvHeaderList: React.FC<Prop> = (prop) => {
 			))}
 		</Grid>
 	))}
-	</>);
+	</Grid>);
 }
 export default CsvHeaderList;

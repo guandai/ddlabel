@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import Papa, { ParseResult } from 'papaparse';
-import { Box, Typography, Grid, Button, Modal, Alert } from '@mui/material';
-import PackageUploadButton from './PackageUploadButton';
-import { HeaderMapping, KeyOfBaseData } from '../types';
+import { Box, Typography, Button, Modal, Alert } from '@mui/material';
+import PackageUploadButton, { RunStatus } from './PackageUploadButton';
+import { AlertMessage, HeaderMapping, KeyOfBaseData, MessageLevel } from '../types.d';
 import { Upload } from '@mui/icons-material';
 import CloseButton from './CloseButton';
 import CsvHeaderList from './CsvHeaderList';
@@ -19,9 +19,8 @@ const defaultMapping = fields.reduce((acc: HeaderMapping, field: KeyOfBaseData) 
 }, {} as HeaderMapping);
 
 const PackageUploadMapping: React.FC = () => {
-  const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState<string>('');
-  const [processing, setProcessing] = useState<boolean>(false);
+  const [message, setMessage] = useState<AlertMessage>(null);
+  const [runStatus, setRunStatus] = useState<RunStatus>(RunStatus.ready);
   const [uploadFile, setUploadFile] = useState<File>();
 
   const [csvLength, setCsvLength] = useState<number>(0);
@@ -53,7 +52,7 @@ const PackageUploadMapping: React.FC = () => {
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setError('');
+    setMessage(null);
     if (!event.target.files) {
       return;
     }
@@ -67,7 +66,7 @@ const PackageUploadMapping: React.FC = () => {
   };
 
   const handleMappingChange = (requiredField: KeyOfBaseData, csvHeader: string) => {
-    setError('');
+    setMessage(null);
     setHeaderMapping((prevMapping) => ({
       ...prevMapping,
       [requiredField]: csvHeader
@@ -77,29 +76,31 @@ const PackageUploadMapping: React.FC = () => {
   const validateForm = () => {
     const missingFields = fields.filter(field => !headerMapping[field]);
     if (missingFields.length > 0) {
-      setError(`The following fields are missing: ${missingFields.join(', ')}`);
+      setMessage({
+        level: MessageLevel.error,
+        text: `The following fields are missing: ${missingFields.join(', ')}`
+      });
       return false;
     }
-    setError('');
+    setMessage(null);
     return true;
   };
 
   const handleModalClose = () => {
     setModalOpen(false);
-    setProcessing(false);
-    setSuccess('');
-    setError('');
+    setRunStatus(RunStatus.ready);
+    setMessage(null);
   };
 
   return (
     <>
-      <Button variant="contained" disabled={processing} color="secondary" startIcon={<Upload />} component="label" >
+      <Button variant="contained" disabled={runStatus === RunStatus.running} color="secondary" startIcon={<Upload />} component="label" >
         {'Upload CSV'}
         <input type="file" accept=".csv" style={{ display: 'none' }} onChange={handleFileChange} />
       </Button>
       <Modal
         open={modalOpen}
-        onClose={!processing ? handleModalClose : () => { }}
+        onClose={handleModalClose}
       >
         <Box sx={{
           position: 'absolute', p: 4, width: 600,
@@ -109,24 +110,22 @@ const PackageUploadMapping: React.FC = () => {
           {csvHeaders.length > 0 && (
             <>
               <Typography variant="h6" id="modal-title">Map CSV Headers</Typography>
-              {!processing && <CloseButton handleModalClose={handleModalClose} />}
-              {error && <Alert severity="error">{error}</Alert>}
-              {success && <Alert severity="success">{success}</Alert>}
-              {!processing && <Grid container spacing={2}>
+              {runStatus !== RunStatus.running && <CloseButton handleModalClose={handleModalClose} />}
+              {message && <Alert severity={message.level}>{message.text}</Alert>}
+              {runStatus === RunStatus.ready &&
                 <CsvHeaderList
                   fields={fields}
                   csvHeaders={csvHeaders}
                   headerMapping={headerMapping}
                   handleMappingChange={handleMappingChange}
                 />
-              </Grid>}
+              }
               {uploadFile && <PackageUploadButton
-                setError={setError}
-                setSuccess={setSuccess}
+                setMessage={setMessage}
                 uploadFile={uploadFile}
                 headerMapping={headerMapping}
-                setProcessing={setProcessing}
-                processing={processing}
+                setRunStatus={setRunStatus}
+                runStatus={runStatus}
                 csvLength={csvLength}
                 validateForm={validateForm} // Pass the validation function to the button
               />}
