@@ -4,6 +4,12 @@ exports.Address = void 0;
 // backend/src/models/Address.ts
 const sequelize_1 = require("sequelize");
 const database_1 = require("../config/database");
+var AddressEnum;
+(function (AddressEnum) {
+    AddressEnum["user"] = "user";
+    AddressEnum["package"] = "package";
+})(AddressEnum || (AddressEnum = {}));
+;
 class Address extends sequelize_1.Model {
 }
 exports.Address = Address;
@@ -12,6 +18,10 @@ Address.init({
         type: sequelize_1.DataTypes.INTEGER.UNSIGNED,
         autoIncrement: true,
         primaryKey: true,
+    },
+    addressType: {
+        type: sequelize_1.DataTypes.ENUM('user', 'package'),
+        allowNull: false,
     },
     name: {
         type: sequelize_1.DataTypes.STRING,
