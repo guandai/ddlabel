@@ -10,16 +10,17 @@ type ProfileType = {
   name: string;
   email: string;
   password?: string; 
+  confirmPassword?: string;
   role: string;
   warehouseAddress: AddressType;
 };
 
 type QuickFieldProp = { 
-  name: keyof ProfileType | 'confirmPass';
+  name: keyof ProfileType;
   autoComplete?: string;
   type?: 'text' | 'password';
   required?: boolean;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
 interface UserFormProps {
@@ -27,14 +28,12 @@ interface UserFormProps {
 }
 
 const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {;
-  const [profile, setProfile] = useState<ProfileType>({warehouseAddress: {}} as ProfileType);
-  const [confirmPass, setConfirmPass] = useState('');
+  const [profile, setProfile] = useState<ProfileType>({role: 'worker', warehouseAddress: {}} as ProfileType);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>();
-  const [passwordChanged, setPasswordChanged] = useState(false); // Track if the password has been changed
 
   useEffect(() => {
-    if (!isRegister) {
+    if (isRegister) {
       return;
     }
     const token = localStorage.getItem('token');
@@ -46,30 +45,27 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {;
       setProfile({
         ...profileData,
         password: '', // Ensure password is empty initially
-        warehouseAddress: profileData.warehouseAddress,
+        confirmPassword: '',
       });
     });
   }, [isRegister]);
+
+  useEffect(() => {
+    // This will run after every render if status changes
+    testPassword();
+  }
+  , [profile.confirmPassword, profile.password]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
   const testPassword = (): boolean => {
-    const test = profile.password && confirmPass && (profile.password !== confirmPass);
-    test && setError('Passwords do not match.');
+    setSuccess('');
+    const test =  profile.password == profile.confirmPassword;
+    !test ? setError('Passwords do not match.') : setError('');
     return !!test;
   }
-
-  const handlePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProfile({ ...profile, password: e.target.value });
-    testPassword() && setPasswordChanged(true);
-  };
-
-  const handleConfirmPass = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setConfirmPass(e.target.value);
-    testPassword() && setPasswordChanged(true);
-  };
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
@@ -90,16 +86,17 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    if (!testPassword()) {
+    if (error) {
       return;
     }
 
+    setError('');
+    setSuccess('');
     const profileToUpdate = { ...profile };
-    if (!passwordChanged) {
-      delete profileToUpdate.password; // Remove password if it hasn't been changed
+
+    if (!profile.confirmPassword) {
+      delete profileToUpdate.confirmPassword;
+      delete profileToUpdate.password;
     }
 
     if (isRegister) {
@@ -122,7 +119,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {;
   const quickField = (
       prop: QuickFieldProp
     ) => {
-      const { autoComplete="", name, onChange, required=true, type='text' } = prop;
+      const { autoComplete="", name, onChange=handleChange, required=true, type='text' } = prop;
     return (
     <TextField
       margin="normal"
@@ -133,7 +130,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {;
       name={name}
       autoComplete={autoComplete}
       type={type}
-      value={name === 'confirmPass' ? '' : profile[name] || ''}
+      value={profile[name] || ''}
       onChange={onChange}
     />
   )};
@@ -155,11 +152,12 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {;
         
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Typography variant="h6">User Info:</Typography>
-          {quickField({name: 'name', autoComplete: 'name', onChange: handleChange})}
-          {quickField({name: 'email', autoComplete: 'email', onChange: handleChange})}
-          {quickField({name: 'password', autoComplete: 'new-password', onChange: handlePassword})}
-          {quickField({name: 'confirmPass', onChange: handleConfirmPass})}
+          {quickField({name: 'name', autoComplete: 'name'})}
+          {quickField({name: 'email', autoComplete: 'email'})}
+          {quickField({name: 'password', type: 'password', required: isRegister})}
+          {quickField({name: 'confirmPassword', type: 'password', required: isRegister})}
           <AddressForm
+            setError={setError}
             addressData={profile.warehouseAddress as AddressType}
             onChange={handleAddressChange}
             title="Warehouse Address"
