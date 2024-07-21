@@ -14,62 +14,60 @@ type ProfileType = {
   warehouseAddress: AddressType;
 };
 
+type QuickFieldProp = { 
+  name: keyof ProfileType | 'confirmPass';
+  autoComplete?: string;
+  type?: 'text' | 'password';
+  required?: boolean;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+};
+
 interface UserFormProps {
   isRegister?: boolean;
 }
 
-const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
-  const initialProfile = {
-    id: '',
-    name: '',
-    email: '',
-    password: '', // Initialize password as an empty string
-    role: 'worker',
-    warehouseAddress: { addressType: AddressEnum.user, name: '', addressLine1: '', city: '', state: '', zip: '' },
-  };
-
-  const [profile, setProfile] = useState<ProfileType>(initialProfile);
-  const [confirmPassword, setConfirmPassword] = useState('');
+const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {;
+  const [profile, setProfile] = useState<ProfileType>({warehouseAddress: {}} as ProfileType);
+  const [confirmPass, setConfirmPass] = useState('');
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>();
   const [passwordChanged, setPasswordChanged] = useState(false); // Track if the password has been changed
 
   useEffect(() => {
     if (!isRegister) {
-      const fetchProfile = async () => {
-        const token = localStorage.getItem('token');
-        tryLoad(setError, async () => {
-          const profileRsp = await axios.get(`${process.env.REACT_APP_BE_URL}/users/me`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          const profileData = profileRsp.data;
-          setProfile({
-            ...profileData,
-            password: '', // Ensure password is empty initially
-            warehouseAddress: profileData.warehouseAddress || initialProfile.warehouseAddress,
-          });
-        });
-      };
-      fetchProfile();
+      return;
     }
-  }, [isRegister, initialProfile.warehouseAddress]);
+    const token = localStorage.getItem('token');
+    tryLoad(setError, async () => {
+      const response = await axios.get<ProfileType>(`${process.env.REACT_APP_BE_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const profileData = response.data;
+      setProfile({
+        ...profileData,
+        password: '', // Ensure password is empty initially
+        warehouseAddress: profileData.warehouseAddress,
+      });
+    });
+  }, [isRegister]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
   const testPassword = (): boolean => {
-    const test = profile.password && confirmPassword && (profile.password !== confirmPassword);
+    const test = profile.password && confirmPass && (profile.password !== confirmPass);
     test && setError('Passwords do not match.');
     return !!test;
   }
 
-  const handlePassword = (e: React.ChangeEvent<HTMLInputElement>, slot: '' | 'confirm' = '') => {
-    if (slot === 'confirm') {
-      setConfirmPassword(e.target.value);
-    } else {
-      setProfile({ ...profile, password: e.target.value });
-    }
+  const handlePassword = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setProfile({ ...profile, password: e.target.value });
+    testPassword() && setPasswordChanged(true);
+  };
+
+  const handleConfirmPass = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setConfirmPass(e.target.value);
     testPassword() && setPasswordChanged(true);
   };
 
@@ -122,11 +120,10 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
   };
 
   const quickField = (
-      name: keyof ProfileType | 'confirmPassword', 
-      onBlur: (e: React.FocusEvent<HTMLInputElement>) => void,
-      required = true,
-      type = 'text'
-    ) => (
+      prop: QuickFieldProp
+    ) => {
+      const { autoComplete="", name, onChange, required=true, type='text' } = prop;
+    return (
     <TextField
       margin="normal"
       required={required}
@@ -134,14 +131,14 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
       id={name}
       label={name}
       name={name}
-      autoComplete={name}
+      autoComplete={autoComplete}
       type={type}
-      value={name === 'confirmPassword' ? '' : profile[name]}
-      onChange={onBlur}
+      value={name === 'confirmPass' ? '' : profile[name] || ''}
+      onChange={onChange}
     />
-  );
+  )};
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="sm">
       <Box
         sx={{
           marginTop: 8,
@@ -158,10 +155,10 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
         
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Typography variant="h6">User Info:</Typography>
-          {quickField('name', handleChange)}
-          {quickField('email', handleChange)}
-          {quickField('password', handlePassword, isRegister, 'password')}
-          {quickField('confirmPassword', (e) => handlePassword(e, 'confirm'), isRegister, 'password')}
+          {quickField({name: 'name', autoComplete: 'name', onChange: handleChange})}
+          {quickField({name: 'email', autoComplete: 'email', onChange: handleChange})}
+          {quickField({name: 'password', autoComplete: 'new-password', onChange: handlePassword})}
+          {quickField({name: 'confirmPass', onChange: handleConfirmPass})}
           <AddressForm
             addressData={profile.warehouseAddress as AddressType}
             onChange={handleAddressChange}
