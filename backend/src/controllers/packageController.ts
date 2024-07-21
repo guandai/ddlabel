@@ -6,7 +6,7 @@ import { generateTrackingNumber } from '../utils/generateTrackingNumber';
 import { User } from '../models/User';
 
 export const addPackage = async (req: Request, res: Response) => {
-  const { user, shipFromAddress, shipToAddress, length, width, height, weight, reference } = req.body;
+  const { userId, shipFromAddress, shipToAddress, length, width, height, weight, reference } = req.body;
   const trackingNumber = generateTrackingNumber();
 
   try {
@@ -14,7 +14,7 @@ export const addPackage = async (req: Request, res: Response) => {
     const toAddress = await Address.create(shipToAddress);
 
     const pkg = await Package.create({
-      userId: user.id,
+      userId,
       shipFromAddressId: fromAddress.id,
       shipToAddressId: toAddress.id,
       length,
@@ -86,28 +86,6 @@ export const deletePackage = async (req: Request, res: Response) => {
     await Package.destroy({ where: { id: req.params.id } });
 
     res.json({ message: 'Package deleted' });
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-export const editPackage = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { shipFromAddress, shipToAddress, length, width, height, weight } = req.body;
-
-  try {
-    const pkg = await Package.findByPk(id);
-
-    if (!pkg) {
-      throw new Error('Package not found');
-    }
-
-    await Address.update(shipFromAddress, { where: { id: pkg.shipFromAddressId } });
-    await Address.update(shipToAddress, { where: { id: pkg.shipToAddressId } });
-
-    await pkg.update({ length, width, height, weight });
-
-    res.json(pkg);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
