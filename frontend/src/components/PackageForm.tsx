@@ -1,15 +1,14 @@
 // frontend/src/components/PackageForm.tsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { TextField, Button, Box, Typography, Container, Alert, Select, MenuItem, InputLabel, FormControl, SelectChangeEvent, Grid } from '@mui/material';
+import { TextField, Button, Box, Typography, Container, Alert, Grid } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { tryLoad } from '../util/errors';
-import AddressForm, { AddressType } from './AddressForm';
-import { UserType } from './LoginForm';
+import AddressForm, { AddressEnum, AddressType } from './AddressForm';
 
 export type PackageType = {
   id: number;
-  user: UserType;
+  userId: number;
   shipFromAddress: AddressType;
   shipToAddress: AddressType;
   length: number;
@@ -20,47 +19,48 @@ export type PackageType = {
   reference: string;
 };
 
-type PackageFormProps = {
-  initialData?: PackageType;
-  onSubmit: (data: Partial<PackageType>) => void;
+const defautAddress = { name: '', email: '', phone: '', 
+  addressType: AddressEnum.package, addressLine1: '', addressLine2: '', city: '', state: '', zip: '' 
+}
+
+const initialPackage = {
+  id: 0, userId: 0,
+  length: 0, width: 0, height: 0, weight: 0, trackingNumber: '', reference: '',
+  shipFromAddress: defautAddress, shipToAddress: defautAddress, 
 };
 
-const defaultPackageData: PackageType = {
-  user: { id: 0, name: '', email: '', password: '', role: '', warehouseAddress: { name: '', addressLine1: '', city: '', state: '', zip: '' }},
-  shipFromAddress: { name: '', addressLine1: '', city: '', state: '', zip: '' },
-  shipToAddress: { name: '', addressLine1: '', city: '', state: '', zip: '' },
-  length: 0,
-  width: 0,
-  height: 0,
-  weight: 0,
-  trackingNumber: '',
-  reference: '',
-  id: 0
-};
-const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageData }) => {
-  const [users, setUsers] = useState<UserType[]>([]);
-  const [packageData, setPackageData] = useState<PackageType>(
-    initialData,
-  );
+
+const PackageForm: React.FC = () => {
+  const [packageData, setPackageData] = useState<PackageType>(initialPackage);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   const navigate = useNavigate();
   const { id: packageId } = useParams<{ id: string }>();
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const token = localStorage.getItem('token');
-      tryLoad(setError, async () => {
-        const response = await axios.get(`${process.env.REACT_APP_BE_URL}/users`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setUsers(response.data);
-      });
-    };
-    fetchUsers();
+  const quickField = (name: keyof PackageType, type = 'number') => (
+    <Grid item xs={12} sm={6}>
+      <TextField
+        required
+        fullWidth
+        id={name}
+        label={name}
+        name={name}
+        type={type}
+        value={packageData[name] || ''}
+        onChange={handleChange}
+      /></Grid>
+  );
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    if (!userId || !token) {
+      window.location.href = '/login';
+      return;
+    };
+
+    setPackageData({...packageData, userId: parseInt(userId)});
     if (packageId) {
-      const token = localStorage.getItem('token');
       tryLoad(setError, async () => {
         const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages/${packageId}`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -78,7 +78,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
     tryLoad(setError, async () => {
       if (packageId) {
         await axios.put(`${process.env.REACT_APP_BE_URL}/packages/${packageId}`, data, header)
-      } else{
+      } else {
         await axios.post(`${process.env.REACT_APP_BE_URL}/packages`, data, header);
         navigate('/packages');
       }
@@ -89,17 +89,6 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPackageData({ ...packageData, [e.target.name]: e.target.value });
-  };
-
-  const handleSelectChange = (e: SelectChangeEvent<string>) => {
-    const { value } = e.target;
-    setPackageData({ 
-      ...packageData, 
-      user: { 
-        ...packageData.user, 
-        id: parseInt(value) 
-      }
-    });
   };
 
   const handleAddressChange = (addressType: 'shipFromAddress' | 'shipToAddress') => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,7 +105,7 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
     e.preventDefault();
     onSubmit(packageData);
   };
-
+const aaa = "length";
   return (
     <Container component="main" maxWidth="md">
       <Box
@@ -133,119 +122,41 @@ const PackageForm: React.FC<PackageFormProps> = ({ initialData = defaultPackageD
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+          <Grid item xs={12} mt="1.5em">
+            <AddressForm
+              addressData={packageData.shipFromAddress}
+              onChange={handleAddressChange('shipFromAddress')}
+              title="Ship From Address"
+            />
+          </Grid>
+          <Grid item xs={12} mt="1.5em">
+            <AddressForm
+              addressData={packageData.shipToAddress}
+              onChange={handleAddressChange('shipToAddress')}
+              title="Ship To Address"
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+            <Typography mb='1em' mt='1.5em' variant="h6">Package Info</Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth required>
-                  <InputLabel id="user-label">Assignee</InputLabel>
-                  <Select
-                    labelId="user-label"
-                    id="userId"
-                    name="userId"
-                    value={packageData.user?.id ? String(packageData.user.id) : ''}
-                    label="Assignee"
-                    onChange={handleSelectChange}
-                  >
-                    {users.map(user => (
-                      <MenuItem key={user.id} value={String(user.id)}>
-                        {user.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+              {quickField("length")}
+              {quickField("width")}
+              {quickField("height")}
+              {quickField("weight")}
+              {quickField("reference", 'text')}
+              <Grid item xs={12}>
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+                >
+                  {packageId ? 'Update Package' : 'Add Package'}
+                </Button>
               </Grid>
             </Grid>
-            <Grid item xs={12} mt="2em">
-              <AddressForm
-                addressData={packageData.shipFromAddress}
-                onChange={handleAddressChange('shipFromAddress')}
-                title="Ship From Address"
-              />
-            </Grid>
-            <Grid item xs={12} mt="2em">
-              <AddressForm
-                addressData={packageData.shipToAddress}
-                onChange={handleAddressChange('shipToAddress')}
-                title="Ship To Address"
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Typography variant="h6">Package Info</Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="length"
-                    label="Length"
-                    name="length"
-                    type="number"
-                    value={packageData.length || ''}
-                    onChange={handleChange}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="width"
-                    label="Width"
-                    name="width"
-                    type="number"
-                    value={packageData.width || ''}
-                    onChange={handleChange}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="height"
-                    label="Height"
-                    name="height"
-                    type="number"
-                    value={packageData.height || ''}
-                    onChange={handleChange}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="weight"
-                    label="Weight"
-                    name="weight"
-                    type="number"
-                    value={packageData.weight || ''}
-                    onChange={handleChange}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="reference"
-                    label="reference"
-                    name="Reference"
-                    type="text"
-                    value={packageData.reference || ''}
-                    onChange={handleChange}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    sx={{ mt: 3, mb: 2 }}
-                  >
-                    {packageId ? 'Update Package' : 'Add Package'}
-                  </Button>
-                </Grid>
-              </Grid>
-            </Grid>
-
-          
+          </Grid>
         </Box>
       </Box>
     </Container>
