@@ -124,6 +124,7 @@ const aaa = "length";
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid item xs={12} mt="1.5em">
             <AddressForm
+              setError={setError}
               addressData={packageData.shipFromAddress}
               onChange={handleAddressChange('shipFromAddress')}
               title="Ship From Address"
@@ -131,6 +132,7 @@ const aaa = "length";
           </Grid>
           <Grid item xs={12} mt="1.5em">
             <AddressForm
+              setError={setError}
               addressData={packageData.shipToAddress}
               onChange={handleAddressChange('shipToAddress')}
               title="Ship To Address"

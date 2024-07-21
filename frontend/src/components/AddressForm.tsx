@@ -30,24 +30,29 @@ type QuickFieldProps = {
 }
 
 interface AddressFormProps {
+  setError: (msg: string) => void;
   addressData: AddressType;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   title: string;
 }
 
-const AddressForm: React.FC<AddressFormProps> = ({ addressData, onChange, title }) => {
+const AddressForm: React.FC<AddressFormProps> = ({ setError, addressData, onChange, title }) => {
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
 
   useEffect(() => {
     if (addressData?.zip) {
+      setCity('');
+      setState('');
       axios.get(`https://api.zippopotam.us/us/${addressData.zip}`)
         .then(response => {
           const place = response.data.places[0];
           setCity(place['place name']);
           setState(place['state abbreviation']);
+          setError('');
         })
         .catch(error => {
+          setError('Not found Zip info'); // Clear any previous error
           console.error('Error fetching city/state data:', error);
         });
     }
