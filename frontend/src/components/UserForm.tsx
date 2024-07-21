@@ -3,13 +3,13 @@ import axios from 'axios';
 import { TextField, Button, Box, Typography, Container, Alert, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material';
 import { tryLoad } from '../util/errors';
-import AddressForm, { AddressType } from './AddressForm';
+import AddressForm, { AddressEnum, AddressType } from './AddressForm';
 
 type ProfileType = {
   id: string;
   name: string;
   email: string;
-  password?: string; // Password is optional
+  password?: string; 
   role: string;
   warehouseAddress: AddressType;
 };
@@ -25,7 +25,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
     email: '',
     password: '', // Initialize password as an empty string
     role: 'worker',
-    warehouseAddress: { name: '', addressLine1: '', city: '', state: '', zip: '' },
+    warehouseAddress: { addressType: AddressEnum.user, name: '', addressLine1: '', city: '', state: '', zip: '' },
   };
 
   const [profile, setProfile] = useState<ProfileType>(initialProfile);
@@ -58,9 +58,19 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProfile({ ...profile, password: e.target.value });
-    setPasswordChanged(true); // Mark password as changed
+  const testPassword = (): boolean => {
+    const test = profile.password && confirmPassword && (profile.password !== confirmPassword);
+    test && setError('Passwords do not match.');
+    return !!test;
+  }
+
+  const handlePassword = (e: React.ChangeEvent<HTMLInputElement>, slot: '' | 'confirm' = '') => {
+    if (slot === 'confirm') {
+      setConfirmPassword(e.target.value);
+    } else {
+      setProfile({ ...profile, password: e.target.value });
+    }
+    testPassword() && setPasswordChanged(true);
   };
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
@@ -84,8 +94,8 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    if (passwordChanged && profile.password !== confirmPassword) {
-      setError('Passwords do not match.');
+
+    if (!testPassword()) {
       return;
     }
 
@@ -111,6 +121,25 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
     }
   };
 
+  const quickField = (
+      name: keyof ProfileType | 'confirmPassword', 
+      onBlur: (e: React.FocusEvent<HTMLInputElement>) => void,
+      required = true,
+      type = 'text'
+    ) => (
+    <TextField
+      margin="normal"
+      required={required}
+      fullWidth
+      id={name}
+      label={name}
+      name={name}
+      autoComplete={name}
+      type={type}
+      value={name === 'confirmPassword' ? '' : profile[name]}
+      onChange={onBlur}
+    />
+  );
   return (
     <Container component="main" maxWidth="xs">
       <Box
@@ -129,52 +158,10 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
         
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Typography variant="h6">User Info:</Typography>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="name"
-            label="Name"
-            name="name"
-            autoComplete="name"
-            autoFocus
-            value={profile.name}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            value={profile.email}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="normal"
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="new-password"
-            value={profile.password}
-            onChange={handlePasswordChange}
-          />
-          <TextField
-            margin="normal"
-            fullWidth
-            name="confirmPassword"
-            label="Confirm Password"
-            type="password"
-            id="confirmPassword"
-            autoComplete="new-password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-
+          {quickField('name', handleChange)}
+          {quickField('email', handleChange)}
+          {quickField('password', handlePassword, isRegister, 'password')}
+          {quickField('confirmPassword', (e) => handlePassword(e, 'confirm'), isRegister, 'password')}
           <AddressForm
             addressData={profile.warehouseAddress as AddressType}
             onChange={handleAddressChange}

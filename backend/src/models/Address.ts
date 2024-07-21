@@ -2,6 +2,11 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 
+enum AddressEnum {
+  user = 'user',
+  package = 'package',
+};
+
 interface AddressAttributes {
   id: number;
   name: string;
@@ -12,6 +17,7 @@ interface AddressAttributes {
   zip: string;
   email?: string;
   phone?: string;
+  addressType?: AddressEnum;
 }
 
 interface AddressCreationAttributes extends Optional<AddressAttributes, 'id'> {}
@@ -26,6 +32,7 @@ class Address extends Model<AddressAttributes, AddressCreationAttributes> implem
   public zip!: string;
   public email?: string;
   public phone?: string;
+  public addressType?: AddressEnum;
 }
 
 Address.init(
@@ -34,6 +41,10 @@ Address.init(
       type: DataTypes.INTEGER.UNSIGNED,
       autoIncrement: true,
       primaryKey: true,
+    },
+    addressType: {
+      type: DataTypes.ENUM('user', 'package'),
+      allowNull: false,
     },
     name: {
       type: DataTypes.STRING,
