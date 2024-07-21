@@ -2,13 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { TextField, Grid, Typography } from '@mui/material';
 import axios from 'axios';
-import styled from 'styled-components';
-
-const StyledTextField = styled(TextField)`
-  .Mui-readOnly.MuiInputBase-readOnly {
-    color: rgba(10, 10, 10, 0.5); 
-  }
-`;
 
 export enum AddressEnum {
   user = 'user',
@@ -29,6 +22,7 @@ export type AddressType = {
 
 type QuickFieldProps = {
   name: keyof AddressType;
+  pattern?: RegExp | string;
   autoComplete: string;
   required?: boolean;
   readOnly?: boolean;
@@ -60,11 +54,14 @@ const AddressForm: React.FC<AddressFormProps> = ({ addressData, onChange, title 
   }, [addressData?.zip]);
 
   const quickField = (prop: QuickFieldProps) => {
-    const { name, autoComplete, required = true, readOnly = false, value = '' } = prop;
+    const { name, autoComplete, required = true, readOnly = false, value = '', pattern=null } = prop;
     return (
     <Grid item xs={12} sm={6}>
       <TextField
         required={required}
+        sx={{
+          pointerEvents: readOnly ? 'none' : 'auto',
+          backgroundColor: readOnly ? "#DDDDDD" : "transparent"}}
         id={name}
         fullWidth
         label={name}
@@ -72,7 +69,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ addressData, onChange, title 
         autoComplete={autoComplete}
         value={value || addressData[name] || ''}
         onChange={onChange}
-        InputProps={{ readOnly }}
+        inputProps={{ readOnly, pattern }}
       />
     </Grid>
   )};
@@ -84,11 +81,11 @@ const AddressForm: React.FC<AddressFormProps> = ({ addressData, onChange, title 
         {quickField({name: 'name', autoComplete: 'name'})}
         {quickField({name: 'addressLine1', autoComplete: 'address-line1'})}
         {quickField({name: 'addressLine2', autoComplete: 'address-line2', required: false})}
-        {quickField({name: 'zip', autoComplete: 'postal-code'})}
+        {quickField({name: 'zip', autoComplete: 'postal-code', pattern: '[0-9]{5}'})}
         {quickField({name: 'state', autoComplete: 'address-level1', readOnly: true, value: state})}
         {quickField({name: 'city', autoComplete: 'address-level2', readOnly: true, value: city})}
-        {quickField({name: 'phone', autoComplete: 'tel'})}
-        {quickField({name: 'email', autoComplete: 'email'})}
+        {quickField({name: 'phone', autoComplete: 'tel', required: false, pattern: '[+]?[0-9]{5,}'})}
+        {quickField({name: 'email', autoComplete: 'email', pattern: '^[\\w\\-\\.]+@([\\w\\-]+\\.)+[\\w\\-]{2,4}$'})}
       </Grid>
     </>
   );
