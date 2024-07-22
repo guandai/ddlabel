@@ -6,7 +6,7 @@ import { PackageType } from './PackageForm';
 import PackageLabel from './PackageLabel';
 import { CircularProgress } from '@mui/material';
 import { tryLoad } from '../util/errors';
-import { MessageContent, MsgLevel } from '../types';
+import { MessageContent } from '../types';
 import MessageAlert from './MessageAlert';
 
 const PackageLabelPage: React.FC = () => {
