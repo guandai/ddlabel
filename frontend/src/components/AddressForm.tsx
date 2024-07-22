@@ -75,7 +75,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onCh
         autoComplete={autoComplete}
         value={value || addressData[name] || ''}
         onChange={onChange}
-        inputProps={{ readOnly, pattern }}
+        inputProps={{ readOnly, pattern, maxLength: 40 }}
       />
     </Grid>
   )};
@@ -85,7 +85,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onCh
       <Typography variant="h6" mb='1em'>{title}</Typography>
       <Grid container spacing={2}>
         {quickField({name: 'name', autoComplete: 'name'})}
-        {quickField({name: 'addressLine1', autoComplete: 'address-line1'})}
+        {quickField({name: 'addressLine1', autoComplete: 'address-line1' })}
         {quickField({name: 'addressLine2', autoComplete: 'address-line2', required: false})}
         {quickField({name: 'zip', autoComplete: 'postal-code', pattern: '[0-9]{5}'})}
         {quickField({name: 'state', autoComplete: 'address-level1', readOnly: true, value: state})}

@@ -61,17 +61,21 @@ const PackageForm: React.FC = () => {
       window.location.href = '/login';
       return;
     };
-
     setPackageData({ ...packageData, userId: parseInt(userId) });
-    if (packageId) {
-      tryLoad(setMessage, async () => {
-        const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages/${packageId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setPackageData(response.data);
-      });
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!packageId) {
+      return
     }
-  }, [packageId, packageData]);
+    tryLoad(setMessage, async () => {
+      const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages/${packageId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPackageData(response.data);
+    });
+  }, [packageId]);
 
   const onSubmit = async (data: Partial<PackageType>) => {
     const token = localStorage.getItem('token');
