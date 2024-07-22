@@ -61,13 +61,13 @@ const PackageForm: React.FC = () => {
       window.location.href = '/login';
       return;
     };
-    setPackageData({ ...packageData, userId: parseInt(userId) });
+    setPackageData(prevData => ({ ...prevData, userId: parseInt(userId) }));
   }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!packageId) {
-      return
+      return;
     }
     tryLoad(setMessage, async () => {
       const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages/${packageId}`, {
@@ -102,18 +102,18 @@ const PackageForm: React.FC = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPackageData({ ...packageData, [e.target.name]: e.target.value });
+    setPackageData(prevData => ({ ...prevData, [e.target.name]: e.target.value }));
   };
 
   const handleAddressChange = 
     (addressType: 'shipFromAddress' | 'shipToAddress') => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setPackageData({
-        ...packageData,
+      setPackageData(prevData => ({
+        ...prevData,
         [addressType]: {
-          ...packageData[addressType],
+          ...prevData[addressType],
           [e.target.name]: e.target.value,
         },
-      });
+      }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
