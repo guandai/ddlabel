@@ -4,19 +4,21 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { PackageType } from './PackageForm';
 import PackageLabel from './PackageLabel';
-import { Alert, CircularProgress } from '@mui/material';
+import { CircularProgress } from '@mui/material';
 import { tryLoad } from '../util/errors';
+import { MessageContent, MsgLevel } from '../types';
+import MessageAlert from './MessageAlert';
 
 const PackageLabelPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [pkg, setPkg] = useState<PackageType | null>(null);
-  const [error, setError] = useState<string>('');
+  const [message, setMessage] = useState<MessageContent>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchPackage = async () => {
       const token = localStorage.getItem('token');
-      tryLoad(setError, async () => {
+      tryLoad(setMessage, async () => {
         const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -31,9 +33,7 @@ const PackageLabelPage: React.FC = () => {
     return <CircularProgress />;
   }
 
-  if (error) {
-    return <Alert severity="error">{error}</Alert>;
-  }
+  <MessageAlert message={message} />
 
   return pkg ? <PackageLabel pkg={pkg} /> : null;
 };

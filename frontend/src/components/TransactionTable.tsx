@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Alert, Container } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Container } from '@mui/material';
 import { tryLoad } from '../util/errors';
+import MessageAlert from './MessageAlert';
+import { MessageContent } from '../types';
 
 const TransactionTable: React.FC = () => {
   const [transactions, setTransactions] = useState([]);
-  const [error, setError] = useState<string>('');
+  const [message, setMessage] = useState<MessageContent>(null);
 
   useEffect(() => {
     const fetchTransactions = async () => {
       const token = localStorage.getItem('token');
-      tryLoad(setError, async () => {
+      tryLoad(setMessage, async () => {
         const response = await axios.get(`${process.env.REACT_APP_BE_URL}/transactions`, {
             headers: { Authorization: `Bearer ${token}` }
         });
@@ -33,7 +35,7 @@ const TransactionTable: React.FC = () => {
         <Typography component="h1" variant="h5">
           Transactions
         </Typography>
-        {error && <Alert severity="error">{error}</Alert>}
+        <MessageAlert message={message} />
         <TableContainer component={Paper} sx={{ mt: 3 }}>
           <Table>
             <TableHead>

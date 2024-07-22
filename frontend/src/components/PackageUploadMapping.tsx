@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Papa, { ParseResult } from 'papaparse';
 import { Box, Typography, Button, Modal, Alert } from '@mui/material';
 import PackageUploadButton, { RunStatus } from './PackageUploadButton';
-import { AlertMessage, HeaderMapping, KeyOfBaseData, MessageLevel } from '../types.d';
+import { MessageContent, HeaderMapping, KeyOfBaseData, MsgLevel } from '../types.d';
 import { Upload } from '@mui/icons-material';
 import CloseButton from './CloseButton';
 import CsvHeaderList from './CsvHeaderList';
@@ -19,7 +19,7 @@ const defaultMapping = fields.reduce((acc: HeaderMapping, field: KeyOfBaseData) 
 }, {} as HeaderMapping);
 
 const PackageUploadMapping: React.FC = () => {
-  const [message, setMessage] = useState<AlertMessage>(null);
+  const [message, setMessage] = useState<MessageContent>(null);
   const [runStatus, setRunStatus] = useState<RunStatus>(RunStatus.ready);
   const [uploadFile, setUploadFile] = useState<File>();
 
@@ -77,7 +77,7 @@ const PackageUploadMapping: React.FC = () => {
     const missingFields = fields.filter(field => !headerMapping[field]);
     if (missingFields.length > 0) {
       setMessage({
-        level: MessageLevel.error,
+        level: MsgLevel.error,
         text: `The following fields are missing: ${missingFields.join(', ')}`
       });
       return false;
