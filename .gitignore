@@ -31,3 +31,5 @@ node_modules/
 .DS_Store
 backend/uploads/
 combined.log
+backend/combined.log
+backend/combined.log
