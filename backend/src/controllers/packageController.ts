@@ -10,13 +10,13 @@ export const addPackage = async (req: Request, res: Response) => {
   const trackingNumber = generateTrackingNumber();
 
   try {
-    const fromAddress = await Address.create(shipFromAddress);
-    const toAddress = await Address.create(shipToAddress);
+    const shipFromAddressId = (await Address.createWithInfo(shipFromAddress)).id;
+    const shipToAddressId = (await Address.createWithInfo(shipToAddress)).id;
 
     const pkg = await Package.create({
       userId,
-      shipFromAddressId: fromAddress.id,
-      shipToAddressId: toAddress.id,
+      shipFromAddressId,
+      shipToAddressId,
       length,
       width,
       height,
@@ -27,7 +27,8 @@ export const addPackage = async (req: Request, res: Response) => {
 
     res.status(201).json(pkg);
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    console.error(error); // Log the detailed error
+    res.status(400).json({ message: error.message, errors: error.errors });
   }
 };
 
@@ -44,6 +45,7 @@ export const getPackages = async (req: Request, res: Response) => {
         { model: Address, as: 'shipToAddress' },
         { model: User, as: 'user' },
       ],
+      where: { userId },
       limit,
       offset,
     });

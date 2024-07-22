@@ -12,14 +12,15 @@ import { generatePDF } from './generatePDF';
 import PackageDialog from './PackageDialog';
 import { useNavigate } from 'react-router-dom';
 import PackageUploadMapping from './PackageUploadMapping';
+import { MessageContent } from '../types';
+import MessageAlert from './MessageAlert';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalPackages, setTotalPackages] = useState(0); // Track the total number of packages
-  const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState<string>('');
+  const [message, setMessage] = useState<MessageContent>(null);
   const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(null);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const PackageTable: React.FC = () => {
     const userId = localStorage.getItem('userId');
     const offset = page * rowsPerPage;
 
-    tryLoad(setError, async () => {
+    tryLoad(setMessage, async () => {
       const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages`, {
         headers: { Authorization: `Bearer ${token}` },
         params: {
@@ -47,12 +48,12 @@ const PackageTable: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     const token = localStorage.getItem('token');
-    tryLoad(setError, async () => {
+    tryLoad(setMessage, async () => {
       await axios.delete(`${process.env.REACT_APP_BE_URL}/packages/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPackages(packages.filter(pkg => pkg.id !== id));
-      setSuccess('Package deleted successfully.');
+      setMessage({ text: 'Package deleted successfully', level: 'success' });
     });
   };
 
@@ -90,8 +91,7 @@ const PackageTable: React.FC = () => {
           <PackageUploadMapping />
         </Box>
 
-        {error && <Alert severity="error">{error}</Alert>}
-        {success && <Alert severity="success">{success}</Alert>}
+        <MessageAlert message={message} />
         <TableContainer component={Paper}>
           <Table>
             <TableHead>

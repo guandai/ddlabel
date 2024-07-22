@@ -1,21 +1,22 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Typography } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 import axios from 'axios';
 import { PackageType } from './PackageForm';
 import { loadApi, tryLoad } from '../util/errors';
-import { PostalZoneType, ZonesType } from '../types';
+import { MessageContent, PostalZoneType, ZonesType } from '../types';
+import MessageAlert from './MessageAlert';
 
 type PackageDialogProps = {
     open: boolean;
     handleClose: () => void;
     selectedPackage: PackageType | null
     ;
-};
+}
 
 const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, selectedPackage }) => {
     const [rate, setRate] = useState<number | string | null>(null);
     const [sortCode, setSortCode] = useState<string | null>(null);
-    const [error, setError] = useState<string>('');
+    const [message, setMessage] = useState<MessageContent>(null);
 
     const Line = () => <>
         <i style={{ display: 'block', fontSize: '0px' , paddingLeft: '100%', height: '12px', borderBottom: '1px solid black'}}>{' '}</i>
@@ -26,7 +27,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
             return null;
         }
         const postZone = await loadApi<PostalZoneType>(
-            setError, 'postal_zones/get_post_zone', { zip_code: selectedPackage.shipFromAddress.zip });
+            setMessage, 'postal_zones/get_post_zone', { zip_code: selectedPackage.shipFromAddress.zip });
         if (!postZone) {
             return null;
         }
@@ -36,7 +37,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
     }, [selectedPackage]);
 
     const getZone = useCallback( async (selectedPackage: PackageType, proposal: ZonesType) => {
-        const zone = await loadApi<string | '-'>(setError, 'postal_zones/get_zone', { zip_code: selectedPackage.shipToAddress.zip, proposal });
+        const zone = await loadApi<string | '-'>(setMessage, 'postal_zones/get_zone', { zip_code: selectedPackage.shipToAddress.zip, proposal });
         return zone?.replace('Zone ', '');
     }, []);
 
@@ -44,7 +45,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
         if (!selectedPackage) {
             return;
         }
-        tryLoad(setError, async () =>{
+        tryLoad(setMessage, async () =>{
             const postalZone = await getPostalZone();
             const zone = await getZone(selectedPackage, postalZone?.proposal as ZonesType);
 
@@ -68,7 +69,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
 
     useEffect(() => {
         setRate(null);
-        setError('');
+        setMessage(null);
         handleGetData();
     }
     , [selectedPackage, handleGetData]);
@@ -78,9 +79,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
             <DialogTitle id="package-details-title">Package Details</DialogTitle>
             {selectedPackage && (
                 <DialogContent>
-                    {error && (
-                        <Typography color="error">{error}</Typography>
-                    )}
+                    <MessageAlert message={message} />
                     <DialogContentText>
                         <strong>Id:</strong> {selectedPackage.id}<br />
                         <strong>Shipping Rate: </strong>{rate === null ? '...' :  rate }<br />
