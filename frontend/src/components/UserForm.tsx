@@ -98,6 +98,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {;
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (message && message.level === 'error') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
