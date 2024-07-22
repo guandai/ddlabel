@@ -15,11 +15,11 @@ export const getPostalZones = async (req: Request, res: Response) => {
 export const getPostalZoneByZip = async (req: Request, res: Response) => {
   try {
     const { zip_code } = req.query as { zip_code: string };
-    logger.log(`zip_code`, zip_code);
+    // logger.info(`zip_code`, zip_code);
     const postalZone = await PostalZone.findOne({
       where: { zip_code },
     });
-    logger.log(`postalZone`, postalZone);
+    // logger.info(`postalZone`, postalZone);
     if (postalZone) {
       res.json(postalZone);
     } else {
