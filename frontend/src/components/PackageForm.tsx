@@ -1,10 +1,18 @@
 // frontend/src/components/PackageForm.tsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { TextField, Button, Box, Typography, Container, Alert, Grid } from '@mui/material';
+import { TextField, Button, Box, Typography, Container, Grid } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { tryLoad } from '../util/errors';
 import AddressForm, { AddressEnum, AddressType } from './AddressForm';
+import { MessageContent } from '../types.d';
+import MessageAlert from './MessageAlert';
+
+type QuickFieldProp = {
+  name: keyof PackageType;
+  type?: 'text' | 'number';
+  pattern?: string | null;
+};
 
 export type PackageType = {
   id: number;
@@ -19,25 +27,19 @@ export type PackageType = {
   reference: string;
 };
 
-const defautAddress = { name: '', email: '', phone: '', 
-  addressType: AddressEnum.package, addressLine1: '', addressLine2: '', city: '', state: '', zip: '' 
-}
-
+const defautAddress = { addressType: AddressEnum.package } as AddressType;
 const initialPackage = {
-  id: 0, userId: 0,
-  length: 0, width: 0, height: 0, weight: 0, trackingNumber: '', reference: '',
-  shipFromAddress: defautAddress, shipToAddress: defautAddress, 
-};
+  shipFromAddress: defautAddress, shipToAddress: defautAddress,
+} as PackageType;
 
 
 const PackageForm: React.FC = () => {
   const [packageData, setPackageData] = useState<PackageType>(initialPackage);
-  const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState<string>('');
+  const [message, setMessage] = useState<MessageContent>(null);
   const navigate = useNavigate();
   const { id: packageId } = useParams<{ id: string }>();
 
-  const quickField = (name: keyof PackageType, type = 'number') => (
+  const quickField = ({ name, type = 'number', pattern = '^[1-9][0-9]*$' }: QuickFieldProp) => (
     <Grid item xs={12} sm={6}>
       <TextField
         required
@@ -48,6 +50,7 @@ const PackageForm: React.FC = () => {
         type={type}
         value={packageData[name] || ''}
         onChange={handleChange}
+        inputProps={{ pattern }}
       /></Grid>
   );
 
@@ -59,30 +62,37 @@ const PackageForm: React.FC = () => {
       return;
     };
 
-    setPackageData({...packageData, userId: parseInt(userId)});
+    setPackageData({ ...packageData, userId: parseInt(userId) });
     if (packageId) {
-      tryLoad(setError, async () => {
+      tryLoad(setMessage, async () => {
         const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages/${packageId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setPackageData(response.data);
       });
     }
-  }, [packageId]);
+  }, [packageId, packageData]);
 
   const onSubmit = async (data: Partial<PackageType>) => {
     const token = localStorage.getItem('token');
     const header = {
       headers: { Authorization: `Bearer ${token}` }
     };
-    tryLoad(setError, async () => {
+    if (message?.text && message.level === 'error') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    tryLoad(setMessage, async () => {
       if (packageId) {
         await axios.put(`${process.env.REACT_APP_BE_URL}/packages/${packageId}`, data, header)
       } else {
         await axios.post(`${process.env.REACT_APP_BE_URL}/packages`, data, header);
         navigate('/packages');
       }
-      setSuccess(packageId ? 'Package updated successfully' : 'Package added successfully');
+      setMessage({ 
+        level: 'success' , 
+        text: packageId ? 'Package updated successfully' : 'Package added successfully' });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   };
@@ -91,21 +101,22 @@ const PackageForm: React.FC = () => {
     setPackageData({ ...packageData, [e.target.name]: e.target.value });
   };
 
-  const handleAddressChange = (addressType: 'shipFromAddress' | 'shipToAddress') => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPackageData({
-      ...packageData,
-      [addressType]: {
-        ...packageData[addressType],
-        [e.target.name]: e.target.value,
-      },
-    });
+  const handleAddressChange = 
+    (addressType: 'shipFromAddress' | 'shipToAddress') => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setPackageData({
+        ...packageData,
+        [addressType]: {
+          ...packageData[addressType],
+          [e.target.name]: e.target.value,
+        },
+      });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(packageData);
   };
-const aaa = "length";
+
   return (
     <Container component="main" maxWidth="md">
       <Box
@@ -119,12 +130,11 @@ const aaa = "length";
         <Typography component="h1" variant="h5">
           {packageId ? 'Edit Package' : 'Add Package'}
         </Typography>
-        {error && <Alert severity="error">{error}</Alert>}
-        {success && <Alert severity="success">{success}</Alert>}
+        <MessageAlert message={message} />
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid item xs={12} mt="1.5em">
             <AddressForm
-              setError={setError}
+              setMessage={setMessage}
               addressData={packageData.shipFromAddress}
               onChange={handleAddressChange('shipFromAddress')}
               title="Ship From Address"
@@ -132,7 +142,7 @@ const aaa = "length";
           </Grid>
           <Grid item xs={12} mt="1.5em">
             <AddressForm
-              setError={setError}
+              setMessage={setMessage}
               addressData={packageData.shipToAddress}
               onChange={handleAddressChange('shipToAddress')}
               title="Ship To Address"
@@ -142,11 +152,11 @@ const aaa = "length";
           <Grid item xs={12}>
             <Typography mb='1em' mt='1.5em' variant="h6">Package Info</Typography>
             <Grid container spacing={2}>
-              {quickField("length")}
-              {quickField("width")}
-              {quickField("height")}
-              {quickField("weight")}
-              {quickField("reference", 'text')}
+              {quickField({ name: 'length' })}
+              {quickField({ name: 'width' })}
+              {quickField({ name: 'height' })}
+              {quickField({ name: 'weight' })}
+              {quickField({ name: 'reference', type: 'text', pattern: null })}
               <Grid item xs={12}>
                 <Button
                   type="submit"

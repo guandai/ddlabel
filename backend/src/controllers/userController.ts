@@ -13,11 +13,12 @@ export const registerUser = async (req: Request, res: Response) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
-    const warehouseAddressId = (await Address.create(warehouseAddress)).id;
+    const warehouseAddressId = (await Address.createWithInfo(warehouseAddress)).id;
     const user = await User.create({ name, email, password: hashedPassword, role, warehouseAddressId });
+
     res.status(201).json(user);
   } catch (error: any) {
-    console.error(error); // Log the detailed error
+    console.error(error); // Log the detailed errorconsole.error(error); // Log the detailed error
     res.status(400).json({ message: error.message, errors: error.errors });
   }
 };
@@ -47,7 +48,7 @@ export const updateUser = async (req: Request, res: Response) => {
     }
 
     await Address.update(user.warehouseAddress, { where: { id: user.warehouseAddressId } });
-    const response = await User.update(user, {where : { id: req.params.id }} );
+    const response = await User.update(user, { where: { id: req.params.id } });
     res.json(response);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
@@ -72,17 +73,18 @@ export const getCurrentUser = async (req: AuthRequest, res: Response) => {
 
   const { name, id, email, role, warehouseAddressId, warehouseAddress } = user;
   const filteredUser = { name, id, email, role, warehouseAddressId, warehouseAddress };
-  
+
   res.json(filteredUser);
 };
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    const users = await User.findAll({ attributes: ['id', 'name', 'email', 'role'], 
+    const users = await User.findAll({
+      attributes: ['id', 'name', 'email', 'role'],
       include: [
         { model: Address, as: 'warehouseAddress' },
       ],
-     }); // Fetch selected attributes
+    }); // Fetch selected attributes
     res.json(users);
   } catch (error: any) {
     res.status(400).json({ message: error.message });

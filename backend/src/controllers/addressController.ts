@@ -1,13 +1,14 @@
 // backend/src/controllers/addressController.ts
 import { Request, Response } from 'express';
 import { Address } from '../models/Address';
+import { getCityState } from '../utils/getZipInfo';
 
 // Create a new address
 export const createAddress = async (req: Request, res: Response) => {
-  const { name, addressLine1, addressLine2, city, state, zip, country, phone } = req.body;
+  const { name, addressLine1, addressLine2, zip, phone, city, state } = req.body;
 
   try {
-    const address = await Address.create({
+    const address = await Address.createWithInfo({
       name,
       addressLine1,
       addressLine2,

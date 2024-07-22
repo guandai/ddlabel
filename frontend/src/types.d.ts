@@ -78,14 +78,14 @@ export type KeyOfCsvHeaders = keyof CsvHeaders;
 export type KeyOfBaseData = keyof BaseData;
 export type HeaderMapping = { [k in KeyOfBaseData]: KeyOfCsvHeaders | KeyOfBaseData | null }
 
-export enum MessageLevel {
+export enum MsgLevel {
     error ='error',
     success ='success',
     info ='info',
     warning ='warning'
 }
 
-export type AlertMessage = {
+export type MessageContent = {
     text: string,
-    level: MessageLevel
+    level: 'error' | 'success' | 'info' | 'warning',
 } | null;

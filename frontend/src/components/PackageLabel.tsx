@@ -47,7 +47,7 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg }) => {
   }, [pkg]);
 
   return (
-    <Box sx={{ width: '384px', height: '576px', padding: '1em', border: '0.25em solid black', position: 'relative' }}>
+    <Box sx={{ width: '4in', height: '6in', padding: '1em', border: '0.25em solid black', position: 'relative' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'top' }}>
         <Box sx={{ textAlign: 'left', mr: '1em', width: '60%' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

@@ -1,9 +1,11 @@
 // frontend/src/components/LoginForm.tsx
 import React, { useState } from 'react';
 import axios from 'axios';
-import { TextField, Button, Box, Typography, Container, Alert } from '@mui/material';
+import { TextField, Button, Box, Typography, Container } from '@mui/material';
 import { tryLoad } from '../util/errors';
 import { AddressType } from './AddressForm';
+import { MessageContent } from '../types';
+import MessageAlert from './MessageAlert';
 
 export type UserType = {
   id: number;
@@ -16,7 +18,7 @@ export type UserType = {
 
 const LoginForm: React.FC = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState<string>('');
+  const [message, setMessage] = useState<MessageContent>({ text: '', level: 'info' });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,15 +26,14 @@ const LoginForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    tryLoad(setError, async () => {
+    setMessage({ text: '', level: 'info' });
+    tryLoad(setMessage, async () => {
         const response = await axios.post(`${process.env.REACT_APP_BE_URL}/users/login`, formData);
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userId', response.data.userId);
         setTimeout(() => {
           window.location.href = '/packages';
         }, 100);
-        // handle success
       });
   };
 
@@ -49,7 +50,7 @@ const LoginForm: React.FC = () => {
         <Typography component="h1" variant="h5">
           Login
         </Typography>
-        {error && <Alert severity="error">{error}</Alert>}
+        <MessageAlert message={message} />
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
           <TextField
             margin="normal"

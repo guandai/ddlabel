@@ -6,7 +6,8 @@ import {
 } from '@mui/material';
 import { Upload } from '@mui/icons-material';
 import { io } from 'socket.io-client';
-import { AlertMessage, HeaderMapping, MessageLevel } from '../types.d';
+import { HeaderMapping } from '../types.d';
+import { SetMessage } from '../util/errors';
 
 const socket = io(`${process.env.REACT_APP_SOCKET_IO_HOST}`, { path: '/api/socket.io' });
 
@@ -15,7 +16,7 @@ export enum RunStatus {
 } ;
 
 type Prop = {
-  setMessage: (message: AlertMessage) => void;
+  setMessage: SetMessage;
   runStatus: RunStatus;
   setRunStatus: (status: RunStatus) => void;
   headerMapping: HeaderMapping;
@@ -29,9 +30,9 @@ const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [generateProgress, setGenerateProgress] = useState<number | null>(null);
   const [insertProgress, setInsertProgress] = useState<number | null>(null);
-  const setError = (text: string) => setMessage({ text, level: MessageLevel.error });
-  const setInfo = (text: string) => setMessage({ text, level: MessageLevel.info });
-  const setSuccess = (text: string) => setMessage({ text, level: MessageLevel.success });
+  const setUploadError = (text: string) => setMessage({ text, level: 'error' });
+  const setUploadInfo = (text: string) => setMessage({ text, level: 'info' });
+  const setUploadSuccess = (text: string) => setMessage({ text, level: 'success' });
 
   useEffect(() => {
     socket.on('insert', (data: { processed: number; total: number }) => {
@@ -58,19 +59,19 @@ const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
 
     if (progressEvent.loaded === total) {
       setUploadProgress(100);
-      setInfo('Upload Done. preparing data...');
+      setUploadInfo('Upload Done. preparing data...');
     }
   };
 
   const handleFileUpload = async (e: any) => {
     if (validateForm && !validateForm()) {
-      setError("Please complete the required fields.");
+      setUploadError("Please complete the required fields.");
       return;
     }
 
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
-    if (!userId) { return setInfo('Please login'); }
+    if (!userId) { return setUploadInfo('Please login'); }
 
     try {
       const formData = new FormData();
@@ -91,10 +92,10 @@ const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
       });
 
       setRunStatus(RunStatus.done);
-      setSuccess(`Import Done - ${response.data.message}`);
+      setUploadSuccess(`Import Done - ${response.data.message}`);
       
     } catch (error: any) {
-      setError(error.response?.data?.message || 'Failed to import packages.');
+      setUploadError(error.response?.data?.message || 'Failed to import packages.');
     }
   };
 

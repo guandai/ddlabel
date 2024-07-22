@@ -31,7 +31,7 @@ export const generatePDF = async (pkg: PackageType) => {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
-    format: [102, 152] // 4 inches x 6 inches
+    format: [101.6, 152] // 4 inches x 6 inches
   });
   doc.addImage(imgData, 'PNG', 0, 0, 102, 152); // Add the image to the PDF
   

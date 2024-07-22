@@ -1,6 +1,7 @@
 // backend/src/models/Address.ts
 import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
+import { getCityState } from '../utils/getZipInfo';
 
 enum AddressEnum {
   user = 'user',
@@ -20,7 +21,7 @@ interface AddressAttributes {
   addressType?: AddressEnum;
 }
 
-interface AddressCreationAttributes extends Optional<AddressAttributes, 'id'> {}
+interface AddressCreationAttributes extends Optional<AddressAttributes, 'id'> { }
 
 class Address extends Model<AddressAttributes, AddressCreationAttributes> implements AddressAttributes {
   public id!: number;
@@ -33,6 +34,13 @@ class Address extends Model<AddressAttributes, AddressCreationAttributes> implem
   public email?: string;
   public phone?: string;
   public addressType?: AddressEnum;
+
+  public static async createWithInfo(addressObj: AddressCreationAttributes): Promise<Address> {
+    const { zip, city, state } = addressObj;
+    const info = getCityState(zip, city, state);
+    const address = await Address.create({...addressObj, city: info.city, state: info.state});
+    return address;
+  }
 }
 
 Address.init(

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { TextField, Grid, Typography } from '@mui/material';
 import axios from 'axios';
+import { SetMessage } from '../util/errors';
 
 export enum AddressEnum {
   user = 'user',
@@ -30,13 +31,13 @@ type QuickFieldProps = {
 }
 
 interface AddressFormProps {
-  setError: (msg: string) => void;
+  setMessage: SetMessage;
   addressData: AddressType;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   title: string;
 }
 
-const AddressForm: React.FC<AddressFormProps> = ({ setError, addressData, onChange, title }) => {
+const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onChange, title }) => {
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
 
@@ -49,24 +50,24 @@ const AddressForm: React.FC<AddressFormProps> = ({ setError, addressData, onChan
           const place = response.data.places[0];
           setCity(place['place name']);
           setState(place['state abbreviation']);
-          setError('');
+          setMessage(null);
         })
         .catch(error => {
-          setError('Not found Zip info'); // Clear any previous error
+          setMessage({ text: 'Not found Zip info', level: 'error' });
           console.error('Error fetching city/state data:', error);
         });
     }
   }, [addressData?.zip]);
 
   const quickField = (prop: QuickFieldProps) => {
-    const { name, autoComplete, required = true, readOnly = false, value = '', pattern=null } = prop;
+    const { name, autoComplete, required = true, readOnly = false, value = '', pattern = null } = prop;
     return (
     <Grid item xs={12} sm={6}>
       <TextField
         required={required}
         sx={{
           pointerEvents: readOnly ? 'none' : 'auto',
-          backgroundColor: readOnly ? "#DDDDDD" : "transparent"}}
+          backgroundColor: readOnly ? "#dddddd" : "transparent"}}
         id={name}
         fullWidth
         label={name}
