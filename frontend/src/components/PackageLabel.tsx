@@ -10,26 +10,24 @@ import { PostalZoneType, ZonesType } from '../types';
 
 interface PackageLabelProps {
   pkg: PackageType;
+  reader?: 'web' | 'pdf';
 }
 
-const PackageLabel: React.FC<PackageLabelProps> = ({ pkg }) => {  
-  const [sortCode, setSortCode] = useState<string | 'N/A' >('N/A');
-  const [toProposal, setToProposal] = useState<ZonesType | 'N/A' >('N/A');
-  const [fromProposal, setFromProposal] = useState<ZonesType | 'N/A' >('N/A');
+const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
+  const [sortCode, setSortCode] = useState<string | 'N/A'>('N/A');
+  const [toProposal, setToProposal] = useState<ZonesType | 'N/A'>('N/A');
+
+  console.log(`reader`, reader);
+  const { width, height } = reader === 'web' ? {
+    width: '4in', height: '6in',
+  } : {
+    width: '4in', height: '6in',
+  };
   useEffect(() => {
     const path = `${process.env.REACT_APP_BE_URL}/postal_zones/get_post_zone`;
     const fetchData = async () => {
-      try {
-        const response = await axios.get(path, {
-          params: { zip_code: pkg.shipFromAddress.zip },
-        });
-        const data = response.data;
-        setFromProposal(data.proposal as ZonesType);
-      } catch (error) {
-        setFromProposal('N/A');
-      }
 
-      try { 
+      try {
         const response = await axios.get<PostalZoneType>(path, {
           params: { zip_code: pkg.shipToAddress.zip },
         });
@@ -46,59 +44,67 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg }) => {
   }, [pkg]);
 
   return (
-    <Box sx={{ width: '4in', height: '6in', padding: '0.1in', margin: 0 , border: '0.05in solid black', position: 'relative', boxSizing: 'border-box' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'top' }}>
-        <Box sx={{ textAlign: 'left', mr: '1em', width: '70%' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <img src={monkeyLogo} alt="Monkey Logo" style={{ width: '0.8in', height: 'auto' }} /> {/* Adjust logo size */}
-            <Box sx={{ textAlign: 'right' }}>
-              <Typography variant="h3" sx={{ fontWeight: 'bold' }}>{sortCode}</Typography>
-            </Box>
+    <Box sx={{ width, height, padding: '0.1in', margin: 0, border: '4px solid black', boxSizing: 'border-box' }}>
+
+      {/* main upper */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'top', }}>
+        {/* top left part */}
+        <Box sx={{ textAlign: 'left', mr: '10px', width: '70%' }}>
+          {/* logo part */}
+          <Box >
+            <img src={monkeyLogo} alt="Monkey Logo" style={{ display: 'inline', width: '0.7in', height: 'auto' }} /> {/* Adjust logo size */}
+
+            <Typography variant="h4" sx={{ float: 'right', display: 'inline', fontWeight: 'bold' }}>{sortCode}</Typography>
+
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Box sx={{ textAlign: 'left' }}>
-              <Typography variant='body1'>Return to:</Typography>
-              <Typography sx={{ fontSize: '0.7rem' }}>{pkg.shipFromAddress.name}</Typography>
-              <Typography sx={{ fontSize: '0.7rem' }}>{pkg.shipFromAddress.addressLine1}</Typography>
-              <Typography sx={{ fontSize: '0.7rem' }}>{pkg.shipFromAddress.addressLine2}</Typography>
-              <Typography sx={{ fontSize: '0.7rem' }}>{pkg.shipFromAddress.state} {pkg.shipFromAddress.zip} { fromProposal as string }</Typography>
-            </Box>
-          </Box>
-          <hr style={{ height: '0.125em', backgroundColor: '#000' }} />
-          <Box sx={{ textAlign: 'left', fontSize: '1.2rem' }}>
-            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>SHIP TO:</Typography>
-            <Typography sx={{ fontSize: '0.8rem' }}>{pkg.shipToAddress.name}</Typography>
-            <Typography sx={{ fontSize: '0.8rem' }}>{pkg.shipToAddress.addressLine1}</Typography>
-            <Typography sx={{ fontSize: '0.8rem' }}>{pkg.shipToAddress.addressLine2}</Typography>
-            <Typography sx={{ fontSize: '0.8rem' }}>{pkg.shipToAddress.state} {pkg.shipToAddress.zip}</Typography>
+
+          {/* Return to part */}
+          <Box sx={{ textAlign: 'left' }}>
+            <Typography variant='body1'>Return to:</Typography>
+            <Typography sx={{ fontSize: '0.1in' }}>{pkg.shipFromAddress.name}</Typography>
+            <Typography sx={{ fontSize: '0.1in' }}>{pkg.shipFromAddress.addressLine1}</Typography>
+            <Typography sx={{ fontSize: '0.1in' }}>{pkg.shipFromAddress.addressLine2}</Typography>
+            <Typography sx={{ fontSize: '0.1in' }}>{pkg.shipFromAddress.city} {pkg.shipFromAddress.state} {pkg.shipFromAddress.zip}</Typography>
           </Box>
         </Box>
-        <Box sx={{ position: 'relative', textAlign: 'right', width: '30%' }}>
-          <QRCode value={`${process.env.REACT_APP_FE_URL}/packages/${pkg.id}`} size={100} /> {/* Increase QR code size */}
-          <Typography sx={{ textAlign: 'center', fontSize: '3rem', fontWeight: 'bold', lineHeight: 1 }}>{ toProposal as string }</Typography> 
-          <Typography sx={{ textAlign: 'center', fontSize: '2rem', color: 'white', backgroundColor: 'black', lineHeight: 1 }}>{pkg.shipToAddress.zip}</Typography>
 
-          <Box sx={{ mb: '-0.5em', textAlign: 'right' }}>
-            <Typography sx={{ fontSize: '0.8rem', position: 'absolute', right: 0, bottom: 0 }}>{pkg.weight} lbs.</Typography>
-          </Box>
+        {/* top right part */}
+        <Box sx={{ textAlign: 'right', width: '30%' }}>
+          <QRCode value={`${process.env.REACT_APP_FE_URL}/packages/${pkg.id}`} size={100} /> {/* Increase QR code size */}
+          <Typography sx={{ textAlign: 'center', fontSize: '3rem', fontWeight: 'bold', lineHeight: 1 }}>{toProposal as string}</Typography>
+          <Typography sx={{ textAlign: 'center', fontSize: '2rem', color: 'white', backgroundColor: 'black', lineHeight: 1 }}>{pkg.shipToAddress.zip}</Typography>
         </Box>
       </Box>
 
-      <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+      {/* Ship to part */}
+      <Box mt={1} sx={{ textAlign: 'left', fontSize: '1.2rem', border: '1px solid black'}}>
+        <Typography variant="body1" sx={{ fontWeight: 'bold' }}>SHIP TO:</Typography>
+        <Typography sx={{ fontSize: '0.15in' }}>{pkg.shipToAddress.name}</Typography>
+        <Typography sx={{ fontSize: '0.15in' }}>{pkg.shipToAddress.addressLine1}</Typography>
+        <Typography sx={{ fontSize: '0.15in' }}>{pkg.shipToAddress.addressLine2}</Typography>
+        <Typography sx={{ fontSize: '0.15in' }}>{pkg.shipToAddress.city} {pkg.shipToAddress.state} {pkg.shipToAddress.zip}</Typography>
+      </Box>
+
+      {/* lbs weight number */}
+      <Box sx={{ mb: '-0.5em', textAlign: 'right' }}>
+        <Typography sx={{ fontSize: '0.8rem' }}>{pkg.weight} lbs.</Typography>
+      </Box>
+
+      {/* barcode tracking */}
+      <Box mt={1} sx={{ width: '100%', textAlign: 'center' }}>
         <BarcodeComponent value={pkg.trackingNumber} />
       </Box>
 
-      <Box sx={{ position: "absolute", bottom: "0.1in"  }}>
-          <Box sx={{ fontSize: '0.8rem' }}>
-            Reference:
-          </Box>
-          <Box sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
-            {pkg.reference}
-          </Box>
+      {/* under barcode spacing */}
+      <Box sx={{ height: '0.72in' }}>
+        {" "}
       </Box>
 
-      <Box sx={{ position: "absolute", bottom: "0", right: '-0.2in'}}>
-        <img src={monkeyFont} alt="Monkey Font Logo" style={{ width: '7em', marginRight: '1.5em' }} />
+      {/* bottom line */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: "end", }}>
+        <Box > Reference: {pkg.reference}</Box>
+
+        <img src={monkeyFont} alt="Monkey Font Logo" style={{ width: '5em' }} />
       </Box>
     </Box>
   );

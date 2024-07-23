@@ -4,9 +4,13 @@ import { Package } from '../models/Package';
 import { Address } from '../models/Address';
 import { generateTrackingNumber } from '../utils/generateTrackingNumber';
 import { User } from '../models/User';
+import { AuthRequest } from '../types';
 
-export const addPackage = async (req: Request, res: Response) => {
-  const { userId, shipFromAddress, shipToAddress, length, width, height, weight, reference } = req.body;
+export const addPackage = async (req: AuthRequest, res: Response) => {
+  if (!req.user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+  const { shipFromAddress, shipToAddress, length, width, height, weight, reference } = req.body;
   const trackingNumber = generateTrackingNumber();
 
   try {
@@ -14,7 +18,7 @@ export const addPackage = async (req: Request, res: Response) => {
     const shipToAddressId = (await Address.createWithInfo(shipToAddress)).id;
 
     const pkg = await Package.create({
-      userId,
+      userId: req.user.id,
       shipFromAddressId,
       shipToAddressId,
       length,
@@ -32,10 +36,10 @@ export const addPackage = async (req: Request, res: Response) => {
   }
 };
 
-export const getPackages = async (req: Request, res: Response) => {
+export const getPackages = async (req: AuthRequest, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 100; // Default limit to 20 if not provided
   const offset = parseInt(req.query.offset as string) || 0; // 
-  const userId = parseInt(req.query.userId as string); 
+  const userId = parseInt(req.user.id as string); 
   try {
     const total = (await Package.count({ where: { userId } })) || 0;
 
@@ -64,6 +68,7 @@ export const updatePackage = async (req: Request, res: Response) => {
       throw new Error('Package not found');
     }
 
+    console.log(`shipFromAddress`, shipFromAddress);
     await Address.update(shipFromAddress, { where: { id: pkg.shipFromAddressId } });
     await Address.update(shipToAddress, { where: { id: pkg.shipToAddressId } });
 
