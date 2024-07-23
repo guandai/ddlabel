@@ -45,7 +45,7 @@ export const updateUser = async (req: Request, res: Response) => {
       user.password = await bcrypt.hash(user.password, 10);
     }
 
-    await Address.update(user.warehouseAddress, { where: { id: user.warehouseAddressId } });
+    await Address.updateWithInfo(user.warehouseAddress, user.warehouseAddressId);
     const response = await User.update(user, { where: { id: req.params.id } });
     res.json(response);
   } catch (error: any) {
