@@ -14,6 +14,8 @@ import compression from 'compression';
 import dotenv from 'dotenv';
 import { Request } from 'express';
 import logger from './config/logger';
+import { getZipCodeData } from './controllers/zipCodeDataController';
+import zipCodeDataRoutes from './routes/zipCodeDataRoutes';
 
 declare global {
   namespace Express {
@@ -47,6 +49,7 @@ app.use(cors()); // Allow all requests
 app.use(compression());
 
 // Routes
+app.use('/api/zipcodes/', zipCodeDataRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/shipping_rates', shippingRateRoutes);

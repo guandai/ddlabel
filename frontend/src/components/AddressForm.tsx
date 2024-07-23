@@ -57,7 +57,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onCh
           console.error('Error fetching city/state data:', error);
         });
     }
-  }, [addressData?.zip, setMessage]);
+  }, [addressData.zip, setMessage]);
 
   const quickField = (prop: QuickFieldProps) => {
     const { name, autoComplete, required = true, readOnly = false, value = '', pattern = null } = prop;
@@ -75,7 +75,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onCh
         autoComplete={autoComplete}
         value={value || addressData[name] || ''}
         onChange={onChange}
-        inputProps={{ readOnly, pattern, maxLength: 35 }}
+        inputProps={{  pattern, maxLength: 35 }}
       />
     </Grid>
   )};

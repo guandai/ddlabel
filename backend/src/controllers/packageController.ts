@@ -69,8 +69,8 @@ export const updatePackage = async (req: Request, res: Response) => {
     }
 
     console.log(`shipFromAddress`, shipFromAddress);
-    await Address.update(shipFromAddress, { where: { id: pkg.shipFromAddressId } });
-    await Address.update(shipToAddress, { where: { id: pkg.shipToAddressId } });
+    await Address.updateWithInfo(shipFromAddress, pkg.shipFromAddressId );
+    await Address.updateWithInfo(shipToAddress, pkg.shipToAddressId);
 
     await pkg.update({ length, width, height, weight });
 

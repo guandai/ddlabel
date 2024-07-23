@@ -35,11 +35,14 @@ class Address extends Model<AddressAttributes, AddressCreationAttributes> implem
   public phone?: string;
   public addressType?: AddressEnum;
 
-  public static async createWithInfo(addressObj: AddressCreationAttributes): Promise<Address> {
-    const { zip, city, state } = addressObj;
-    const info = getCityState(zip, city, state);
-    const address = await Address.create({...addressObj, city: info.city, state: info.state});
-    return address;
+  public static async createWithInfo(attr: AddressCreationAttributes): Promise<Address> {
+    const info = await getCityState(attr.zip, attr.city, attr.state);
+    return await Address.create({ ...attr, city: info.city, state: info.state });
+  }
+
+  public static async updateWithInfo(attr: AddressCreationAttributes, id: number) {
+    const info = await getCityState(attr.zip, attr.city, attr.state);
+    await Address.update({ ...attr, city: info.city, state: info.state }, { where: { id } });
   }
 }
 
@@ -90,6 +93,7 @@ Address.init(
   {
     sequelize,
     tableName: 'addresses',
+    timestamps: false, // Disable timestamps if not needed
   }
 );
 

@@ -135,20 +135,20 @@ const onEndData = async (req: Request, res: Response, pkgAll: BatchDataType) => 
 const getPreparedData = (packageCsvMap: string, data: CsvData) => {
 	const mapping: Mapping = isValidJSON(packageCsvMap) ? JSON.parse(packageCsvMap) : defaultMapping;
 	const mappedData = getMappingData(data, mapping);
-	const addressFrom = getZipInfo(mappedData['shipFromAddressZip'] );
-	const addressTo = getZipInfo(mappedData['shipToAddressZip'] );
-	if (!addressFrom) { 
+	const fromZipInfo = getZipInfo(mappedData['shipFromAddressZip'] );
+	const toZipInfo = getZipInfo(mappedData['shipToAddressZip'] );
+	if (!fromZipInfo) { 
 		console.error(`has no From ZipInfo for ${mappedData['shipFromAddressZip']}`);
 		return;
 	}
-	if (!addressTo) { 
+	if (!toZipInfo) { 
 		console.error(`has no To ZipInfo for ${mappedData['shipToAddressZip']}`);
 		return;
 	}
 	return {
 		mappedData,
-		addressFrom,
-		addressTo,
+		fromZipInfo,
+		toZipInfo,
 	};
 }
 
@@ -170,7 +170,7 @@ const onData = (OnDataParams: OnDataParams) => {
 	const prepared = getPreparedData(packageCsvMap, csvData);
 	if (!prepared) return;
 
-	const { mappedData, addressFrom, addressTo } = prepared;
+	const { mappedData, fromZipInfo, toZipInfo } = prepared;
 	pkgAll.pkgBatch.push({
 		userId: req.user.id,
 		length: mappedData['length'],
@@ -181,13 +181,13 @@ const onData = (OnDataParams: OnDataParams) => {
 		reference: mappedData['reference'],
 	});
 	pkgAll.fromBatch.push({
-		...addressFrom,
+		...fromZipInfo,
 		name: mappedData['shipFromName'],
 		addressLine1: mappedData['shipFromAddressStreet'],
 		zip: mappedData['shipFromAddressZip'],
 	});
 	pkgAll.toBatch.push({
-		...addressTo,
+		...toZipInfo,
 		name: mappedData['shipToName'],
 		addressLine1: mappedData['shipToAddressStreet'],
 		zip: mappedData['shipToAddressZip'],
