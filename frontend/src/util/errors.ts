@@ -19,13 +19,13 @@ const tryError = (setMessage: SetMessage, error: any) => {
 export const tryLoad = async <T, P = void>(
   setMessage: SetMessage,
   callback: () => Promise<T>,
-  errorCallback?: () => Promise<P>
+  errorFn?: (() => Promise<P>) | (() => void)
 ) => {
   try {
     return await callback();
   } catch (error) {
     tryError(setMessage, error);
-    return errorCallback ? await errorCallback() : '';
+    return errorFn?.();
   }
 }
 
@@ -35,7 +35,7 @@ export const loadApi = async<T>(
   params: unknown
 ) => tryLoad<T>(setMessage, async () => {
   const responst = await axios.get<T>(
-    `${process.env.REACT_APP_BE_URL}/${path}`, 
+    `${process.env.REACT_APP_BE_URL}/${path}`,
     { params });
   return responst.data;
 })

@@ -1,12 +1,10 @@
+// backend/src/controllers/userController.ts
 import { Request, Response } from 'express';
 import { User } from '../models/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Address } from '../models/Address';
-
-interface AuthRequest extends Request {
-  user?: User;
-}
+import { AuthRequest } from '../types';
 
 export const registerUser = async (req: Request, res: Response) => {
   const { name, email, password, role, warehouseAddress } = req.body;

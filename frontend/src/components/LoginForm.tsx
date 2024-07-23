@@ -27,14 +27,16 @@ const LoginForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage({ text: '', level: 'info' });
-    tryLoad(setMessage, async () => {
+
+    tryLoad(setMessage,
+      async () => {
         const response = await axios.post(`${process.env.REACT_APP_BE_URL}/users/login`, formData);
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userId', response.data.userId);
         setTimeout(() => {
           window.location.href = '/packages';
         }, 100);
-      });
+      })
   };
 
   return (

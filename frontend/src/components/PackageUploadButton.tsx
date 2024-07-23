@@ -70,14 +70,12 @@ const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
     }
 
     const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
-    if (!userId) { return setUploadInfo('Please login'); }
+    if (!token) { return setUploadInfo('Please login'); }
 
     try {
       const formData = new FormData();
       const packageCsvFile = uploadFile;
       formData.append('packageCsvFile', packageCsvFile);
-      formData.append('packageUserId', userId);
       formData.append('packageCsvLength', csvLength?.toString() || '0');
       formData.append('packageCsvMap', JSON.stringify(headerMapping));
 

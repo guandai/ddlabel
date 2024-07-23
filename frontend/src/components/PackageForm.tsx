@@ -16,7 +16,6 @@ type QuickFieldProp = {
 
 export type PackageType = {
   id: number;
-  userId: number;
   shipFromAddress: AddressType;
   shipToAddress: AddressType;
   length: number;
@@ -56,12 +55,9 @@ const PackageForm: React.FC = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
-    if (!userId || !token) {
-      window.location.href = '/login';
-      return;
+    if (!token) {
+      window.location.href = '/login';      
     };
-    setPackageData(prevData => ({ ...prevData, userId: parseInt(userId) }));
   }, []);
 
   useEffect(() => {
@@ -107,6 +103,7 @@ const PackageForm: React.FC = () => {
 
   const handleAddressChange = 
     (addressType: 'shipFromAddress' | 'shipToAddress') => (e: React.ChangeEvent<HTMLInputElement>) => {
+      console.log(`e.target`, e.target);
       setPackageData(prevData => ({
         ...prevData,
         [addressType]: {
