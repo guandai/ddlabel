@@ -34,8 +34,7 @@ const PackageLabelPage: React.FC = () => {
   }
 
   <MessageAlert message={message} />
-
-  return pkg ? <PackageLabel pkg={pkg} /> : null;
+  return pkg ? <PackageLabel pkg={pkg} reader='web' /> : null;
 };
 
 export default PackageLabelPage;

@@ -10,6 +10,7 @@ import path from 'path';
 import getZipInfo from '../utils/getZipInfo';
 import { reportIoSocket } from '../utils/reportIo';
 import { isValidJSON } from '../utils/errors';
+import { AuthRequest } from '../types';
 
 type BaseData = {
 	length: number,
@@ -153,26 +154,25 @@ const getPreparedData = (packageCsvMap: string, data: CsvData) => {
 
 type ReqBody = {
 	packageCsvLength: number,
-	packageUserId: number,
 	packageCsvMap: string,
 }
 
 type OnDataParams = {
-	req: Request, 
+	req: AuthRequest, 
 	csvData: CsvData,
 	pkgAll: BatchDataType,
 
 }
 const onData = (OnDataParams: OnDataParams) => {
 	const { req, csvData, pkgAll } = OnDataParams;
-	const {packageCsvLength , packageUserId, packageCsvMap} = req.body;
+	const {packageCsvLength, packageCsvMap} = req.body;
 
 	const prepared = getPreparedData(packageCsvMap, csvData);
 	if (!prepared) return;
 
 	const { mappedData, addressFrom, addressTo } = prepared;
 	pkgAll.pkgBatch.push({
-		userId: packageUserId,
+		userId: req.user.id,
 		length: mappedData['length'],
 		width: mappedData['width'],
 		height: mappedData['height'],
