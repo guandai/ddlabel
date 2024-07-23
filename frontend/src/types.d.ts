@@ -11,8 +11,6 @@ type ErrorDetail = {
         "password": string,
         "role": "admin" | 'worker',
         "warehouseAddress": string,
-        "updatedAt": Date,
-        "createdAt": Date
     },
     "validatorKey": "not_unique" | string,
     "validatorName": null | string,

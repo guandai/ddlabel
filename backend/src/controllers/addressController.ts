@@ -1,7 +1,6 @@
 // backend/src/controllers/addressController.ts
 import { Request, Response } from 'express';
 import { Address } from '../models/Address';
-import { getCityState } from '../utils/getZipInfo';
 
 // Create a new address
 export const createAddress = async (req: Request, res: Response) => {

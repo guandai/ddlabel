@@ -19,10 +19,10 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
     const [message, setMessage] = useState<MessageContent>(null);
 
     const Line = () => <>
-        <i style={{ display: 'block', fontSize: '0px' , paddingLeft: '100%', height: '12px', borderBottom: '1px solid black'}}>{' '}</i>
+        <i style={{ display: 'block', fontSize: '0px', paddingLeft: '100%', height: '12px', borderBottom: '1px solid black' }}>{' '}</i>
     </>
 
-    const getPostalZone = useCallback( async (): Promise<PostalZoneType | null> => {
+    const getPostalZone = useCallback(async (): Promise<PostalZoneType | null> => {
         if (!selectedPackage) {
             return null;
         }
@@ -36,16 +36,16 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
         return postZone;
     }, [selectedPackage]);
 
-    const getZone = useCallback( async (selectedPackage: PackageType, proposal: ZonesType) => {
+    const getZone = useCallback(async (selectedPackage: PackageType, proposal: ZonesType) => {
         const zone = await loadApi<string | '-'>(setMessage, 'postal_zones/get_zone', { zip_code: selectedPackage.shipToAddress.zip, proposal });
         return zone?.replace('Zone ', '');
     }, []);
 
-    const handleGetData = useCallback( async () => {
+    const handleGetData = useCallback(async () => {
         if (!selectedPackage) {
             return;
         }
-        tryLoad(setMessage, async () =>{
+        tryLoad(setMessage, async () => {
             const postalZone = await getPostalZone();
             const zone = await getZone(selectedPackage, postalZone?.proposal as ZonesType);
 
@@ -53,7 +53,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                 setRate('Can not deliver');
                 return;
             }
-            const response = await axios.get(`${ process.env.REACT_APP_BE_URL}/shipping_rates/full-rate`, {
+            const response = await axios.get(`${process.env.REACT_APP_BE_URL}/shipping_rates/full-rate`, {
                 params: {
                     length: selectedPackage.length,
                     width: selectedPackage.width,
@@ -72,7 +72,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
         setMessage(null);
         handleGetData();
     }
-    , [selectedPackage, handleGetData]);
+        , [selectedPackage, handleGetData]);
 
     return (
         <Dialog open={open} onClose={handleClose} aria-labelledby="package-details-title">
@@ -82,12 +82,12 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                     <MessageAlert message={message} />
                     <DialogContentText>
                         <strong>Id:</strong> {selectedPackage.id}<br />
-                        <strong>Shipping Rate: </strong>{rate === null ? '...' :  rate }<br />
-                        <strong>Sort Code: </strong>{rate === null ? '...' :  sortCode }<br />
-                        
+                        <strong>Shipping Rate: </strong>{rate === null ? '...' : rate}<br />
+                        <strong>Sort Code: </strong>{rate === null ? '...' : sortCode}<br />
+
                         <Line />
                         <strong>Tracking Number:</strong> {selectedPackage.trackingNumber}<br />
-                        <strong>Reference Number:</strong> {selectedPackage.reference}<br />                        
+                        <strong>Reference Number:</strong> {selectedPackage.reference}<br />
                         <Line />
                         From: <br />
                         <strong>Name:</strong> {selectedPackage.shipFromAddress.name}<br />
@@ -98,7 +98,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                         <strong>State:</strong> {selectedPackage.shipFromAddress.state}<br />
                         <strong>Phone:</strong> {selectedPackage.shipFromAddress.phone}<br />
                         <strong>Email:</strong> {selectedPackage.shipFromAddress.email}<br />
-                        
+
                         <Line />
                         To: <br />
                         <strong>Name:</strong> {selectedPackage.shipToAddress.name}<br />
@@ -109,7 +109,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                         <strong>State:</strong> {selectedPackage.shipToAddress.state}<br />
                         <strong>Phone:</strong> {selectedPackage.shipToAddress.phone}<br />
                         <strong>Email:</strong> {selectedPackage.shipToAddress.email}<br />
-                        
+
                         <Line />
                         <strong>Weight:</strong> {selectedPackage.weight}<br />
                         <strong>Length:</strong> {selectedPackage.length}<br />

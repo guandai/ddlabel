@@ -56,7 +56,7 @@ const PackageForm: React.FC = () => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      window.location.href = '/login';      
+      window.location.href = '/login';
     };
   }, []);
 
@@ -90,9 +90,10 @@ const PackageForm: React.FC = () => {
         await axios.post(`${process.env.REACT_APP_BE_URL}/packages`, data, header);
         navigate('/packages');
       }
-      setMessage({ 
-        level: 'success' , 
-        text: packageId ? 'Package updated successfully' : 'Package added successfully' });
+      setMessage({
+        level: 'success',
+        text: packageId ? 'Package updated successfully' : 'Package added successfully'
+      });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   };
@@ -101,9 +102,9 @@ const PackageForm: React.FC = () => {
     setPackageData(prevData => ({ ...prevData, [e.target.name]: e.target.value }));
   };
 
-  const handleAddressChange = 
+  const handleAddressChange =
     (addressType: 'shipFromAddress' | 'shipToAddress') => (e: React.ChangeEvent<HTMLInputElement>) => {
-      console.log(`e.target`, e.target);
+      console.log(`e.target`, addressType, e.target.name, e.target.value);
       setPackageData(prevData => ({
         ...prevData,
         [addressType]: {
@@ -111,7 +112,7 @@ const PackageForm: React.FC = () => {
           [e.target.name]: e.target.value,
         },
       }));
-  };
+    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
