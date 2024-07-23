@@ -47,7 +47,7 @@ export const getAddressById = async (req: Request, res: Response) => {
 
 // Update an address
 export const updateAddress = async (req: Request, res: Response) => {
-  const { name, addressLine1, addressLine2, city, state, zip, country, phone } = req.body;
+  const { name, addressLine1, addressLine2, city, state, zip, phone } = req.body;
 
   try {
     const address = await Address.findByPk(req.params.id);

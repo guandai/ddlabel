@@ -68,7 +68,6 @@ export const updatePackage = async (req: Request, res: Response) => {
       throw new Error('Package not found');
     }
 
-    console.log(`shipFromAddress`, shipFromAddress);
     await Address.updateWithInfo(shipFromAddress, pkg.shipFromAddressId );
     await Address.updateWithInfo(shipToAddress, pkg.shipToAddressId);
 
