@@ -85,8 +85,10 @@ const PackageForm: React.FC = () => {
 
     tryLoad(setMessage, async () => {
       if (packageId) {
+        // update
         await axios.put(`${process.env.REACT_APP_BE_URL}/packages/${packageId}`, data, header)
       } else {
+        // create
         await axios.post(`${process.env.REACT_APP_BE_URL}/packages`, data, header);
         navigate('/packages');
       }
@@ -104,7 +106,7 @@ const PackageForm: React.FC = () => {
 
   const handleAddressChange =
     (addressType: 'shipFromAddress' | 'shipToAddress') => (e: React.ChangeEvent<HTMLInputElement>) => {
-      console.log(`e.target`, addressType, e.target.name, e.target.value);
+      console.log(`e.target`, addressType, e.target.name, e.target.value, 'all');
       setPackageData(prevData => ({
         ...prevData,
         [addressType]: {

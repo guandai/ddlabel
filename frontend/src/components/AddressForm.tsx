@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { TextField, Grid, Typography } from '@mui/material';
 import axios from 'axios';
-import { SetMessage } from '../util/errors';
+import { SetMessage, tryLoad } from '../util/errors';
 
 export enum AddressEnum {
   user = 'user',
@@ -45,53 +45,57 @@ const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onCh
     if (addressData?.zip) {
       setCity('');
       setState('');
-      axios.get(`https://api.zippopotam.us/us/${addressData.zip}`)
-        .then(response => {
-          const place = response.data.places[0];
-          setCity(place['place name']);
-          setState(place['state abbreviation']);
-          setMessage(null);
-        })
-        .catch(error => {
-          setMessage({ text: 'Not found Zip info', level: 'error' });
-          console.error('Error fetching city/state data:', error);
-        });
+      tryLoad(setMessage, async () => {
+        const response = await axios.get(`${process.env.REACT_APP_BE_URL}/zipcodes/datafile/${addressData.zip}`)
+        const info = response.data;
+        setCity(info.city_name);
+        setState(info.state_name);
+        setMessage(null);
+      })
     }
   }, [addressData.zip, setMessage]);
+
+  useEffect(() => {
+    onChange({ target: { name: 'city', value: city } } as React.ChangeEvent<HTMLInputElement>);
+    onChange({ target: { name: 'state', value: state } } as React.ChangeEvent<HTMLInputElement>);
+  }, [city, state]);
+
 
   const quickField = (prop: QuickFieldProps) => {
     const { name, autoComplete, required = true, readOnly = false, value = '', pattern = null } = prop;
     return (
-    <Grid item xs={12} sm={6}>
-      <TextField
-        required={required}
-        sx={{
-          pointerEvents: readOnly ? 'none' : 'auto',
-          backgroundColor: readOnly ? "#dddddd" : "transparent"}}
-        id={name}
-        fullWidth
-        label={name}
-        name={name}
-        autoComplete={autoComplete}
-        value={value || addressData[name] || ''}
-        onChange={onChange}
-        inputProps={{  pattern, maxLength: 35 }}
-      />
-    </Grid>
-  )};
+      <Grid item xs={12} sm={6}>
+        <TextField
+          sx={{
+            pointerEvents: readOnly ? 'none' : 'auto',
+            backgroundColor: readOnly ? "#dddddd" : "transparent"
+          }}
+          required={required}
+          id={name}
+          fullWidth
+          label={name}
+          name={name}
+          autoComplete={autoComplete}
+          value={value || addressData[name] || ''}
+          onChange={onChange}
+          inputProps={{ pattern, maxLength: 35 }}
+        />
+      </Grid>
+    )
+  };
 
   return (
     <>
       <Typography variant="h6" mb='1em'>{title}</Typography>
       <Grid container spacing={2}>
-        {quickField({name: 'name', autoComplete: 'name'})}
-        {quickField({name: 'addressLine1', autoComplete: 'address-line1' })}
-        {quickField({name: 'addressLine2', autoComplete: 'address-line2', required: false})}
-        {quickField({name: 'zip', autoComplete: 'postal-code', pattern: '[0-9]{5}'})}
-        {quickField({name: 'state', autoComplete: 'address-level1', readOnly: true, value: state})}
-        {quickField({name: 'city', autoComplete: 'address-level2', readOnly: true, value: city})}
-        {quickField({name: 'phone', autoComplete: 'tel', required: false, pattern: '[+]?[0-9]{5,}'})}
-        {quickField({name: 'email', autoComplete: 'email', pattern: '^[\\w\\-\\.]+@([\\w\\-]+\\.)+[\\w\\-]{2,4}$'})}
+        {quickField({ name: 'name', autoComplete: 'name' })}
+        {quickField({ name: 'addressLine1', autoComplete: 'address-line1' })}
+        {quickField({ name: 'addressLine2', autoComplete: 'address-line2', required: false })}
+        {quickField({ name: 'zip', autoComplete: 'postal-code', pattern: '[0-9]{5}' })}
+        {quickField({ name: 'state', autoComplete: 'address-level1', readOnly: true, value: state })}
+        {quickField({ name: 'city', autoComplete: 'address-level2', readOnly: true, value: city })}
+        {quickField({ name: 'phone', autoComplete: 'tel', required: false, pattern: '[+]?[0-9]{5,}' })}
+        {quickField({ name: 'email', autoComplete: 'email', pattern: '^[\\w\\-\\.]+@([\\w\\-]+\\.)+[\\w\\-]{2,4}$' })}
       </Grid>
     </>
   );
