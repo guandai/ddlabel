@@ -1,10 +1,16 @@
 #!/bin/bash
 
-latest_commit=$(git rev-parse HEAD)
+short_commit=$(git rev-parse --short HEAD)
 
 yarn build
 git add .
-git commit -m "deploy ${latest_commit}"
+git commit -m "deploy ${short_commit}"
+git push
 
-# npx pm2 delete all
-# yarn prod
+USER="ubuntu"
+HOST="34.235.102.89"
+COMMAND="cd /git/ddlabel && git pull && ./run.sh"
+
+# Run the command on the remote host using SSH
+ssh $USER@$HOST "$COMMAND"
+
