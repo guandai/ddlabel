@@ -84,7 +84,7 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
       </Box>
 
       {/* Ship to part */}
-      <Box mt={1} sx={{ height: '1.15in', borderTop : 'solid', borderBottom : 'solid' }}>
+      <Box mt={1} sx={{ height: '1.15in', borderTop : 'solid' }}>
         <Typography variant="body1" sx={{ fontWeight: 'bold' }}>SHIP TO:</Typography>
         <MonoTypoNormal >{pkg.shipToAddress.name}</MonoTypoNormal>
         <MonoTypoNormal >{pkg.shipToAddress.addressLine1}</MonoTypoNormal>
