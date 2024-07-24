@@ -94,7 +94,7 @@ const PackageTable: React.FC = () => {
           </Button>
           <PackageUploadMapping />
           <TextField
-            label="Search by Tracking Number"
+            label="Search by Tracking"
             value={search}
             onChange={handleSearchChange}
             variant="outlined"
