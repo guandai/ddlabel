@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, IconButton, Alert, Typography, Box, Container, Button,
-  TablePagination
+  TablePagination, TextField
 } from '@mui/material';
 import { Visibility, Edit, Delete, PictureAsPdf, Label, AddCircle } from '@mui/icons-material';
 import { PackageType } from './PackageForm';
@@ -23,6 +23,7 @@ const PackageTable: React.FC = () => {
   const [message, setMessage] = useState<MessageContent>(null);
   const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(null);
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState(''); // Add search state
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,14 +36,14 @@ const PackageTable: React.FC = () => {
         params: {
           limit: rowsPerPage,
           offset,
+          search, // Include search query
         }
       });
       setPackages(response.data.packages);
-      setTotalPackages(response
-        .data.total); // Set the total number of packages
+      setTotalPackages(response.data.total); // Set the total number of packages
     });
     
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, search]);
 
   const handleDelete = async (id: number) => {
     const token = localStorage.getItem('token');
@@ -78,15 +79,26 @@ const PackageTable: React.FC = () => {
     setPage(0);
   };
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
+    setPage(0); // Reset to first page when searching
+  };
+
   return (
     <Container component="main" maxWidth="lg">
       <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '400px' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '600px' }}>
           <Typography component="h1" variant="h5">Packages</Typography>
           <Button variant="contained" color="primary" onClick={() => navigate('/packages/create')} startIcon={<AddCircle />} >
-              Add
-            </Button>
+            Add
+          </Button>
           <PackageUploadMapping />
+          <TextField
+            label="Search by Tracking Number"
+            value={search}
+            onChange={handleSearchChange}
+            variant="outlined"
+          />
         </Box>
 
         <MessageAlert message={message} />
