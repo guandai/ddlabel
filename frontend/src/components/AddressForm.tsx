@@ -48,8 +48,8 @@ const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onCh
       tryLoad(setMessage, async () => {
         const response = await axios.get(`${process.env.REACT_APP_BE_URL}/zipcodes/datafile/${addressData.zip}`)
         const info = response.data;
-        setCity(info.city_name);
-        setState(info.state_name);
+        setCity(info.city);
+        setState(info.state);
         setMessage(null);
       })
     }
@@ -95,7 +95,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onCh
         {quickField({ name: 'state', autoComplete: 'address-level1', readOnly: true, value: state })}
         {quickField({ name: 'city', autoComplete: 'address-level2', readOnly: true, value: city })}
         {quickField({ name: 'phone', autoComplete: 'tel', required: false, pattern: '[+]?[0-9]{5,}' })}
-        {quickField({ name: 'email', autoComplete: 'email', pattern: '^[\\w\\-\\.]+@([\\w\\-]+\\.)+[\\w\\-]{2,4}$' })}
+        {quickField({ name: 'email', autoComplete: 'email', required: false, pattern: '^[\\w\\-\\.]+@([\\w\\-]+\\.)+[\\w\\-]{2,4}$' })}
       </Grid>
     </>
   );
