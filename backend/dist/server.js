@@ -17,6 +17,7 @@ const postalZoneRoutes_1 = __importDefault(require("./routes/postalZoneRoutes"))
 const compression_1 = __importDefault(require("compression"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const logger_1 = __importDefault(require("./config/logger"));
+const zipCodeDataRoutes_1 = __importDefault(require("./routes/zipCodeDataRoutes"));
 // Load environment variables from .env file
 const env = process.env.NODE_ENV || 'development';
 if (env === 'production') {
@@ -38,6 +39,7 @@ app.use(express_1.default.json());
 app.use((0, cors_1.default)()); // Allow all requests
 app.use((0, compression_1.default)());
 // Routes
+app.use('/api/zipcodes/', zipCodeDataRoutes_1.default);
 app.use('/api/users', userRoutes_1.default);
 app.use('/api/transactions', transactionRoutes_1.default);
 app.use('/api/shipping_rates', shippingRateRoutes_1.default);

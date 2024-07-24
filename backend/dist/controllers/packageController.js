@@ -8,22 +8,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPackageDetails = exports.deletePackage = exports.updatePackage = exports.getPackages = exports.addPackage = void 0;
 const Package_1 = require("../models/Package");
 const Address_1 = require("../models/Address");
 const generateTrackingNumber_1 = require("../utils/generateTrackingNumber");
 const User_1 = require("../models/User");
+const sequelize_1 = require("sequelize");
+const logger_1 = __importDefault(require("../config/logger"));
 const addPackage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId, shipFromAddress, shipToAddress, length, width, height, weight, reference } = req.body;
+    if (!req.user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+    const { shipFromAddress, shipToAddress, length, width, height, weight, reference } = req.body;
     const trackingNumber = (0, generateTrackingNumber_1.generateTrackingNumber)();
     try {
-        const fromAddress = yield Address_1.Address.create(shipFromAddress);
-        const toAddress = yield Address_1.Address.create(shipToAddress);
+        const shipFromAddressId = (yield Address_1.Address.createWithInfo(shipFromAddress)).id;
+        const shipToAddressId = (yield Address_1.Address.createWithInfo(shipToAddress)).id;
         const pkg = yield Package_1.Package.create({
-            userId,
-            shipFromAddressId: fromAddress.id,
-            shipToAddressId: toAddress.id,
+            userId: req.user.id,
+            shipFromAddressId,
+            shipToAddressId,
             length,
             width,
             height,
@@ -34,22 +42,33 @@ const addPackage = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(201).json(pkg);
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        logger_1.default.error(error); // Log the detailed error
+        res.status(400).json({ message: error.message, errors: error.errors });
     }
 });
 exports.addPackage = addPackage;
 const getPackages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const limit = parseInt(req.query.limit) || 100; // Default limit to 20 if not provided
     const offset = parseInt(req.query.offset) || 0; // 
-    const userId = parseInt(req.query.userId);
+    const userId = req.user.id;
+    const search = req.query.search; // 
     try {
         const total = (yield Package_1.Package.count({ where: { userId } })) || 0;
+        const whereCondition = search
+            ? {
+                userId,
+                trackingNumber: {
+                    [sequelize_1.Op.like]: `%${search}%`,
+                },
+            }
+            : { userId };
         const packages = yield Package_1.Package.findAll({
             include: [
                 { model: Address_1.Address, as: 'shipFromAddress' },
                 { model: Address_1.Address, as: 'shipToAddress' },
                 { model: User_1.User, as: 'user' },
             ],
+            where: whereCondition,
             limit,
             offset,
         });
@@ -67,8 +86,8 @@ const updatePackage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         if (!pkg) {
             throw new Error('Package not found');
         }
-        yield Address_1.Address.update(shipFromAddress, { where: { id: pkg.shipFromAddressId } });
-        yield Address_1.Address.update(shipToAddress, { where: { id: pkg.shipToAddressId } });
+        yield Address_1.Address.updateWithInfo(shipFromAddress, pkg.shipFromAddressId);
+        yield Address_1.Address.updateWithInfo(shipToAddress, pkg.shipToAddressId);
         yield pkg.update({ length, width, height, weight });
         res.json(pkg);
     }

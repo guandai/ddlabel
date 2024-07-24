@@ -13,9 +13,9 @@ exports.deleteAddress = exports.updateAddress = exports.getAddressById = exports
 const Address_1 = require("../models/Address");
 // Create a new address
 const createAddress = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, addressLine1, addressLine2, city, state, zip, country, phone } = req.body;
+    const { name, addressLine1, addressLine2, zip, phone, city, state } = req.body;
     try {
-        const address = yield Address_1.Address.create({
+        const address = yield Address_1.Address.createWithInfo({
             name,
             addressLine1,
             addressLine2,
@@ -58,7 +58,7 @@ const getAddressById = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.getAddressById = getAddressById;
 // Update an address
 const updateAddress = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, addressLine1, addressLine2, city, state, zip, country, phone } = req.body;
+    const { name, addressLine1, addressLine2, city, state, zip, phone } = req.body;
     try {
         const address = yield Address_1.Address.findByPk(req.params.id);
         if (!address) {

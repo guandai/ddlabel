@@ -17,16 +17,17 @@ const User_1 = require("../models/User");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const Address_1 = require("../models/Address");
+const logger_1 = __importDefault(require("../config/logger"));
 const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, email, password, role, warehouseAddress } = req.body;
     const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
     try {
-        const warehouseAddressId = (yield Address_1.Address.create(warehouseAddress)).id;
+        const warehouseAddressId = (yield Address_1.Address.createWithInfo(warehouseAddress)).id;
         const user = yield User_1.User.create({ name, email, password: hashedPassword, role, warehouseAddressId });
         res.status(201).json(user);
     }
     catch (error) {
-        console.error(error); // Log the detailed error
+        logger_1.default.error(error); // Log the detailed
         res.status(400).json({ message: error.message, errors: error.errors });
     }
 });
@@ -55,7 +56,7 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         if (user && user.password) {
             user.password = yield bcryptjs_1.default.hash(user.password, 10);
         }
-        yield Address_1.Address.update(user.warehouseAddress, { where: { id: user.warehouseAddressId } });
+        yield Address_1.Address.updateWithInfo(user.warehouseAddress, user.warehouseAddressId);
         const response = yield User_1.User.update(user, { where: { id: req.params.id } });
         res.json(response);
     }
@@ -84,7 +85,8 @@ const getCurrentUser = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.getCurrentUser = getCurrentUser;
 const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const users = yield User_1.User.findAll({ attributes: ['id', 'name', 'email', 'role'],
+        const users = yield User_1.User.findAll({
+            attributes: ['id', 'name', 'email', 'role'],
             include: [
                 { model: Address_1.Address, as: 'warehouseAddress' },
             ],
