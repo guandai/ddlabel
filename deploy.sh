@@ -9,7 +9,7 @@ git push
 
 USER="ubuntu"
 HOST="34.235.102.89"
-COMMAND="cd /git/ddlabel && git pull && ./run.sh"
+COMMAND="cd /git/ddlabel && ./run.sh"
 
 # Run the command on the remote host using SSH
 ssh $USER@$HOST "$COMMAND"
