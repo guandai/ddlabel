@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Address } from '../models/Address';
 import { AuthRequest } from '../types';
+import logger from '../config/logger';
 
 export const registerUser = async (req: Request, res: Response) => {
   const { name, email, password, role, warehouseAddress } = req.body;
@@ -16,7 +17,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
     res.status(201).json(user);
   } catch (error: any) {
-    console.error(error); // Log the detailed errorconsole.error(error); // Log the detailed error
+    logger.error(error); // Log the detailed
     res.status(400).json({ message: error.message, errors: error.errors });
   }
 };

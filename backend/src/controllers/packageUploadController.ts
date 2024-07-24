@@ -11,6 +11,7 @@ import getZipInfo from '../utils/getZipInfo';
 import { reportIoSocket } from '../utils/reportIo';
 import { isValidJSON } from '../utils/errors';
 import { AuthRequest } from '../types';
+import logger from '../config/logger';
 
 type BaseData = {
 	length: number,
@@ -124,7 +125,7 @@ const onEndData = async (req: Request, res: Response, pkgAll: BatchDataType) => 
 			processed += pkgDataSlice.length;
 			reportIoSocket( 'insert', req, processed, pkgBatch.length );
 		} catch (error) {
-			console.error('Error processing batch', error);
+			logger.error('Error processing batch', error);
 			return res.status(500).send({ message: 'Error processing batch' });
 		}
 	}
@@ -138,11 +139,11 @@ const getPreparedData = (packageCsvMap: string, data: CsvData) => {
 	const fromZipInfo = getZipInfo(mappedData['shipFromAddressZip'] );
 	const toZipInfo = getZipInfo(mappedData['shipToAddressZip'] );
 	if (!fromZipInfo) { 
-		console.error(`has no From ZipInfo for ${mappedData['shipFromAddressZip']}`);
+		logger.error(`has no From ZipInfo for ${mappedData['shipFromAddressZip']}`);
 		return;
 	}
 	if (!toZipInfo) { 
-		console.error(`has no To ZipInfo for ${mappedData['shipToAddressZip']}`);
+		logger.error(`has no To ZipInfo for ${mappedData['shipToAddressZip']}`);
 		return;
 	}
 	return {
@@ -214,7 +215,7 @@ export const importPackages = async (req: Request, res: Response) => {
 		.on('data', (csvData: CsvData) => onData({ req, csvData, pkgAll }))
 		.on('end', async () =>  onEndData(req, res, pkgAll))
 		.on('error', (err) => {
-			console.error('Error parsing CSV:', err);
+			logger.error('Error parsing CSV:', err);
 			res.status(500).send({ message: 'Error importing pkgBatch' });
 		});
 };
@@ -232,7 +233,7 @@ const processBatch = async (batchData: BatchDataType) => {
 
 		await Package.bulkCreate(packages);
 	} catch (error: any) {
-		console.error('Error processing batch', error);
+		logger.error('Error processing batch', error);
 		throw new Error('Batch processing failed');
 	}
 };

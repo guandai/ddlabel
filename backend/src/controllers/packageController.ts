@@ -5,6 +5,8 @@ import { Address } from '../models/Address';
 import { generateTrackingNumber } from '../utils/generateTrackingNumber';
 import { User } from '../models/User';
 import { AuthRequest } from '../types';
+import { Op } from 'sequelize';
+import logger from '../config/logger';
 
 export const addPackage = async (req: AuthRequest, res: Response) => {
   if (!req.user) {
@@ -31,17 +33,55 @@ export const addPackage = async (req: AuthRequest, res: Response) => {
 
     res.status(201).json(pkg);
   } catch (error: any) {
-    console.error(error); // Log the detailed error
+    logger.error(error); // Log the detailed error
     res.status(400).json({ message: error.message, errors: error.errors });
+  }
+};
+
+export const getPackagesSearch = async (req: Request, res: Response) => {
+  const { limit, offset, search } = req.query;
+
+  const whereCondition = search
+    ? {
+        trackingNumber: {
+          [Op.like]: `%${search}%`,
+        },
+      }
+    : {};
+
+  try {
+    const { rows, count } = await Package.findAndCountAll({
+      where: whereCondition,
+      include: [
+        { model: Address, as: 'shipFromAddress' },
+        { model: Address, as: 'shipToAddress' },
+      ],
+      limit: Number(limit),
+      offset: Number(offset),
+    });
+
+    res.status(200).json({ packages: rows, total: count });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
 };
 
 export const getPackages = async (req: AuthRequest, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 100; // Default limit to 20 if not provided
   const offset = parseInt(req.query.offset as string) || 0; // 
-  const userId = parseInt(req.user.id as string); 
+  const userId = req.user.id; 
+  const search = req.query.search; // 
   try {
     const total = (await Package.count({ where: { userId } })) || 0;
+
+    const whereCondition = search
+    ? {
+        userId,
+        trackingNumber: {
+          [Op.like]: `%${search}%`,
+        },
+      }
+    : {userId};
 
     const packages = await Package.findAll({
       include: [
@@ -49,7 +89,7 @@ export const getPackages = async (req: AuthRequest, res: Response) => {
         { model: Address, as: 'shipToAddress' },
         { model: User, as: 'user' },
       ],
-      where: { userId },
+      where: whereCondition,
       limit,
       offset,
     });
