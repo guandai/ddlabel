@@ -30,5 +30,8 @@ backend/.yarn/cache/
 node_modules/
 .DS_Store
 backend/uploads/
+
+
+# Logs
 combined.log
-backend/combined.log
+error.log
