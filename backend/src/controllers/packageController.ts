@@ -38,34 +38,6 @@ export const addPackage = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getPackagesSearch = async (req: Request, res: Response) => {
-  const { limit, offset, search } = req.query;
-
-  const whereCondition = search
-    ? {
-        trackingNumber: {
-          [Op.like]: `%${search}%`,
-        },
-      }
-    : {};
-
-  try {
-    const { rows, count } = await Package.findAndCountAll({
-      where: whereCondition,
-      include: [
-        { model: Address, as: 'shipFromAddress' },
-        { model: Address, as: 'shipToAddress' },
-      ],
-      limit: Number(limit),
-      offset: Number(offset),
-    });
-
-    res.status(200).json({ packages: rows, total: count });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
 export const getPackages = async (req: AuthRequest, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 100; // Default limit to 20 if not provided
   const offset = parseInt(req.query.offset as string) || 0; // 

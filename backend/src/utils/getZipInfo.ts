@@ -1,11 +1,11 @@
-import stateData from '../data/state.json';
+import stateData from '../data/stateSmall.json';
 
 interface StateData {
-	zip_code: string;
-	city_name: string;
-	state_name: string;
-	county_name: string;
-	timezone: string;
+	zip: string;
+	city: string;
+	state: string;
+	county?: string;
+	tz?: string;
 }
 
 type DataStructure = StateData[];
@@ -28,14 +28,15 @@ export const getCityState = (zip: string, city: string, state: string) => {
 export type ZipInfo = {
 	city: string;
 	state: string;
-	county: string;
+	county?: string;
 }
 
+
 const getZipInfo = (zip: string): ZipInfo | null => {
-	const entry = stData.find(it => it.zip_code === zip);
+	const entry = stData.find(it => it.zip === zip);
 	if (entry) {
-		const { city_name, state_name, county_name } = entry
-		return { city: city_name, state: state_name, county: county_name };
+		const { city, state, county } = entry
+		return { city: city, state: state, county: county };
 	}
 	return null
 }

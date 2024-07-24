@@ -54,7 +54,7 @@ export const getZipCodeDataFromFile = async (req: Request, res: Response) => {
   }
   res.json({
     zip: req.params.zip,
-    city_name: info.county,
-    state_name: info.state,
+    city: info.city,
+    state: info.state,
   });
 }

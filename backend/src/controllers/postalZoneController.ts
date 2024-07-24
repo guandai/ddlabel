@@ -1,7 +1,6 @@
 // backend/src/controllers/postalZoneController.ts
 import { Request, Response } from 'express';
 import { PostalZone } from '../models/PostalZone';
-import logger from '../config/logger';
 
 export const getPostalZones = async (req: Request, res: Response) => {
   try {
