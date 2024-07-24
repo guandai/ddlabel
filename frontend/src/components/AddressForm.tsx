@@ -78,7 +78,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onCh
           autoComplete={autoComplete}
           value={value || addressData[name] || ''}
           onChange={onChange}
-          inputProps={{ pattern, maxLength: 35 }}
+          inputProps={{ pattern, maxLength: 38 }}
         />
       </Grid>
     )

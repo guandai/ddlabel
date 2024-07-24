@@ -7,6 +7,16 @@ import monkeyLogo from '../assets/svg/monkey_logo.jpg'; // Import the main logo
 import monkeyFont from '../assets/svg/monkey_font.jpg'; // Import the bottom-right logo
 import axios from 'axios';
 import { PostalZoneType, ZonesType } from '../types';
+import styled from 'styled-components';
+
+const MonoTypoSmall = styled(Typography)(() => ({
+  fontFamily: 'monospace',
+  fontSize: '0.11in'
+}));
+const MonoTypoNormal = styled(Typography)(() => ({
+  fontFamily: 'monospace',
+  fontSize: '0.15in'
+}));
 
 interface PackageLabelProps {
   pkg: PackageType;
@@ -17,16 +27,15 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
   const [sortCode, setSortCode] = useState<string | 'N/A'>('N/A');
   const [toProposal, setToProposal] = useState<ZonesType | 'N/A'>('N/A');
 
-  console.log(`reader`, reader);
   const { width, height } = reader === 'web' ? {
     width: '4in', height: '6in',
   } : {
     width: '4in', height: '6in',
   };
+
   useEffect(() => {
     const path = `${process.env.REACT_APP_BE_URL}/postal_zones/get_post_zone`;
     const fetchData = async () => {
-
       try {
         const response = await axios.get<PostalZoneType>(path, {
           params: { zip_code: pkg.shipToAddress.zip },
@@ -44,27 +53,25 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
   }, [pkg]);
 
   return (
-    <Box sx={{ width, height, padding: '0.1in', margin: 0, border: '4px solid black', boxSizing: 'border-box' }}>
+    <Box sx={{ width, height, padding: '0.1in', margin: 0, border: '0.02in solid black', boxSizing: 'border-box' }}>
 
       {/* main upper */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'top', }}>
+      <Box sx={{ height: '1.  9in', display: 'flex', justifyContent: 'space-between', alignItems: 'top', }}>
         {/* top left part */}
-        <Box sx={{ textAlign: 'left', mr: '10px', width: '70%' }}>
+        <Box sx={{ textAlign: 'left', mr: '8px', width: '70%' }}>
           {/* logo part */}
           <Box >
-            <img src={monkeyLogo} alt="Monkey Logo" style={{ display: 'inline', width: '0.7in', height: 'auto' }} /> {/* Adjust logo size */}
-
+            <img src={monkeyLogo} alt="Monkey Logo" style={{ display: 'inline', width: '0.7in'}} /> {/* Adjust logo size */}
             <Typography variant="h4" sx={{ float: 'right', display: 'inline', fontWeight: 'bold' }}>{sortCode}</Typography>
-
           </Box>
 
           {/* Return to part */}
-          <Box sx={{ textAlign: 'left' }}>
-            <Typography variant='body1'>Return to:</Typography>
-            <Typography sx={{ fontSize: '0.1in' }}>{pkg.shipFromAddress.name}</Typography>
-            <Typography sx={{ fontSize: '0.1in' }}>{pkg.shipFromAddress.addressLine1}</Typography>
-            <Typography sx={{ fontSize: '0.1in' }}>{pkg.shipFromAddress.addressLine2}</Typography>
-            <Typography sx={{ fontSize: '0.1in' }}>{pkg.shipFromAddress.city} {pkg.shipFromAddress.state} {pkg.shipFromAddress.zip}</Typography>
+          <Box sx={{ height: '1.05in', textAlign: 'left' }}>
+            <MonoTypoSmall variant='body1'>Return to:</MonoTypoSmall>
+            <MonoTypoSmall >{pkg.shipFromAddress.name}</MonoTypoSmall>
+            <MonoTypoSmall >{pkg.shipFromAddress.addressLine1}</MonoTypoSmall>
+            <MonoTypoSmall >{pkg.shipFromAddress.addressLine2}</MonoTypoSmall>
+            <MonoTypoSmall >{pkg.shipFromAddress.city} {pkg.shipFromAddress.state} {pkg.shipFromAddress.zip}</MonoTypoSmall>
           </Box>
         </Box>
 
@@ -77,33 +84,32 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
       </Box>
 
       {/* Ship to part */}
-      <Box mt={1} sx={{ textAlign: 'left', fontSize: '1.2rem', border: '1px solid black'}}>
+      <Box mt={1} sx={{ height: '1.15in', borderTop : 'solid', borderBottom : 'solid' }}>
         <Typography variant="body1" sx={{ fontWeight: 'bold' }}>SHIP TO:</Typography>
-        <Typography sx={{ fontSize: '0.15in' }}>{pkg.shipToAddress.name}</Typography>
-        <Typography sx={{ fontSize: '0.15in' }}>{pkg.shipToAddress.addressLine1}</Typography>
-        <Typography sx={{ fontSize: '0.15in' }}>{pkg.shipToAddress.addressLine2}</Typography>
-        <Typography sx={{ fontSize: '0.15in' }}>{pkg.shipToAddress.city} {pkg.shipToAddress.state} {pkg.shipToAddress.zip}</Typography>
+        <MonoTypoNormal >{pkg.shipToAddress.name}</MonoTypoNormal>
+        <MonoTypoNormal >{pkg.shipToAddress.addressLine1}</MonoTypoNormal>
+        <MonoTypoNormal >{pkg.shipToAddress.addressLine2}</MonoTypoNormal>
+        <MonoTypoNormal >{pkg.shipToAddress.city} {pkg.shipToAddress.state} {pkg.shipToAddress.zip}</MonoTypoNormal>
       </Box>
 
       {/* lbs weight number */}
-      <Box sx={{ mb: '-0.5em', textAlign: 'right' }}>
+      <Box sx={{ height: '0.2in', textAlign: 'right' }}>
         <Typography sx={{ fontSize: '0.8rem' }}>{pkg.weight} lbs.</Typography>
       </Box>
 
       {/* barcode tracking */}
-      <Box mt={1} sx={{ width: '100%', textAlign: 'center' }}>
+      <Box sx={{ height: '1.5in', width: '100%', textAlign: 'center' }}>
         <BarcodeComponent value={pkg.trackingNumber} />
       </Box>
 
       {/* under barcode spacing */}
-      <Box sx={{ height: '0.72in' }}>
+      <Box sx={{ height: '0.7in' }}>
         {" "}
       </Box>
 
       {/* bottom line */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: "end", }}>
-        <Box > Reference: {pkg.reference}</Box>
-
+      <Box sx={{ height: '0.2in', display: 'flex', justifyContent: 'space-between', alignItems: "end", }}>
+        <Box> Reference: {pkg.reference}</Box>
         <img src={monkeyFont} alt="Monkey Font Logo" style={{ width: '5em' }} />
       </Box>
     </Box>
