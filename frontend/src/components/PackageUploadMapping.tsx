@@ -2,18 +2,13 @@ import React, { useState } from 'react';
 import Papa, { ParseResult } from 'papaparse';
 import { Box, Typography, Button, Modal, Alert } from '@mui/material';
 import PackageUploadButton, { RunStatus } from './PackageUploadButton';
-import { MessageContent, HeaderMapping, KeyOfBaseData, MsgLevel } from '../types.d';
+import { MessageContent, MsgLevel } from '../types.d';
 import { Upload } from '@mui/icons-material';
 import CloseButton from './CloseButton';
 import CsvHeaderList from './CsvHeaderList';
+import { KeyOfBaseData, HeaderMapping, FIELDS } from '@ddlabel/shared';
 
-const fields = [
-  'length', 'width', 'height', 'weight', 'reference',
-  'shipFromName', 'shipFromAddressStreet', 'shipFromAddressZip',
-  'shipToName', 'shipToAddressStreet', 'shipToAddressZip'
-] as KeyOfBaseData[];
-
-const defaultMapping = fields.reduce((acc: HeaderMapping, field: KeyOfBaseData) => {
+const defaultMapping = FIELDS.reduce((acc: HeaderMapping , field: KeyOfBaseData) => {
   acc[field] = null;
   return acc;
 }, {} as HeaderMapping);
@@ -30,7 +25,7 @@ const PackageUploadMapping: React.FC = () => {
 
   const getAutoMapping = (headers: string[]): HeaderMapping => {
     const autoMapping: HeaderMapping = defaultMapping;
-    fields.forEach(field => {
+    FIELDS.forEach(field => {
       if (headers.includes(field)) { autoMapping[field] = field }
     });
     return autoMapping;
@@ -74,7 +69,7 @@ const PackageUploadMapping: React.FC = () => {
   };
 
   const validateForm = () => {
-    const missingFields = fields.filter(field => !headerMapping[field]);
+    const missingFields = FIELDS.filter(field => !headerMapping[field]);
     if (missingFields.length > 0) {
       setMessage({
         level: MsgLevel.error,
@@ -114,7 +109,6 @@ const PackageUploadMapping: React.FC = () => {
               {message && <Alert severity={message.level}>{message.text}</Alert>}
               {runStatus === RunStatus.ready &&
                 <CsvHeaderList
-                  fields={fields}
                   csvHeaders={csvHeaders}
                   headerMapping={headerMapping}
                   handleMappingChange={handleMappingChange}
