@@ -12,20 +12,8 @@ import { reportIoSocket } from '../utils/reportIo';
 import { isValidJSON } from '../utils/errors';
 import { AuthRequest } from '../types';
 import logger from '../config/logger';
+import { BaseData, FIELDS, HeaderMapping, KeyOfBaseData } from '@ddlabel/shared';
 
-type BaseData = {
-	length: number,
-	width: number,
-	height: number,
-	weight: number,
-	reference: string,
-	shipFromName: string,
-	shipFromAddressStreet: string,
-	shipFromAddressZip: string,
-	shipToName: string,
-	shipToAddressStreet: string,
-	shipToAddressZip: string,
-}
 
 type ExtryData = {
 	shipFromAddressCity: string,
@@ -34,23 +22,16 @@ type ExtryData = {
 	shipToAddressState: string,
 }
 
-type PkgData = {
-	shipFromAddress: AddressData,
-	shipToAddress: AddressData,
-	packageSelf: PackageSelf,
-}
-
 type BatchDataType = {
-	pkgBatch: PackageSelf[],
+	pkgBatch: PackageRoot[],
 	fromBatch: AddressData[],
 	toBatch: AddressData[],
 }
 
-type PackageSelf = {
+type PackageRoot = {
 	userId: number,
 	length: number,
 	width: number,
-
 	height: number,
 	weight: number,
 	trackingNumber: string,
@@ -65,34 +46,25 @@ type AddressData = {
 	zip: string,
 }
 
-type CsvKeys = string[];
-type CsvData = { [K in KeyOfCsvHeaders]: string | number };
-type Mapping = { [K in KeyOfBaseData]: KeyOfCsvHeaders }; // KeyOfCsvHeaders is csv arbitrary header names
 
-type KeyOfBaseData = keyof BaseData;
+type CsvData = { [k: string]: string | number };
+
 type KeyOfExtraData = keyof ExtryData;
-type KeyOfPkgData = keyof PkgData;
-type KeyOfCsvHeaders = keyof CsvKeys;
 
 const BATCH_SIZE = 500;
-const FIELDS: KeyOfBaseData[] = [
-	'length', 'width', 'height', 'weight', 'reference',
-	'shipFromName', 'shipFromAddressStreet', 'shipFromAddressZip',
-	'shipToName', 'shipToAddressStreet', 'shipToAddressZip'
-];
 
 const ExtraFields: KeyOfExtraData[] = ['shipFromAddressCity', 'shipFromAddressState', 'shipToAddressCity', 'shipToAddressState'];
 
-const defaultMapping = FIELDS.reduce((acc: Mapping, field: KeyOfBaseData) => {
+const defaultMapping = FIELDS.reduce((acc: HeaderMapping, field: KeyOfBaseData) => {
 	Object.assign(acc, { [field]: field });
 	return acc;
-}, {} as Mapping);
+}, {} as HeaderMapping);
 
 
-const getMappingData = (data: CsvData, mapping: Mapping) => {
+const getMappingData = (data: CsvData, mapping: HeaderMapping) => {
 	return FIELDS.reduce((acc: BaseData, field: KeyOfBaseData) => {
 		const csvHeader = mapping[field];
-		return Object.assign(acc, { [field]: data[csvHeader] });
+		return Object.assign(acc, { [field]: !!csvHeader ? data[csvHeader] : null });
 	}, {} as BaseData);
 }
 
@@ -134,7 +106,7 @@ const onEndData = async (req: Request, res: Response, pkgAll: BatchDataType) => 
 };
 
 const getPreparedData = (packageCsvMap: string, data: CsvData) => {
-	const mapping: Mapping = isValidJSON(packageCsvMap) ? JSON.parse(packageCsvMap) : defaultMapping;
+	const mapping: HeaderMapping = isValidJSON(packageCsvMap) ? JSON.parse(packageCsvMap) : defaultMapping;
 	const mappedData = getMappingData(data, mapping);
 	const fromZipInfo = getZipInfo(mappedData['shipFromAddressZip'] );
 	const toZipInfo = getZipInfo(mappedData['shipToAddressZip'] );
@@ -225,7 +197,7 @@ const processBatch = async (batchData: BatchDataType) => {
 	try {
 		const fromAddresses = await Address.bulkCreate(fromBatch);
 		const toAddresses = await Address.bulkCreate(toBatch);
-		const packages = pkgBatch.map((pkg: PackageSelf, index: number) => ({
+		const packages = pkgBatch.map((pkg: PackageRoot, index: number) => ({
 			...pkg,
 			shipFromAddressId: fromAddresses[index].id,
 			shipToAddressId: toAddresses[index].id

@@ -57,25 +57,6 @@ export interface PostalZoneType {
   PDX?: string;
 }
 
-export type BaseData = {
-	length: number,
-	width: number,
-	height: number,
-	weight: number,
-	reference: string,
-	shipFromName: string,
-	shipFromAddressStreet: string,
-	shipFromAddressZip: string,
-	shipToName: string,
-	shipToAddressStreet: string,
-	shipToAddressZip: string,
-}
-
-export type CsvHeaders = string[];
-export type KeyOfCsvHeaders = keyof CsvHeaders;
-export type KeyOfBaseData = keyof BaseData;
-export type HeaderMapping = { [k in KeyOfBaseData]: KeyOfCsvHeaders | KeyOfBaseData | null }
-
 export enum MsgLevel {
     error ='error',
     success ='success',
