@@ -12,17 +12,17 @@ export const addPackage = async (req: AuthRequest, res: Response) => {
   if (!req.user) {
     return res.status(404).json({ message: 'User not found' });
   }
-  const { shipFromAddress, shipToAddress, length, width, height, weight, reference } = req.body;
+  const { fromAddress, toAddress, length, width, height, weight, reference } = req.body;
   const trackingNumber = generateTrackingNumber();
 
   try {
-    const shipFromAddressId = (await Address.createWithInfo(shipFromAddress)).id;
-    const shipToAddressId = (await Address.createWithInfo(shipToAddress)).id;
+    const fromAddressId = (await Address.createWithInfo(fromAddress)).id;
+    const toAddressId = (await Address.createWithInfo(toAddress)).id;
 
     const pkg = await Package.create({
       userId: req.user.id,
-      shipFromAddressId,
-      shipToAddressId,
+      fromAddressId,
+      toAddressId,
       length,
       width,
       height,
@@ -57,8 +57,8 @@ export const getPackages = async (req: AuthRequest, res: Response) => {
 
     const packages = await Package.findAll({
       include: [
-        { model: Address, as: 'shipFromAddress' },
-        { model: Address, as: 'shipToAddress' },
+        { model: Address, as: 'fromAddress' },
+        { model: Address, as: 'toAddress' },
         { model: User, as: 'user' },
       ],
       where: whereCondition,
@@ -72,7 +72,7 @@ export const getPackages = async (req: AuthRequest, res: Response) => {
 };
 
 export const updatePackage = async (req: Request, res: Response) => {
-  const { shipFromAddress, shipToAddress, length, width, height, weight } = req.body;
+  const { fromAddress, toAddress, length, width, height, weight } = req.body;
   try {
     const pkg = await Package.findByPk(req.params.id);
 
@@ -80,8 +80,8 @@ export const updatePackage = async (req: Request, res: Response) => {
       throw new Error('Package not found');
     }
 
-    await Address.updateWithInfo(shipFromAddress, pkg.shipFromAddressId );
-    await Address.updateWithInfo(shipToAddress, pkg.shipToAddressId);
+    await Address.updateWithInfo(fromAddress, pkg.fromAddressId );
+    await Address.updateWithInfo(toAddress, pkg.toAddressId);
 
     await pkg.update({ length, width, height, weight });
 
@@ -99,8 +99,8 @@ export const deletePackage = async (req: Request, res: Response) => {
       throw new Error('Package not found');
     }
 
-    await Address.destroy({ where: { id: pkg.shipFromAddressId } });
-    await Address.destroy({ where: { id: pkg.shipToAddressId } });
+    await Address.destroy({ where: { id: pkg.fromAddressId } });
+    await Address.destroy({ where: { id: pkg.toAddressId } });
     await Package.destroy({ where: { id: req.params.id } });
 
     res.json({ message: 'Package deleted' });
@@ -116,8 +116,8 @@ export const getPackageDetails = async (req: Request, res: Response) => {
     const pkg = await Package.findOne({
       where: { id },
       include: [
-        { model: Address, as: 'shipFromAddress' },
-        { model: Address, as: 'shipToAddress' },
+        { model: Address, as: 'fromAddress' },
+        { model: Address, as: 'toAddress' },
         { model: User, as: 'user' },
       ],
     });

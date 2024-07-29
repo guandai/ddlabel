@@ -21,7 +21,7 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ setMessage, selectedPack
             return null;
         }
         const postZone = await loadApi<PostalZoneType>(
-            setMessage, 'postal_zones/get_post_zone', { zip_code: selectedPackage.shipFromAddress.zip });
+            setMessage, 'postal_zones/get_post_zone', { zip_code: selectedPackage.fromAddress.zip });
         if (!postZone) {
             return null;
         }
@@ -31,7 +31,7 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ setMessage, selectedPack
     }, [selectedPackage]);
 
     const getZone = useCallback(async (selectedPackage: PackageType, proposal: ZonesType) => {
-        const zone = await loadApi<string | '-'>(setMessage, 'postal_zones/get_zone', { zip_code: selectedPackage.shipToAddress.zip, proposal });
+        const zone = await loadApi<string | '-'>(setMessage, 'postal_zones/get_zone', { zip_code: selectedPackage.toAddress.zip, proposal });
         return zone?.replace('Zone ', '');
     }, []);
 

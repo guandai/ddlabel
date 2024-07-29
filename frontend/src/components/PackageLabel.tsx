@@ -38,7 +38,7 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
     const fetchData = async () => {
       try {
         const response = await axios.get<PostalZoneType>(path, {
-          params: { zip_code: pkg.shipToAddress.zip },
+          params: { zip_code: pkg.toAddress.zip },
         });
         const data = response.data;
         setToProposal(data.proposal as ZonesType);
@@ -68,10 +68,10 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
           {/* Return to part */}
           <Box sx={{ height: '1.05in', textAlign: 'left' }}>
             <MonoTypoSmall variant='body1'>Return to:</MonoTypoSmall>
-            <MonoTypoSmall >{pkg.shipFromAddress.name}</MonoTypoSmall>
-            <MonoTypoSmall >{pkg.shipFromAddress.addressLine1}</MonoTypoSmall>
-            <MonoTypoSmall >{pkg.shipFromAddress.addressLine2}</MonoTypoSmall>
-            <MonoTypoSmall >{pkg.shipFromAddress.city} {pkg.shipFromAddress.state} {pkg.shipFromAddress.zip}</MonoTypoSmall>
+            <MonoTypoSmall >{pkg.fromAddress.name}</MonoTypoSmall>
+            <MonoTypoSmall >{pkg.fromAddress.address1}</MonoTypoSmall>
+            <MonoTypoSmall >{pkg.fromAddress.address2}</MonoTypoSmall>
+            <MonoTypoSmall >{pkg.fromAddress.city} {pkg.fromAddress.state} {pkg.fromAddress.zip}</MonoTypoSmall>
           </Box>
         </Box>
 
@@ -79,17 +79,17 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
         <Box sx={{ textAlign: 'right', width: '30%' }}>
           <QRCode value={`${process.env.REACT_APP_FE_URL}/packages/${pkg.id}`} size={100} /> {/* Increase QR code size */}
           <Typography sx={{ textAlign: 'center', fontSize: '3rem', fontWeight: 'bold', lineHeight: 1 }}>{toProposal as string}</Typography>
-          <Typography sx={{ textAlign: 'center', fontSize: '2rem', color: 'white', backgroundColor: 'black', lineHeight: 1 }}>{pkg.shipToAddress.zip}</Typography>
+          <Typography sx={{ textAlign: 'center', fontSize: '2rem', color: 'white', backgroundColor: 'black', lineHeight: 1 }}>{pkg.toAddress.zip}</Typography>
         </Box>
       </Box>
 
       {/* Ship to part */}
       <Box mt={1} sx={{ height: '1.15in', borderTop : 'solid' }}>
         <Typography variant="body1" sx={{ fontWeight: 'bold' }}>SHIP TO:</Typography>
-        <MonoTypoNormal >{pkg.shipToAddress.name}</MonoTypoNormal>
-        <MonoTypoNormal >{pkg.shipToAddress.addressLine1}</MonoTypoNormal>
-        <MonoTypoNormal >{pkg.shipToAddress.addressLine2}</MonoTypoNormal>
-        <MonoTypoNormal >{pkg.shipToAddress.city} {pkg.shipToAddress.state} {pkg.shipToAddress.zip}</MonoTypoNormal>
+        <MonoTypoNormal >{pkg.toAddress.name}</MonoTypoNormal>
+        <MonoTypoNormal >{pkg.toAddress.address1}</MonoTypoNormal>
+        <MonoTypoNormal >{pkg.toAddress.address2}</MonoTypoNormal>
+        <MonoTypoNormal >{pkg.toAddress.city} {pkg.toAddress.state} {pkg.toAddress.zip}</MonoTypoNormal>
       </Box>
 
       {/* lbs weight number */}

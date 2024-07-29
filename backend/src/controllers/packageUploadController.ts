@@ -14,14 +14,6 @@ import { AuthRequest } from '../types';
 import logger from '../config/logger';
 import { BaseData, FIELDS, HeaderMapping, KeyOfBaseData } from '@ddlabel/shared';
 
-
-type ExtryData = {
-	shipFromAddressCity: string,
-	shipFromAddressState: string,
-	shipToAddressCity: string,
-	shipToAddressState: string,
-}
-
 type BatchDataType = {
 	pkgBatch: PackageRoot[],
 	fromBatch: AddressData[],
@@ -34,26 +26,22 @@ type PackageRoot = {
 	width: number,
 	height: number,
 	weight: number,
-	trackingNumber: string,
+	tracking: string,
 	reference: string,
 }
 
 type AddressData = {
 	name: string,
-	addressLine1: string,
+	address1: string,
+	address2: string,
 	city: string,
 	state: string,
 	zip: string,
 }
 
-
 type CsvData = { [k: string]: string | number };
 
-type KeyOfExtraData = keyof ExtryData;
-
 const BATCH_SIZE = 500;
-
-const ExtraFields: KeyOfExtraData[] = ['shipFromAddressCity', 'shipFromAddressState', 'shipToAddressCity', 'shipToAddressState'];
 
 const defaultMapping = FIELDS.reduce((acc: HeaderMapping, field: KeyOfBaseData) => {
 	Object.assign(acc, { [field]: field });
@@ -82,11 +70,11 @@ const onEndData = async (req: Request, res: Response, pkgAll: BatchDataType) => 
 	for (let i = 0; i < turns; i++) {
 		const start = i * BATCH_SIZE;
 		const pkgDataSlice = pkgBatch.slice(start, start + BATCH_SIZE);
-		const shipFromSlice = fromBatch.slice(start, start + BATCH_SIZE);
-		const shipToSlice = toBatch.slice(start, start + BATCH_SIZE);
+		const fromSlice = fromBatch.slice(start, start + BATCH_SIZE);
+		const toSlice = toBatch.slice(start, start + BATCH_SIZE);
 
-		batchData.fromBatch = shipFromSlice;
-		batchData.toBatch = shipToSlice;
+		batchData.fromBatch = fromSlice;
+		batchData.toBatch = toSlice;
 		batchData.pkgBatch = pkgDataSlice;
 
 		try {
@@ -108,14 +96,14 @@ const onEndData = async (req: Request, res: Response, pkgAll: BatchDataType) => 
 const getPreparedData = (packageCsvMap: string, data: CsvData) => {
 	const mapping: HeaderMapping = isValidJSON(packageCsvMap) ? JSON.parse(packageCsvMap) : defaultMapping;
 	const mappedData = getMappingData(data, mapping);
-	const fromZipInfo = getZipInfo(mappedData['shipFromAddressZip'] );
-	const toZipInfo = getZipInfo(mappedData['shipToAddressZip'] );
+	const fromZipInfo = getZipInfo(mappedData['fromAddressZip'] );
+	const toZipInfo = getZipInfo(mappedData['toAddressZip'] );
 	if (!fromZipInfo) { 
-		logger.error(`has no From ZipInfo for ${mappedData['shipFromAddressZip']}`);
+		logger.error(`has no From ZipInfo for ${mappedData['fromAddressZip']}`);
 		return;
 	}
 	if (!toZipInfo) { 
-		logger.error(`has no To ZipInfo for ${mappedData['shipToAddressZip']}`);
+		logger.error(`has no To ZipInfo for ${mappedData['toAddressZip']}`);
 		return;
 	}
 	return {
@@ -150,20 +138,22 @@ const onData = (OnDataParams: OnDataParams) => {
 		width: mappedData['width'],
 		height: mappedData['height'],
 		weight: mappedData['weight'],
-		trackingNumber: generateTrackingNumber(),
+		tracking: generateTrackingNumber(),
 		reference: mappedData['reference'],
 	});
 	pkgAll.fromBatch.push({
 		...fromZipInfo,
-		name: mappedData['shipFromName'],
-		addressLine1: mappedData['shipFromAddressStreet'],
-		zip: mappedData['shipFromAddressZip'],
+		name: mappedData['fromName'],
+		address1: mappedData['fromAddress1'],
+		address2: mappedData['fromAddress2'],
+		zip: mappedData['fromAddressZip'],
 	});
 	pkgAll.toBatch.push({
 		...toZipInfo,
-		name: mappedData['shipToName'],
-		addressLine1: mappedData['shipToAddressStreet'],
-		zip: mappedData['shipToAddressZip'],
+		name: mappedData['toName'],
+		address1: mappedData['toAddress1'],
+		address2: mappedData['toAddress2'],
+		zip: mappedData['toAddressZip'],
 	})
 	reportIoSocket( 'generate', req, pkgAll.pkgBatch.length, packageCsvLength);
 	return;
@@ -199,8 +189,8 @@ const processBatch = async (batchData: BatchDataType) => {
 		const toAddresses = await Address.bulkCreate(toBatch);
 		const packages = pkgBatch.map((pkg: PackageRoot, index: number) => ({
 			...pkg,
-			shipFromAddressId: fromAddresses[index].id,
-			shipToAddressId: toAddresses[index].id
+			fromAddressId: fromAddresses[index].id,
+			toAddressId: toAddresses[index].id
 		}));
 
 		await Package.bulkCreate(packages);

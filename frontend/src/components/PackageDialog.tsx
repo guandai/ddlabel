@@ -33,25 +33,25 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                         <strong>Reference Number:</strong> {selectedPackage.reference}<br />
                         <Line />
                         From: <br />
-                        <strong>Name:</strong> {selectedPackage.shipFromAddress.name}<br />
-                        <strong>Address1:</strong> {selectedPackage.shipFromAddress.addressLine1}<br />
-                        <strong>Address2:</strong> {selectedPackage.shipFromAddress.addressLine2}<br />
-                        <strong>City:</strong> {selectedPackage.shipFromAddress.city}<br />
-                        <strong>Zip:</strong> {selectedPackage.shipFromAddress.zip}<br />
-                        <strong>State:</strong> {selectedPackage.shipFromAddress.state}<br />
-                        <strong>Phone:</strong> {selectedPackage.shipFromAddress.phone}<br />
-                        <strong>Email:</strong> {selectedPackage.shipFromAddress.email}<br />
+                        <strong>Name:</strong> {selectedPackage.fromAddress.name}<br />
+                        <strong>Address1:</strong> {selectedPackage.fromAddress.address1}<br />
+                        <strong>Address2:</strong> {selectedPackage.fromAddress.address2}<br />
+                        <strong>City:</strong> {selectedPackage.fromAddress.city}<br />
+                        <strong>Zip:</strong> {selectedPackage.fromAddress.zip}<br />
+                        <strong>State:</strong> {selectedPackage.fromAddress.state}<br />
+                        <strong>Phone:</strong> {selectedPackage.fromAddress.phone}<br />
+                        <strong>Email:</strong> {selectedPackage.fromAddress.email}<br />
 
                         <Line />
                         To: <br />
-                        <strong>Name:</strong> {selectedPackage.shipToAddress.name}<br />
-                        <strong>Address1:</strong> {selectedPackage.shipToAddress.addressLine1}<br />
-                        <strong>Address2:</strong> {selectedPackage.shipToAddress.addressLine2}<br />
-                        <strong>City:</strong> {selectedPackage.shipToAddress.city}<br />
-                        <strong>Zip:</strong> {selectedPackage.shipToAddress.zip}<br />
-                        <strong>State:</strong> {selectedPackage.shipToAddress.state}<br />
-                        <strong>Phone:</strong> {selectedPackage.shipToAddress.phone}<br />
-                        <strong>Email:</strong> {selectedPackage.shipToAddress.email}<br />
+                        <strong>Name:</strong> {selectedPackage.toAddress.name}<br />
+                        <strong>Address1:</strong> {selectedPackage.toAddress.address1}<br />
+                        <strong>Address2:</strong> {selectedPackage.toAddress.address2}<br />
+                        <strong>City:</strong> {selectedPackage.toAddress.city}<br />
+                        <strong>Zip:</strong> {selectedPackage.toAddress.zip}<br />
+                        <strong>State:</strong> {selectedPackage.toAddress.state}<br />
+                        <strong>Phone:</strong> {selectedPackage.toAddress.phone}<br />
+                        <strong>Email:</strong> {selectedPackage.toAddress.email}<br />
 
                         <Line />
                         <strong>Weight:</strong> {selectedPackage.weight}<br />

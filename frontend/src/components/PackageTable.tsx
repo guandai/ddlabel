@@ -116,8 +116,8 @@ const PackageTable: React.FC = () => {
             <TableBody>
               {packages.map(pkg => (
                 <TableRow key={pkg.id}>
-                  <TableCell>{pkg.shipToAddress.addressLine1}</TableCell>
-                  <TableCell>{pkg.shipToAddress.state}</TableCell>
+                  <TableCell>{pkg.toAddress.address1}</TableCell>
+                  <TableCell>{pkg.toAddress.state}</TableCell>
                   <TableCell>{pkg.weight}</TableCell>
                   <TableCell>{pkg.trackingNumber}</TableCell>
                   <TableCell style={{ width: '200px', whiteSpace: 'nowrap' }}>
