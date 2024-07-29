@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box } from '@mui/material';
 import axios from 'axios';
+import { FullRateRsp } from '@ddlabel/shared';
 import { PackageType } from './PackageForm';
 import { loadApi, tryLoad } from '../util/errors';
 import { MessageContent, PostalZoneType, ZonesType } from '../types';
@@ -46,7 +47,7 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ setMessage, selectedPack
                 setRate('Can not deliver');
                 return;
             }
-            const response = await axios.get<any, { data: {totalCost: number} }> (`${process.env.REACT_APP_BE_URL}/shipping_rates/full-rate`, {
+            const response = await axios.get<FullRateRsp> (`${process.env.REACT_APP_BE_URL}/shipping_rates/full-rate`, {
                 params: {
                     length: selectedPackage.length,
                     width: selectedPackage.width,
@@ -57,7 +58,13 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ setMessage, selectedPack
                     volumeUnit: 'inch',
                 },
             });
-            setRate('$' + response.data.totalCost.toFixed(2));
+            const cost = response.data.totalCost;
+            if (cost === -1){
+                setMessage({ text: 'No rate available', level: 'info' }); 
+                setRate(`N/A`);
+                return;
+            }
+            setRate(`$${cost.toFixed(2)}`);
         });
     }, [getPostalZone, getZone, selectedPackage]);
 
