@@ -11,8 +11,7 @@ const MessageAlert: React.FC<Prop> = ({message}: Prop) => {
   
   return (
     <>
-    {message.level === 'error' && <Alert severity="error">{message.text}</Alert>}
-    {message.level === 'success' && <Alert severity="success">{message.text}</Alert>}
+      <Alert severity={message.level}>{message.text}</Alert>
     </>
   )
 }
