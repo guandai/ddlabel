@@ -2,21 +2,9 @@
 import { Request, Response } from 'express';
 import { ShippingRate } from '../models/ShippingRate';
 import { Op } from 'sequelize';
-
-type WeightUnit = 'lbs' | 'oz';
-type VolumeUnit = 'inch' | 'mm';
-
-type FullRateProp = {
-  weight: number;
-  weightUnit: WeightUnit;
-  length: number;
-  width: number;
-  height: number;
-  volumeUnit: VolumeUnit;
-  zone: number;
-};
+import { FullRateParam, VolumeUnit, WeightUnit } from '@ddlabel/shared';
 // Function to calculate shipping rate
-export const fullShippingRate = async (prop: FullRateProp): Promise<number | 'NO_RATE'> => {
+export const fullShippingRate = async (prop: FullRateParam): Promise<number | 'NO_RATE'> => {
   let { weight, weightUnit, length, width, height, volumeUnit, zone } = prop;
   if (width > 108 || height > 108 || length > 108) {
     return 1000;
@@ -32,7 +20,6 @@ export const fullShippingRate = async (prop: FullRateProp): Promise<number | 'NO
     : (length * width * height) / 9000;  // mm
 
   weight = Math.ceil(Math.max(volumetricWeight, weight));
-
 
   const shippingRates = await getShippingRatesForWeight(weight, weightUnit);
 
@@ -68,17 +55,14 @@ export const getShippingRatesForWeight = async (weight: number, unit: string): P
     } as ShippingRate;
   }
 
-  const data = await ShippingRate.findAll({
+  const data = await ShippingRate.findOne({
     where: {
       unit,
-      weightRange: { [Op.eq]: `${weight-1}<n=${weight}` }
+      weightRange: { [Op.eq]: `${weight-1}<n<=${weight}` }
     }
   });
-  console.log(`ShippingRate find data`, data);
-  return data.find(row => {
-    const [min, max] = row.weightRange.split('<n=').map(parseFloat);
-    return weight > min && weight <= max;
-  }) || null;
+  console.log(`data`,data, weight, unit);
+  return data;
 }
 
 export const getShippingRates = async (req: Request, res: Response) => {
@@ -109,8 +93,8 @@ export const getFullRate = async (req: Request, res: Response) => {
     };
 
     const totalCost = await fullShippingRate(param);
-    if (!totalCost) {
-      return res.status(204).json({ totalCost: -1, message: `No shipping rate found for the specified weight and zone ${weight} ${weightUnit}` });
+    if (totalCost === 'NO_RATE') {
+      return res.json({ totalCost: -1, message: `No shipping rate found for the specified weight and zone ${weight} ${weightUnit}` });
     };
     res.json({ totalCost });
   } catch (error: any) {
