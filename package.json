@@ -4,12 +4,22 @@
   "private": true,
   "workspaces": [
     "frontend",
-    "backend"
+    "backend",
+    "shared"
   ],
   "scripts": {
-    "prod": "concurrently \"yarn workspace frontend prod\" \"yarn workspace backend prod\"",
-    "start": "concurrently \"yarn workspace frontend start\" \"yarn workspace backend start\"",
-    "build": "yarn workspace frontend build && yarn workspace backend build"
+    "prod-frontend": "yarn workspace @ddlabel/frontend prod",
+    "prod-backend": "yarn workspace @ddlabel/backend prod",
+    "prod-shared": "yarn workspace @ddlabel/shared prod",
+    "prod": "concurrently \"yarn prod-shared\" \"yarn prod-frontend\" \"yarn prod-backend\"",
+    "start-frontend": "yarn workspace @ddlabel/frontend start",
+    "start-backend": "yarn workspace @ddlabel/backend start",
+    "start-shared": "yarn workspace @ddlabel/shared start",
+    "start": "concurrently \"yarn start-shared\" \"yarn start-frontend\" \"yarn start-backend\"",
+    "build-backend": "yarn workspace @ddlabel/backend build",
+    "build-frontend": "yarn workspace @ddlabel/frontend build",
+    "build-shared": "yarn workspace @ddlabel/shared build",
+    "build": "yarn build-backend && yarn build-frontend && yarn build-shared"
   },
   "devDependencies": {
     "@types/papaparse": "^5.3.14",
