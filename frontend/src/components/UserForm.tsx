@@ -3,9 +3,10 @@ import axios from 'axios';
 import { TextField, Button, Box, Typography, Container, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material';
 import { tryLoad } from '../util/errors';
-import AddressForm, { AddressEnum, AddressType } from './AddressForm';
+import AddressForm, { AddressType } from './AddressForm';
 import { MessageContent } from '../types.d';
 import MessageAlert from './MessageAlert';
+import { AddressEnum } from '@ddlabel/shared';
 
 type ProfileType = {
   id: string;

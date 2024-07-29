@@ -6,8 +6,8 @@ import { Address } from './Address';
 interface PackageAttributes {
   id: number;
   userId: number;
-  shipFromAddressId: number;
-  shipToAddressId: number;
+  fromAddressId: number;
+  toAddressId: number;
   length: number;
   width: number;
   height: number;
@@ -21,16 +21,16 @@ interface PackageCreationAttributes extends Optional<PackageAttributes, 'id'> {}
 class Package extends Model<PackageAttributes, PackageCreationAttributes> implements PackageAttributes {
   public id!: number;
   public userId!: number;
-  public shipFromAddressId!: number;
-  public shipToAddressId!: number;
+  public fromAddressId!: number;
+  public toAddressId!: number;
   public length!: number;
   public width!: number;
   public height!: number;
   public weight!: number;
   public trackingNumber!: string;
   public reference!: string;
-  public shipFromAddress!: Address;
-  public shipToAddress!: Address;
+  public fromAddress!: Address;
+  public toAddress!: Address;
   public User!: User;
 }
 
@@ -49,7 +49,7 @@ Package.init(
         key: 'id',
       },
     },
-    shipFromAddressId: {
+    fromAddressId: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
       references: {
@@ -57,7 +57,7 @@ Package.init(
         key: 'id',
       },
     },
-    shipToAddressId: {
+    toAddressId: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: false,
       references: {
@@ -97,8 +97,8 @@ Package.init(
   }
 );
 
-Package.belongsTo(Address, { as: 'shipFromAddress', foreignKey: 'shipFromAddressId', onDelete: 'CASCADE' });
-Package.belongsTo(Address, { as: 'shipToAddress', foreignKey: 'shipToAddressId', onDelete: 'CASCADE' });
+Package.belongsTo(Address, { as: 'fromAddress', foreignKey: 'fromAddressId', onDelete: 'CASCADE' });
+Package.belongsTo(Address, { as: 'toAddress', foreignKey: 'toAddressId', onDelete: 'CASCADE' });
 Package.belongsTo(User, { as: 'user', foreignKey: 'userId' }); // Ensure alias 'owner' is defined here
 
 export { Package, PackageAttributes, PackageCreationAttributes };

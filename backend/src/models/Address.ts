@@ -2,17 +2,13 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 import { getCityState } from '../utils/getZipInfo';
-
-enum AddressEnum {
-  user = 'user',
-  package = 'package',
-};
+import { AddressEnum } from '@ddlabel/shared';
 
 interface AddressAttributes {
   id: number;
   name: string;
-  addressLine1: string;
-  addressLine2?: string;
+  address1: string;
+  address2?: string;
   city: string;
   state: string;
   zip: string;
@@ -26,8 +22,8 @@ interface AddressCreationAttributes extends Optional<AddressAttributes, 'id'> { 
 class Address extends Model<AddressAttributes, AddressCreationAttributes> implements AddressAttributes {
   public id!: number;
   public name!: string;
-  public addressLine1!: string;
-  public addressLine2?: string;
+  public address1!: string;
+  public address2?: string;
   public city!: string;
   public state!: string;
   public zip!: string;
@@ -61,11 +57,11 @@ Address.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    addressLine1: {
+    address1: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    addressLine2: {
+    address2: {
       type: DataTypes.STRING,
       allowNull: true,
     },

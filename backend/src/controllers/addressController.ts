@@ -4,13 +4,13 @@ import { Address } from '../models/Address';
 
 // Create a new address
 export const createAddress = async (req: Request, res: Response) => {
-  const { name, addressLine1, addressLine2, zip, phone, city, state } = req.body;
+  const { name, address1, address2, zip, phone, city, state } = req.body;
 
   try {
     const address = await Address.createWithInfo({
       name,
-      addressLine1,
-      addressLine2,
+      address1,
+      address2,
       city,
       state,
       zip,
@@ -47,7 +47,7 @@ export const getAddressById = async (req: Request, res: Response) => {
 
 // Update an address
 export const updateAddress = async (req: Request, res: Response) => {
-  const { name, addressLine1, addressLine2, city, state, zip, phone } = req.body;
+  const { name, address1, address2, city, state, zip, phone } = req.body;
 
   try {
     const address = await Address.findByPk(req.params.id);
@@ -56,8 +56,8 @@ export const updateAddress = async (req: Request, res: Response) => {
     }
 
     address.name = name;
-    address.addressLine1 = addressLine1;
-    address.addressLine2 = addressLine2;
+    address.address1 = address1;
+    address.address2 = address2;
     address.city = city;
     address.state = state;
     address.zip = zip;
