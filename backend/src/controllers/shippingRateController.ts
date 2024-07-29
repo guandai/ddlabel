@@ -61,7 +61,6 @@ export const getShippingRatesForWeight = async (weight: number, unit: string): P
       weightRange: { [Op.eq]: `${weight-1}<n<=${weight}` }
     }
   });
-  console.log(`data`,data, weight, unit);
   return data;
 }
 
