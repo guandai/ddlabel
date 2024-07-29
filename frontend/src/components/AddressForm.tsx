@@ -3,16 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { TextField, Grid, Typography } from '@mui/material';
 import axios from 'axios';
 import { SetMessage, tryLoad } from '../util/errors';
-
-export enum AddressEnum {
-  user = 'user',
-  package = 'package'
-}
+import { AddressEnum } from '@ddlabel/shared';
 
 export type AddressType = {
   name: string;
-  addressLine1: string;
-  addressLine2?: string;
+  address1: string;
+  address2?: string;
   city: string;
   state: string;
   zip: string;
@@ -89,8 +85,8 @@ const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onCh
       <Typography variant="h6" mb='1em'>{title}</Typography>
       <Grid container spacing={2}>
         {quickField({ name: 'name', autoComplete: 'name' })}
-        {quickField({ name: 'addressLine1', autoComplete: 'address-line1' })}
-        {quickField({ name: 'addressLine2', autoComplete: 'address-line2', required: false })}
+        {quickField({ name: 'address1', autoComplete: 'address-line1' })}
+        {quickField({ name: 'address2', autoComplete: 'address-line2', required: false })}
         {quickField({ name: 'zip', autoComplete: 'postal-code', pattern: '[0-9]{5}' })}
         {quickField({ name: 'state', autoComplete: 'address-level1', readOnly: true, value: state })}
         {quickField({ name: 'city', autoComplete: 'address-level2', readOnly: true, value: city })}

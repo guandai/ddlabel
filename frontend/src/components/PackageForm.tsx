@@ -4,9 +4,10 @@ import axios from 'axios';
 import { TextField, Button, Box, Typography, Container, Grid } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { tryLoad } from '../util/errors';
-import AddressForm, { AddressEnum, AddressType } from './AddressForm';
+import AddressForm, { AddressType } from './AddressForm';
 import { MessageContent } from '../types.d';
 import MessageAlert from './MessageAlert';
+import { AddressEnum } from '@ddlabel/shared';
 
 type QuickFieldProp = {
   name: keyof PackageType;
@@ -16,8 +17,8 @@ type QuickFieldProp = {
 
 export type PackageType = {
   id: number;
-  shipFromAddress: AddressType;
-  shipToAddress: AddressType;
+  fromAddress: AddressType;
+  toAddress: AddressType;
   length: number;
   width: number;
   height: number;
@@ -28,7 +29,7 @@ export type PackageType = {
 
 const defautAddress = { addressType: AddressEnum.package } as AddressType;
 const initialPackage = {
-  shipFromAddress: defautAddress, shipToAddress: defautAddress,
+  fromAddress: defautAddress, toAddress: defautAddress,
 } as PackageType;
 
 
@@ -105,7 +106,7 @@ const PackageForm: React.FC = () => {
   };
 
   const handleAddressChange =
-    (addressType: 'shipFromAddress' | 'shipToAddress') => (e: React.ChangeEvent<HTMLInputElement>) => {
+    (addressType: 'fromAddress' | 'toAddress') => (e: React.ChangeEvent<HTMLInputElement>) => {
       console.log(`e.target`, addressType, e.target.name, e.target.value, 'all');
       setPackageData(prevData => ({
         ...prevData,
@@ -139,16 +140,16 @@ const PackageForm: React.FC = () => {
           <Grid item xs={12} mt="1.5em">
             <AddressForm
               setMessage={setMessage}
-              addressData={packageData.shipFromAddress}
-              onChange={handleAddressChange('shipFromAddress')}
+              addressData={packageData.fromAddress}
+              onChange={handleAddressChange('fromAddress')}
               title="Ship From Address"
             />
           </Grid>
           <Grid item xs={12} mt="1.5em">
             <AddressForm
               setMessage={setMessage}
-              addressData={packageData.shipToAddress}
-              onChange={handleAddressChange('shipToAddress')}
+              addressData={packageData.toAddress}
+              onChange={handleAddressChange('toAddress')}
               title="Ship To Address"
             />
           </Grid>
