@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
-import axios from 'axios';
 import { PackageType } from './PackageForm';
-import { loadApi, tryLoad } from '../util/errors';
-import { MessageContent, PostalZoneType, ZonesType } from '../types';
+import { MessageContent } from '../types';
 import MessageAlert from './MessageAlert';
+import PackageGetRate from './PackageGetRate';
 
 type PackageDialogProps = {
     open: boolean;
@@ -14,77 +13,21 @@ type PackageDialogProps = {
 }
 
 const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, selectedPackage }) => {
-    const [rate, setRate] = useState<number | string | null>(null);
-    const [sortCode, setSortCode] = useState<string | null>(null);
     const [message, setMessage] = useState<MessageContent>(null);
 
     const Line = () => <>
-        <i style={{ display: 'block', fontSize: '0px', paddingLeft: '100%', height: '12px', borderBottom: '1px solid black' }}>{' '}</i>
+        <i style={{ display: 'block', fontSize: '0px', height: '12px', borderBottom: '1px solid black' }}>{' '}</i>
     </>
-
-    const getPostalZone = useCallback(async (): Promise<PostalZoneType | null> => {
-        if (!selectedPackage) {
-            return null;
-        }
-        const postZone = await loadApi<PostalZoneType>(
-            setMessage, 'postal_zones/get_post_zone', { zip_code: selectedPackage.shipFromAddress.zip });
-        if (!postZone) {
-            return null;
-        }
-
-        setSortCode(postZone.new_sort_code);
-        return postZone;
-    }, [selectedPackage]);
-
-    const getZone = useCallback(async (selectedPackage: PackageType, proposal: ZonesType) => {
-        const zone = await loadApi<string | '-'>(setMessage, 'postal_zones/get_zone', { zip_code: selectedPackage.shipToAddress.zip, proposal });
-        return zone?.replace('Zone ', '');
-    }, []);
-
-    const handleGetData = useCallback(async () => {
-        if (!selectedPackage) {
-            return;
-        }
-        tryLoad(setMessage, async () => {
-            const postalZone = await getPostalZone();
-            const zone = await getZone(selectedPackage, postalZone?.proposal as ZonesType);
-
-            if (!zone || zone === '-') {
-                setRate('Can not deliver');
-                return;
-            }
-            const response = await axios.get(`${process.env.REACT_APP_BE_URL}/shipping_rates/full-rate`, {
-                params: {
-                    length: selectedPackage.length,
-                    width: selectedPackage.width,
-                    height: selectedPackage.height,
-                    weight: selectedPackage.weight,
-                    zone, // Replace with actual zone if available
-                    unit: 'lbs',
-                },
-            });
-            setRate('$' + response.data.totalCost.toFixed(2));
-        });
-    }, [getPostalZone, getZone, selectedPackage]);
-
-    useEffect(() => {
-        setRate(null);
-        setMessage(null);
-        handleGetData();
-    }
-        , [selectedPackage, handleGetData]);
 
     return (
         <Dialog open={open} onClose={handleClose} aria-labelledby="package-details-title">
             <DialogTitle id="package-details-title">Package Details</DialogTitle>
             {selectedPackage && (
-                <DialogContent>
+                <DialogContent  sx={{width: '400px'}}>
                     <MessageAlert message={message} />
+                    <PackageGetRate setMessage={setMessage} selectedPackage={selectedPackage} />
                     <DialogContentText>
                         <strong>Id:</strong> {selectedPackage.id}<br />
-                        <strong>Shipping Rate: </strong>{rate === null ? '...' : rate}<br />
-                        <strong>Sort Code: </strong>{rate === null ? '...' : sortCode}<br />
-
                         <Line />
                         <strong>Tracking Number:</strong> {selectedPackage.trackingNumber}<br />
                         <strong>Reference Number:</strong> {selectedPackage.reference}<br />
@@ -116,12 +59,12 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                         <strong>Width:</strong> {selectedPackage.width}<br />
                         <strong>Height:</strong> {selectedPackage.height}<br />
                     </DialogContentText>
+
+                    <DialogActions>
+                        <Button onClick={handleClose} color="primary">Close</Button>
+                    </DialogActions>
                 </DialogContent>
             )}
-            <DialogActions>
-                <Button onClick={handleGetData} color="primary">Get Rate</Button>
-                <Button onClick={handleClose} color="primary">Close</Button>
-            </DialogActions>
         </Dialog>
     );
 };
