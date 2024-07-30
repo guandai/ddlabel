@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Select, MenuItem, Typography, Grid, FormControl } from '@mui/material';
-import { KeyOfBaseData, HeaderMapping, FIELDS } from '@ddlabel/shared';
+import { KeyOfBaseData, HeaderMapping, PKG_FIELDS } from '@ddlabel/shared';
 
 type Prop = {
 	csvHeaders: string[];
@@ -10,10 +10,10 @@ type Prop = {
 
 const CsvHeaderList: React.FC<Prop> = (prop) => {
 	const { csvHeaders, headerMapping, handleMappingChange } = prop;
-	const third = Math.ceil(FIELDS.length / 3);
-	const firstThird = FIELDS.slice(0, third);
-	const secondThird = FIELDS.slice(third, third * 2);
-	const lastThird = FIELDS.slice(third * 2);
+	const third = Math.ceil(PKG_FIELDS.length / 3);
+	const firstThird = PKG_FIELDS.slice(0, third);
+	const secondThird = PKG_FIELDS.slice(third, third * 2);
+	const lastThird = PKG_FIELDS.slice(third * 2);
 	const fieldsRows = [firstThird, secondThird, lastThird];
 
 	return (<Grid container spacing={2}>{fieldsRows.map((fieldRow, idx) => (
