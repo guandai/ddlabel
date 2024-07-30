@@ -6,12 +6,7 @@ import { MessageContent, MsgLevel } from '../types.d';
 import { Upload } from '@mui/icons-material';
 import CloseButton from './CloseButton';
 import CsvHeaderList from './CsvHeaderList';
-import { KeyOfBaseData, HeaderMapping, FIELDS } from '@ddlabel/shared';
-
-const defaultMapping = FIELDS.reduce((acc: HeaderMapping , field: KeyOfBaseData) => {
-  acc[field] = null;
-  return acc;
-}, {} as HeaderMapping);
+import { KeyOfBaseData, HeaderMapping, PKG_FIELDS, defaultMapping } from '@ddlabel/shared';
 
 const PackageUploadMapping: React.FC = () => {
   const [message, setMessage] = useState<MessageContent>(null);
@@ -25,7 +20,7 @@ const PackageUploadMapping: React.FC = () => {
 
   const getAutoMapping = (headers: string[]): HeaderMapping => {
     const autoMapping: HeaderMapping = defaultMapping;
-    FIELDS.forEach(field => {
+    PKG_FIELDS.forEach(field => {
       if (headers.includes(field)) { autoMapping[field] = field }
     });
     return autoMapping;
@@ -69,7 +64,7 @@ const PackageUploadMapping: React.FC = () => {
   };
 
   const validateForm = () => {
-    const missingFields = FIELDS.filter(field => !headerMapping[field]);
+    const missingFields = PKG_FIELDS.filter(field => !headerMapping[field]);
     if (missingFields.length > 0) {
       setMessage({
         level: MsgLevel.error,

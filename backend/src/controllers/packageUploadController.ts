@@ -1,18 +1,15 @@
 // backend/src/controllers/packageUpload.ts
 import { Request, Response } from 'express';
-import { Package } from '../models/Package';
-import { Address } from '../models/Address';
 import { generateTrackingNumber } from '../utils/generateTrackingNumber';
 import multer from 'multer';
 import csv from 'csv-parser';
 import fs from 'fs';
 import path from 'path';
-import getZipInfo from '../utils/getZipInfo';
 import { reportIoSocket } from '../utils/reportIo';
-import { isValidJSON } from '../utils/errors';
 import { AuthRequest } from '../types';
 import logger from '../config/logger';
-import { BaseData, FIELDS, HeaderMapping, KeyOfBaseData } from '@ddlabel/shared';
+import { PackageSource } from '@ddlabel/shared';
+import { getPreparedData, processBatch } from './packageBatchFuntions';
 
 type BatchDataType = {
 	pkgBatch: PackageRoot[],
@@ -26,8 +23,9 @@ type PackageRoot = {
 	width: number,
 	height: number,
 	weight: number,
-	tracking: string,
+	trackingNumber: string,
 	reference: string,
+	source: PackageSource
 }
 
 type AddressData = {
@@ -41,20 +39,50 @@ type AddressData = {
 
 type CsvData = { [k: string]: string | number };
 
+type OnDataParams = {
+	req: AuthRequest, 
+	csvData: CsvData,
+	pkgAll: BatchDataType,
+}
+
 const BATCH_SIZE = 500;
 
-const defaultMapping = FIELDS.reduce((acc: HeaderMapping, field: KeyOfBaseData) => {
-	Object.assign(acc, { [field]: field });
-	return acc;
-}, {} as HeaderMapping);
 
+const onData = (OnDataParams: OnDataParams) => {
+	const { req, csvData, pkgAll } = OnDataParams;
+	const {packageCsvLength, packageCsvMap} = req.body;
 
-const getMappingData = (data: CsvData, mapping: HeaderMapping) => {
-	return FIELDS.reduce((acc: BaseData, field: KeyOfBaseData) => {
-		const csvHeader = mapping[field];
-		return Object.assign(acc, { [field]: !!csvHeader ? data[csvHeader] : null });
-	}, {} as BaseData);
-}
+	const prepared = getPreparedData(packageCsvMap, csvData);
+	if (!prepared) return;
+
+	const { mappedData, fromZipInfo, toZipInfo } = prepared;
+	pkgAll.pkgBatch.push({
+		userId: req.user.id,
+		length: mappedData['length'],
+		width: mappedData['width'],
+		height: mappedData['height'],
+		weight: mappedData['weight'],
+		trackingNumber: mappedData['tracking'] || generateTrackingNumber(),
+		reference: mappedData['reference'],
+		source: PackageSource.api,
+	});
+	pkgAll.fromBatch.push({
+		...fromZipInfo,
+		name: mappedData['fromName'],
+		address1: mappedData['fromAddress1'],
+		address2: mappedData['fromAddress2'],
+		zip: mappedData['fromAddressZip'],
+	});
+	pkgAll.toBatch.push({
+		...toZipInfo,
+		name: mappedData['toName'],
+		address1: mappedData['toAddress1'],
+		address2: mappedData['toAddress2'],
+		zip: mappedData['toAddressZip'],
+	})
+	reportIoSocket( 'generate', req, pkgAll.pkgBatch.length, packageCsvLength);
+	return;
+};
 
 const onEndData = async (req: Request, res: Response, pkgAll: BatchDataType) => {
 	const { pkgBatch, fromBatch, toBatch } = pkgAll;
@@ -93,71 +121,6 @@ const onEndData = async (req: Request, res: Response, pkgAll: BatchDataType) => 
 	res.status(200).send({ message: 'PkgBatch imported successfully' });
 };
 
-const getPreparedData = (packageCsvMap: string, data: CsvData) => {
-	const mapping: HeaderMapping = isValidJSON(packageCsvMap) ? JSON.parse(packageCsvMap) : defaultMapping;
-	const mappedData = getMappingData(data, mapping);
-	const fromZipInfo = getZipInfo(mappedData['fromAddressZip'] );
-	const toZipInfo = getZipInfo(mappedData['toAddressZip'] );
-	if (!fromZipInfo) { 
-		logger.error(`has no From ZipInfo for ${mappedData['fromAddressZip']}`);
-		return;
-	}
-	if (!toZipInfo) { 
-		logger.error(`has no To ZipInfo for ${mappedData['toAddressZip']}`);
-		return;
-	}
-	return {
-		mappedData,
-		fromZipInfo,
-		toZipInfo,
-	};
-}
-
-type ReqBody = {
-	packageCsvLength: number,
-	packageCsvMap: string,
-}
-
-type OnDataParams = {
-	req: AuthRequest, 
-	csvData: CsvData,
-	pkgAll: BatchDataType,
-
-}
-const onData = (OnDataParams: OnDataParams) => {
-	const { req, csvData, pkgAll } = OnDataParams;
-	const {packageCsvLength, packageCsvMap} = req.body;
-
-	const prepared = getPreparedData(packageCsvMap, csvData);
-	if (!prepared) return;
-
-	const { mappedData, fromZipInfo, toZipInfo } = prepared;
-	pkgAll.pkgBatch.push({
-		userId: req.user.id,
-		length: mappedData['length'],
-		width: mappedData['width'],
-		height: mappedData['height'],
-		weight: mappedData['weight'],
-		tracking: generateTrackingNumber(),
-		reference: mappedData['reference'],
-	});
-	pkgAll.fromBatch.push({
-		...fromZipInfo,
-		name: mappedData['fromName'],
-		address1: mappedData['fromAddress1'],
-		address2: mappedData['fromAddress2'],
-		zip: mappedData['fromAddressZip'],
-	});
-	pkgAll.toBatch.push({
-		...toZipInfo,
-		name: mappedData['toName'],
-		address1: mappedData['toAddress1'],
-		address2: mappedData['toAddress2'],
-		zip: mappedData['toAddressZip'],
-	})
-	reportIoSocket( 'generate', req, pkgAll.pkgBatch.length, packageCsvLength);
-	return;
-};
 
 export const importPackages = async (req: Request, res: Response) => {
 	const { body, file } = req;
@@ -180,24 +143,6 @@ export const importPackages = async (req: Request, res: Response) => {
 			logger.error('Error parsing CSV:', err);
 			res.status(500).send({ message: 'Error importing pkgBatch' });
 		});
-};
-
-const processBatch = async (batchData: BatchDataType) => {
-	const { pkgBatch, fromBatch, toBatch } = batchData;
-	try {
-		const fromAddresses = await Address.bulkCreate(fromBatch);
-		const toAddresses = await Address.bulkCreate(toBatch);
-		const packages = pkgBatch.map((pkg: PackageRoot, index: number) => ({
-			...pkg,
-			fromAddressId: fromAddresses[index].id,
-			toAddressId: toAddresses[index].id
-		}));
-
-		await Package.bulkCreate(packages);
-	} catch (error: any) {
-		logger.error('Error processing batch', error);
-		throw new Error('Batch processing failed');
-	}
 };
 
 const storage = multer.diskStorage({

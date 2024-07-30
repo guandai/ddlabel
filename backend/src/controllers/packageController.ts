@@ -7,8 +7,9 @@ import { User } from '../models/User';
 import { AuthRequest } from '../types';
 import { Op } from 'sequelize';
 import logger from '../config/logger';
+import { PackageSource } from '@ddlabel/shared';
 
-export const addPackage = async (req: AuthRequest, res: Response) => {
+export const manualAddPackage = async (req: AuthRequest, res: Response) => {
   if (!req.user) {
     return res.status(404).json({ message: 'User not found' });
   }
@@ -29,6 +30,7 @@ export const addPackage = async (req: AuthRequest, res: Response) => {
       weight,
       trackingNumber,
       reference,
+      source: PackageSource.manual,
     });
 
     res.status(201).json(pkg);

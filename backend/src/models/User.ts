@@ -2,15 +2,7 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 import { Address } from './Address';
-
-interface UserAttributes {
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-  role: string;
-  warehouseAddressId: number;
-}
+import { UserAttributes } from '@ddlabel/shared/dist/models';
 
 interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
 

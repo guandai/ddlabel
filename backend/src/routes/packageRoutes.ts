@@ -1,7 +1,7 @@
 // backend/src/routes/packageRoutes.ts
 import { Router } from 'express';
 import {
-	addPackage,
+	manualAddPackage,
 	getPackages,
 	updatePackage,
 	deletePackage,
@@ -12,7 +12,7 @@ import { importPackages, uploadMiddleware } from '../controllers/packageUploadCo
 
 const router = Router();
 
-router.post('/', authenticate, addPackage);
+router.post('/', authenticate, manualAddPackage);
 router.get('/', authenticate, getPackages);
 router.put('/:id', authenticate, updatePackage);
 router.delete('/:id', authenticate, deletePackage);

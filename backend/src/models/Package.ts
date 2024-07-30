@@ -2,19 +2,7 @@ import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 import { User } from './User';
 import { Address } from './Address';
-
-interface PackageAttributes {
-  id: number;
-  userId: number;
-  fromAddressId: number;
-  toAddressId: number;
-  length: number;
-  width: number;
-  height: number;
-  weight: number;
-  trackingNumber: string;
-  reference?: string;
-}
+import { PackageAttributes, PackageSource } from '@ddlabel/shared';
 
 interface PackageCreationAttributes extends Optional<PackageAttributes, 'id'> {}
 
@@ -32,6 +20,7 @@ class Package extends Model<PackageAttributes, PackageCreationAttributes> implem
   public fromAddress!: Address;
   public toAddress!: Address;
   public User!: User;
+  public source!: PackageSource;
 }
 
 Package.init(
@@ -90,6 +79,10 @@ Package.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    source: {
+      type: DataTypes.ENUM('manual', 'api'),
+      allowNull: false,
+    },
   },
   {
     sequelize,
@@ -101,4 +94,4 @@ Package.belongsTo(Address, { as: 'fromAddress', foreignKey: 'fromAddressId', onD
 Package.belongsTo(Address, { as: 'toAddress', foreignKey: 'toAddressId', onDelete: 'CASCADE' });
 Package.belongsTo(User, { as: 'user', foreignKey: 'userId' }); // Ensure alias 'owner' is defined here
 
-export { Package, PackageAttributes, PackageCreationAttributes };
+export { Package, PackageCreationAttributes };

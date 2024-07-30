@@ -32,7 +32,6 @@ const initialPackage = {
   fromAddress: defautAddress, toAddress: defautAddress,
 } as PackageType;
 
-
 const PackageForm: React.FC = () => {
   const [packageData, setPackageData] = useState<PackageType>(initialPackage);
   const [message, setMessage] = useState<MessageContent>(null);
