@@ -2,20 +2,7 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 import { getCityState } from '../utils/getZipInfo';
-import { AddressEnum } from '@ddlabel/shared';
-
-interface AddressAttributes {
-  id: number;
-  name: string;
-  address1: string;
-  address2?: string;
-  city: string;
-  state: string;
-  zip: string;
-  email?: string;
-  phone?: string;
-  addressType?: AddressEnum;
-}
+import { AddressAttributes, AddressEnum } from '@ddlabel/shared';
 
 interface AddressCreationAttributes extends Optional<AddressAttributes, 'id'> { }
 
@@ -93,4 +80,4 @@ Address.init(
   }
 );
 
-export { Address, AddressAttributes, AddressCreationAttributes };
+export { Address, AddressCreationAttributes };
