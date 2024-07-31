@@ -1,7 +1,4 @@
-import { PKG_FIELDS } from "./constants";
-import { HeaderMapping, KeyOfBaseData } from "./types";
+// import { CSV_KEYS } from "./constants";
+// import { HeaderMapping, KeyCsvRecord } from "./types";
 
-export const defaultMapping = PKG_FIELDS.reduce((acc: HeaderMapping, field: KeyOfBaseData) => {
-	Object.assign(acc, { [field]: field });
-	return acc;
-}, {} as HeaderMapping);
+

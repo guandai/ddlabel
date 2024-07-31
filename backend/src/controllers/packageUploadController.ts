@@ -1,6 +1,6 @@
 // backend/src/controllers/packageUpload.ts
 import { Request, Response } from 'express';
-import { generateTrackingNumber } from '../utils/generateTrackingNumber';
+import { generateTrackingNo } from '../utils/generateTrackingNo';
 import multer from 'multer';
 import csv from 'csv-parser';
 import fs from 'fs';
@@ -9,35 +9,7 @@ import { reportIoSocket } from '../utils/reportIo';
 import { AuthRequest } from '../types';
 import logger from '../config/logger';
 import { PackageSource } from '@ddlabel/shared';
-import { getPreparedData, processBatch } from './packageBatchFuntions';
-
-type BatchDataType = {
-	pkgBatch: PackageRoot[],
-	fromBatch: AddressData[],
-	toBatch: AddressData[],
-}
-
-type PackageRoot = {
-	userId: number,
-	length: number,
-	width: number,
-	height: number,
-	weight: number,
-	trackingNumber: string,
-	reference: string,
-	source: PackageSource
-}
-
-type AddressData = {
-	name: string,
-	address1: string,
-	address2: string,
-	city: string,
-	state: string,
-	zip: string,
-}
-
-type CsvData = { [k: string]: string | number };
+import { BatchDataType, CsvData, getPreparedData, processBatch } from './packageBatchFuntions';
 
 type OnDataParams = {
 	req: AuthRequest, 
@@ -46,7 +18,6 @@ type OnDataParams = {
 }
 
 const BATCH_SIZE = 500;
-
 
 const onData = (OnDataParams: OnDataParams) => {
 	const { req, csvData, pkgAll } = OnDataParams;
@@ -62,8 +33,8 @@ const onData = (OnDataParams: OnDataParams) => {
 		width: mappedData['width'],
 		height: mappedData['height'],
 		weight: mappedData['weight'],
-		trackingNumber: mappedData['tracking'] || generateTrackingNumber(),
-		reference: mappedData['reference'],
+		trackingNo: mappedData['trackingNo'] || generateTrackingNo(),
+		referenceNo: mappedData['referenceNo'],
 		source: PackageSource.api,
 	});
 	pkgAll.fromBatch.push({
@@ -112,9 +83,9 @@ const onEndData = async (req: Request, res: Response, pkgAll: BatchDataType) => 
 			batchData.toBatch = [];
 			processed += pkgDataSlice.length;
 			reportIoSocket( 'insert', req, processed, pkgBatch.length );
-		} catch (error) {
+		} catch (error: any) {
 			logger.error('Error processing batch', error);
-			return res.status(500).send({ message: 'Error processing batch' });
+			return res.status(500).send({ message: `Error processing batch: ${error?.errors?.[0]?.message}` });
 		}
 	}
 

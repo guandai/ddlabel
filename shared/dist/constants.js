@@ -1,8 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PKG_FIELDS = void 0;
-exports.PKG_FIELDS = [
-    'length', 'width', 'height', 'weight', 'reference',
-    'fromName', 'fromAddress1', 'fromAddress2', 'fromAddressZip',
-    'toName', 'toAddress1', 'toAddress2', 'toAddressZip'
-];
+exports.defaultMapping = exports.CSV_KEYS = exports.CSV_KEYS_REQUIRED = exports.CSV_KEYS_OPTIONAL = void 0;
+var ADDRESS_FROM_KEYS = ['fromName', 'fromAddress1', 'fromAddressZip'];
+var ADDRESS_FROM_KEYS_OPTIONAL = ['fromAddress2'];
+var ADDRESS_TO_KEYS = ['toName', 'toAddress1', 'toAddressZip'];
+var ADDRESS_TO_KEYS_OPTIONAL = ['toAddress2'];
+var ROOT_KEYS = ['weight', 'referenceNo'];
+var ROOT_KEYS_OPTIONAL = ['length', 'width', 'height', 'trackingNo'];
+exports.CSV_KEYS_OPTIONAL = ROOT_KEYS_OPTIONAL.concat(ADDRESS_TO_KEYS_OPTIONAL, ADDRESS_FROM_KEYS_OPTIONAL);
+exports.CSV_KEYS_REQUIRED = ROOT_KEYS.concat(ADDRESS_FROM_KEYS, ADDRESS_TO_KEYS);
+exports.CSV_KEYS = exports.CSV_KEYS_REQUIRED.concat(exports.CSV_KEYS_OPTIONAL);
+exports.defaultMapping = exports.CSV_KEYS.reduce(function (acc, key) {
+    var _a;
+    Object.assign(acc, (_a = {}, _a[key] = undefined, _a));
+    return acc;
+}, {});

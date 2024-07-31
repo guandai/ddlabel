@@ -2,19 +2,19 @@
 import { Request, Response } from 'express';
 import { Package } from '../models/Package';
 import { Address } from '../models/Address';
-import { generateTrackingNumber } from '../utils/generateTrackingNumber';
 import { User } from '../models/User';
 import { AuthRequest } from '../types';
 import { Op } from 'sequelize';
 import logger from '../config/logger';
 import { PackageSource } from '@ddlabel/shared';
+import { generateTrackingNo } from '../utils/generateTrackingNo';
 
 export const manualAddPackage = async (req: AuthRequest, res: Response) => {
   if (!req.user) {
     return res.status(404).json({ message: 'User not found' });
   }
-  const { fromAddress, toAddress, length, width, height, weight, reference } = req.body;
-  const trackingNumber = generateTrackingNumber();
+  const { fromAddress, toAddress, length, width, height, weight, referenceNo, trackingNo } = req.body;
+  const tracking = trackingNo || generateTrackingNo();
 
   try {
     const fromAddressId = (await Address.createWithInfo(fromAddress)).id;
@@ -28,8 +28,8 @@ export const manualAddPackage = async (req: AuthRequest, res: Response) => {
       width,
       height,
       weight,
-      trackingNumber,
-      reference,
+      trackingNo,
+      referenceNo,
       source: PackageSource.manual,
     });
 
@@ -51,7 +51,7 @@ export const getPackages = async (req: AuthRequest, res: Response) => {
     const whereCondition = search
     ? {
         userId,
-        trackingNumber: {
+        trackingNo: {
           [Op.like]: `%${search}%`,
         },
       }
@@ -133,3 +133,7 @@ export const getPackageDetails = async (req: Request, res: Response) => {
     res.status(400).json({ message: error.message });
   }
 };
+function generateTracking(): any {
+  throw new Error('Function not implemented.');
+}
+

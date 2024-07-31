@@ -119,7 +119,7 @@ const PackageTable: React.FC = () => {
                   <TableCell>{pkg.toAddress.address1}</TableCell>
                   <TableCell>{pkg.toAddress.state}</TableCell>
                   <TableCell>{pkg.weight}</TableCell>
-                  <TableCell>{pkg.trackingNumber}</TableCell>
+                  <TableCell>{pkg.trackingNo}</TableCell>
                   <TableCell style={{ width: '200px', whiteSpace: 'nowrap' }}>
                     <IconButton onClick={() => handleViewDetails(pkg)}><Visibility /></IconButton>
                     <IconButton onClick={() => handleEdit(pkg)}><Edit /></IconButton>

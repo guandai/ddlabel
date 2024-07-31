@@ -12,8 +12,8 @@ export type PackageAttributes = {
 	width: number;
 	height: number;
 	weight: number;
-	trackingNumber: string;
-	reference?: string;
+	trackingNo: string;
+	referenceNo?: string;
 	source: PackageSource;
 }
 
