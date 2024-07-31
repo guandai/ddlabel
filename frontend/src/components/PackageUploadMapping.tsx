@@ -6,7 +6,7 @@ import { MessageContent, MsgLevel } from '../types.d';
 import { Upload } from '@mui/icons-material';
 import CloseButton from './CloseButton';
 import CsvHeaderList from './CsvHeaderList';
-import { KeyOfBaseData, HeaderMapping, PKG_FIELDS, defaultMapping } from '@ddlabel/shared';
+import { KeyCsvRecord, HeaderMapping, CSV_KEYS, defaultMapping, CSV_KEYS_REQUIRED } from '@ddlabel/shared';
 
 const PackageUploadMapping: React.FC = () => {
   const [message, setMessage] = useState<MessageContent>(null);
@@ -19,9 +19,9 @@ const PackageUploadMapping: React.FC = () => {
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   const getAutoMapping = (headers: string[]): HeaderMapping => {
-    const autoMapping: HeaderMapping = defaultMapping;
-    PKG_FIELDS.forEach(field => {
-      if (headers.includes(field)) { autoMapping[field] = field }
+    const autoMapping = {} as HeaderMapping;
+    CSV_KEYS.forEach(key => {
+      if (headers.includes(key)) { Object.assign(autoMapping, { [key]: key }); }
     });
     return autoMapping;
   };
@@ -55,7 +55,7 @@ const PackageUploadMapping: React.FC = () => {
     });
   };
 
-  const handleMappingChange = (requiredField: KeyOfBaseData, csvHeader: string) => {
+  const handleMappingChange = (requiredField: KeyCsvRecord, csvHeader: string) => {
     setMessage(null);
     setHeaderMapping((prevMapping) => ({
       ...prevMapping,
@@ -64,11 +64,12 @@ const PackageUploadMapping: React.FC = () => {
   };
 
   const validateForm = () => {
-    const missingFields = PKG_FIELDS.filter(field => !headerMapping[field]);
-    if (missingFields.length > 0) {
+    const missingKeys = CSV_KEYS_REQUIRED.filter(key => !headerMapping[key]);
+
+    if (missingKeys.length > 0) {
       setMessage({
         level: MsgLevel.error,
-        text: `The following fields are missing: ${missingFields.join(', ')}`
+        text: `The following fields are missing: ${missingKeys.join(', ')}`
       });
       return false;
     }
@@ -86,7 +87,7 @@ const PackageUploadMapping: React.FC = () => {
     <>
       <Button variant="contained" disabled={runStatus === RunStatus.running} color="secondary" startIcon={<Upload />} component="label" >
         {'Upload CSV'}
-        <input type="file" accept=".csv" style={{ display: 'none' }} onChange={handleFileChange} />
+        <input type="file" required accept=".csv" style={{ display: 'none' }} onChange={handleFileChange} />
       </Button>
       <Modal
         open={modalOpen}

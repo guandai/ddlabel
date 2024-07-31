@@ -11,12 +11,12 @@ class Package extends Model<PackageAttributes, PackageCreationAttributes> implem
   public userId!: number;
   public fromAddressId!: number;
   public toAddressId!: number;
-  public length!: number;
-  public width!: number;
-  public height!: number;
+  public length?: number;
+  public width?: number;
+  public height?: number;
   public weight!: number;
-  public trackingNumber!: string;
-  public reference!: string;
+  public trackingNo?: string;
+  public referenceNo!: string;
   public fromAddress!: Address;
   public toAddress!: Address;
   public User!: User;
@@ -70,12 +70,12 @@ Package.init(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
-    trackingNumber: {
+    trackingNo: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
     },
-    reference: {
+    referenceNo: {
       type: DataTypes.STRING,
       allowNull: false,
     },

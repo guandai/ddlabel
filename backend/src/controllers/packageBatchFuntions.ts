@@ -4,48 +4,46 @@ import { Address } from '../models/Address';
 import getZipInfo from '../utils/getZipInfo';
 import { isValidJSON } from '../utils/errors';
 import logger from '../config/logger';
-import { BaseData, defaultMapping, PKG_FIELDS, HeaderMapping, KeyOfBaseData, PackageSource } from '@ddlabel/shared';
+import { CsvRecord, defaultMapping, CSV_KEYS, HeaderMapping, KeyCsvRecord, PackageSource } from '@ddlabel/shared';
 
-type BatchDataType = {
+export type BatchDataType = {
 	pkgBatch: PackageRoot[],
 	fromBatch: AddressData[],
 	toBatch: AddressData[],
 }
 
-type PackageRoot = {
+export type PackageRoot = {
 	userId: number,
-	length: number,
-	width: number,
-	height: number,
+	length?: number,
+	width?: number,
+	height?: number,
 	weight: number,
-	trackingNumber: string,
-	reference: string,
+	trackingNo?: string,
+	referenceNo: string,
 	source: PackageSource
 }
 
 type AddressData = {
 	name: string,
 	address1: string,
-	address2: string,
+	address2?: string,
 	city: string,
 	state: string,
 	zip: string,
 }
 
-type CsvFileHeaders = { [k: string]: string | number };
+export type CsvData = { [k: string]: string | number };
 
-const BATCH_SIZE = 500;
-
-const getMappingData = (data: CsvFileHeaders, mapping: HeaderMapping) => {
-	return PKG_FIELDS.reduce((acc: BaseData, field: KeyOfBaseData) => {
-		const csvHeader = mapping[field];
-		return Object.assign(acc, { [field]: !!csvHeader ? data[csvHeader] : null });
-	}, {} as BaseData);
+const getMappingData = (headers: CsvData, headerMapping: HeaderMapping): CsvRecord => {
+	return CSV_KEYS.reduce((acc: CsvRecord, csvKey: KeyCsvRecord) => {
+		const csvFileHeader = headerMapping[csvKey];
+		return Object.assign(acc, { [csvKey]: !!csvFileHeader ? headers[csvFileHeader] : null });
+	}, {} as CsvRecord);
 }
 
-export const getPreparedData = (packageCsvMap: string, data: CsvFileHeaders) => {
-	const mapping: HeaderMapping = isValidJSON(packageCsvMap) ? JSON.parse(packageCsvMap) : defaultMapping;
-	const mappedData = getMappingData(data, mapping);
+export const getPreparedData = (packageCsvMap: string, csvData: CsvData) => {
+	const headerMapping: HeaderMapping = isValidJSON(packageCsvMap) ? JSON.parse(packageCsvMap) : defaultMapping;
+	const mappedData = getMappingData(csvData, headerMapping);
 	const fromZipInfo = getZipInfo(mappedData['fromAddressZip'] );
 	const toZipInfo = getZipInfo(mappedData['toAddressZip'] );
 	if (!fromZipInfo) { 
@@ -76,7 +74,8 @@ export const processBatch = async (batchData: BatchDataType) => {
 
 		await Package.bulkCreate(packages);
 	} catch (error: any) {
+		console.log(`errorerrorerror`, error);
 		logger.error('Error processing batch', error);
-		throw new Error('Batch processing failed');
+		throw error;
 	}
 };

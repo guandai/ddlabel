@@ -65,7 +65,6 @@ const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
 
   const handleFileUpload = async (e: any) => {
     if (validateForm && !validateForm()) {
-      setUploadError("Please complete the required fields.");
       return;
     }
 

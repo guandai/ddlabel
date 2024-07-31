@@ -1,18 +1,18 @@
 export declare enum PackageSource {
     manual = "manual",
-    api = "api"
+    api = "api",
 }
 export type PackageAttributes = {
     id: number;
     userId: number;
     fromAddressId: number;
     toAddressId: number;
-    length: number;
-    width: number;
-    height: number;
+    length?: number;
+    width?: number;
+    height?: number;
     weight: number;
-    trackingNumber: string;
-    reference?: string;
+    trackingNo?: string;
+    referenceNo: string;
     source: PackageSource;
 };
 export declare enum AddressEnum {

@@ -1,19 +1,24 @@
-export type BaseData = {
-    length: number;
-    width: number;
-    height: number;
+type CsvRecordRequired = {
     weight: number;
-    reference: string;
+    referenceNo: string;
     fromName: string;
-    fromAddress1: string;
-    fromAddress2: string;
     fromAddressZip: string;
+    fromAddress1: string;
     toName: string;
-    toAddress1: string;
-    toAddress2: string;
     toAddressZip: string;
+    toAddress1: string;
 };
-export type KeyOfBaseData = keyof BaseData;
+type CsvRecordOptional = {
+    trackingNo?: string;
+    length?: number;
+    width?: number;
+    height?: number;
+    fromAddress2?: string;
+    toAddress2?: string;
+};
+export type CsvRecord = CsvRecordOptional & CsvRecordRequired;
+export type KeyCsvRecord = keyof CsvRecord;
 export type HeaderMapping = {
-    [k in KeyOfBaseData]: KeyOfBaseData | string | null;
+    [k in keyof CsvRecord]: string | undefined;
 };
+export {};
