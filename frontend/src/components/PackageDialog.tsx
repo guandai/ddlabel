@@ -29,8 +29,8 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                     <DialogContentText>
                         <strong>Id:</strong> {selectedPackage.id}<br />
                         <Line />
-                        <strong>Tracking Number:</strong> {selectedPackage.trackingNumber}<br />
-                        <strong>Reference Number:</strong> {selectedPackage.reference}<br />
+                        <strong>Tracking Number:</strong> {selectedPackage.trackingNo}<br />
+                        <strong>Reference Number:</strong> {selectedPackage.referenceNo}<br />
                         <Line />
                         From: <br />
                         <strong>Name:</strong> {selectedPackage.fromAddress.name}<br />

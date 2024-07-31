@@ -23,8 +23,8 @@ export type PackageType = {
   width: number;
   height: number;
   weight: number;
-  trackingNumber: string;
-  reference: string;
+  trackingNo: string;
+  referenceNo: string;
 };
 
 const defautAddress = { addressType: AddressEnum.package } as AddressType;
@@ -106,7 +106,6 @@ const PackageForm: React.FC = () => {
 
   const handleAddressChange =
     (addressType: 'fromAddress' | 'toAddress') => (e: React.ChangeEvent<HTMLInputElement>) => {
-      console.log(`e.target`, addressType, e.target.name, e.target.value, 'all');
       setPackageData(prevData => ({
         ...prevData,
         [addressType]: {
@@ -122,7 +121,7 @@ const PackageForm: React.FC = () => {
   };
 
   return (
-    <Container component="main" maxWidth="md">
+    <Container component="main" maxWidth="md" sx={{maxHeight: "100%", overflow: "scroll"}}>
       <Box
         sx={{
           marginTop: 8,
@@ -160,7 +159,8 @@ const PackageForm: React.FC = () => {
               {quickField({ name: 'width' })}
               {quickField({ name: 'height' })}
               {quickField({ name: 'weight' })}
-              {quickField({ name: 'reference', type: 'text', pattern: null })}
+              {quickField({ name: 'referenceNo', type: 'text', pattern: null })}
+              {quickField({ name: 'trackingNo', type: 'text', pattern: null })}
               <Grid item xs={12}>
                 <Button
                   type="submit"

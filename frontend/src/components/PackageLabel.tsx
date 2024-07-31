@@ -99,7 +99,7 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
 
       {/* barcode tracking */}
       <Box sx={{ height: '1.5in', width: '100%', textAlign: 'center' }}>
-        <BarcodeComponent value={pkg.trackingNumber} />
+        <BarcodeComponent value={pkg.trackingNo} />
       </Box>
 
       {/* under barcode spacing */}
@@ -109,7 +109,7 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
 
       {/* bottom line */}
       <Box sx={{ height: '0.2in', display: 'flex', justifyContent: 'space-between', alignItems: "end", }}>
-        <Box> Reference: {pkg.reference}</Box>
+        <Box> Reference No: {pkg.referenceNo}</Box>
         <img src={monkeyFont} alt="Monkey Font Logo" style={{ width: '5em' }} />
       </Box>
     </Box>

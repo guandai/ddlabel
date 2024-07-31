@@ -18,7 +18,7 @@ type ErrorDetail = {
 }
 
 export type ResError = {
-    "message": "Validation error" | string,
+    "message": "Validation Error" | string,
     "errors": ErrorDetail[];
 }
 
