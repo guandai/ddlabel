@@ -13,7 +13,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public email!: string;
   public password!: string;
   public role!: string;
-  public warehouseAddressId!: number;
+  // public warehouseAddressId!: number;
   public warehouseAddress!: Address;
 }
 
@@ -41,14 +41,14 @@ User.init(
       type: DataTypes.ENUM('admin', 'worker'),
       allowNull: false,
     },
-    warehouseAddressId: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: false,
-      references: {
-        model: Address,
-        key: 'id',
-      },
-    },
+    // warehouseAddressId: {
+    //   type: DataTypes.INTEGER.UNSIGNED,
+    //   allowNull: false,
+    //   references: {
+    //     model: Address,
+    //     key: 'id',
+    //   },
+    // },
   },
   {
     sequelize,

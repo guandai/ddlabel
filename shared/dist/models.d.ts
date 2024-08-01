@@ -6,8 +6,8 @@ export declare enum PackageSource {
 export type PackageAttributes = {
     id: number;
     userId: number;
-    fromAddressId: number;
-    toAddressId: number;
+    // fromAddressId: number;
+    // toAddressId: number;
     length: number;
     width: number;
     height: number;
@@ -32,6 +32,9 @@ export type AddressAttributes = {
     email?: string;
     phone?: string;
     addressType?: AddressEnum;
+    userId?: number;
+    fromPackageId?: number;
+    toPackageId?: number;
 };
 export type UserAttributes = {
     id: number;
@@ -39,7 +42,7 @@ export type UserAttributes = {
     email: string;
     password: string;
     role: string;
-    warehouseAddressId: number;
+    // warehouseAddressId: number;
 };
 export type PostalZoneAttributes = {
     zip_code: string;

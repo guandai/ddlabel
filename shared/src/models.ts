@@ -35,6 +35,9 @@ export type AddressAttributes = {
 	email?: string;
 	phone?: string;
 	addressType?: AddressEnum;
+	userId?: number;
+	fromPackageId?: number;
+	toPackageId?: number;
 }
 
 export type UserAttributes = {

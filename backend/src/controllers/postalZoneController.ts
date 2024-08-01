@@ -15,7 +15,7 @@ export const getPostalZones = async (req: Request, res: Response) => {
 export const getPostalZoneByZip = async (req: Request, res: Response) => {
   try {
     const { zip_code } = req.query as { zip_code: string };
-    const postalZone: PostalZoneAttributes | null = await PostalZone.findOne({
+    const postalZone = await PostalZone.findOne({
       where: { zip_code },
     });
     if (postalZone) {

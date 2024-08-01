@@ -1,7 +1,7 @@
 // backend/src/models/PostalZone.ts
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../config/database';
-import { PostalZoneAttributes } from '@ddlabel/shared';
+import { KeyZones, PostalZoneAttributes } from '@ddlabel/shared';
 
 class PostalZone extends Model<PostalZoneAttributes> implements PostalZoneAttributes {
   public zip_code!: string;
@@ -11,7 +11,7 @@ class PostalZone extends Model<PostalZoneAttributes> implements PostalZoneAttrib
   public city!: string;
   public remote_code!: string;
   public code!: string;
-  public proposal!: string;
+  public proposal!: KeyZones;
   public start_zip?: string;
   public open_date!: string;
   public LAX?: string;
