@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios, { AxiosProgressEvent } from 'axios';
+import { AxiosProgressEvent } from 'axios';
 import {
   Typography, Box, Button,
    LinearProgress
@@ -8,6 +8,7 @@ import { Upload } from '@mui/icons-material';
 import { io } from 'socket.io-client';
 import { SetMessage } from '../util/errors';
 import { HeaderMapping } from '@ddlabel/shared';
+import { PackageApi } from '../api/PackageApi';
 
 const socket = io(`${process.env.REACT_APP_SOCKET_IO_HOST}`, { path: '/api/socket.io' });
 
@@ -25,7 +26,7 @@ type Prop = {
   csvLength: number;
 };
 
-const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
+export const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
   const { runStatus, setRunStatus, setMessage, headerMapping, uploadFile, validateForm, csvLength } = prop;
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [generateProgress, setGenerateProgress] = useState<number | null>(null);
@@ -79,17 +80,10 @@ const PackageUploadButton: React.FC<Prop> = (prop: Prop) => {
       formData.append('packageCsvMap', JSON.stringify(headerMapping));
 
       setRunStatus(RunStatus.running);
-      const response = await axios.post(`${process.env.REACT_APP_BE_URL}/packages/import`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`,
-          'socket-id': socket.id,
-        },
-        onUploadProgress,
-      });
+      const response = await new PackageApi().importPackage(formData, onUploadProgress, socket.id);
 
       setRunStatus(RunStatus.done);
-      setUploadSuccess(`Import Done - ${response.data.message}`);
+      setUploadSuccess(`Import Done - ${response.message}`);
       
     } catch (error: any) {
       setUploadError(error.response?.data?.message || 'Failed to import packages.');

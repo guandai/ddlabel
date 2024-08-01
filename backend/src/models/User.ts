@@ -3,6 +3,7 @@ import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 import { Address } from './Address';
 import { UserAttributes } from '@ddlabel/shared/dist/models';
+import { defineRelations } from '../config/relations';
 
 interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
 
@@ -54,8 +55,5 @@ User.init(
     tableName: 'users',
   }
 );
-
-
-User.belongsTo(Address, { as: 'warehouseAddress', foreignKey: 'warehouseAddressId', onDelete: 'CASCADE' });
-
+defineRelations();
 export { User, UserCreationAttributes };

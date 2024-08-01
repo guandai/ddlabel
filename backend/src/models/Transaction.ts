@@ -2,10 +2,12 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 import { Package } from './Package';
+import { User } from './User';
 
 interface TransactionAttributes {
   id: number;
   packageId: number;
+  userId: number;
   dateAdded: Date;
   event: string;
   cost: number;
@@ -17,6 +19,7 @@ interface TransactionCreationAttributes extends Optional<TransactionAttributes, 
 class Transaction extends Model<TransactionAttributes, TransactionCreationAttributes> implements TransactionAttributes {
   public id!: number;
   public packageId!: number;
+  public userId!: number;
   public dateAdded!: Date;
   public event!: string;
   public cost!: number;
@@ -35,6 +38,14 @@ Transaction.init(
       allowNull: false,
       references: {
         model: Package,
+        key: 'id',
+      },
+    },
+    userId: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      references: {
+        model: User,
         key: 'id',
       },
     },
@@ -60,5 +71,6 @@ Transaction.init(
     tableName: 'transactions',
   }
 );
+
 
 export { Transaction, TransactionAttributes, TransactionCreationAttributes };

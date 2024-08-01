@@ -1,23 +1,14 @@
 // frontend/src/components/LoginForm.tsx
 import React, { useState } from 'react';
-import axios from 'axios';
 import { TextField, Button, Box, Typography, Container } from '@mui/material';
 import { tryLoad } from '../util/errors';
-import { AddressType } from './AddressForm';
+import { LoginReq } from "@ddlabel/shared";
 import { MessageContent } from '../types';
 import MessageAlert from './MessageAlert';
-
-export type UserType = {
-  id: number;
-  name: string;
-  email: string;
-  password?: string;
-  role: string;
-  warehouseAddress: AddressType;
-};
+import UserApi from '../api/UserApi';
 
 const LoginForm: React.FC = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState<LoginReq>({ email: '', password: '' });
   const [message, setMessage] = useState<MessageContent>({ text: '', level: 'info' });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,7 +21,7 @@ const LoginForm: React.FC = () => {
 
     tryLoad(setMessage,
       async () => {
-        const response = await axios.post(`${process.env.REACT_APP_BE_URL}/users/login`, formData);
+        const response = await UserApi.login(formData);
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('userId', response.data.userId);
         setTimeout(() => {

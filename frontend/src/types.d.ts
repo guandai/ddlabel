@@ -1,4 +1,7 @@
-type ErrorDetail = {
+import { KeyZones } from "@ddlabel/shared";
+import { Key } from "react";
+
+type PkgErrorDetail = {
     "message": string,
     "type": string,
     "path": string,
@@ -17,9 +20,9 @@ type ErrorDetail = {
     "validatorArgs": []
 }
 
-export type ResError = {
+export type PkgCsvError = {
     "message": "Validation Error" | string,
-    "errors": ErrorDetail[];
+    "errors": PkgErrorDetail[];
 }
 
 declare module "*.svg" {
@@ -32,30 +35,15 @@ declare module "*.jpg" {
     export default content;
 }
 
-
-export type ZonesType = Pick<PostalZoneType ,'LAX' | 'SFO' | 'ORD' | 'JFK' | 'ATL' | 'DFW' | 'MIA' | 'SEA' | 'BOS' | 'PDX'>;
-export interface PostalZoneType {
-  zip_code: string;
-  new_sort_code: string;
-  sort_code: string;
-  state: string;
-  city: string;
-  remote_code: string;
-  code: string;
-  proposal: string;
-  start_zip?: string;
-  open_date: string;
-  LAX?: string;
-  SFO?: string;
-  ORD?: string;
-  JFK?: string;
-  ATL?: string;
-  DFW?: string;
-  MIA?: string;
-  SEA?: string;
-  BOS?: string;
-  PDX?: string;
-}
+export type ProfileType = {
+    id: number;
+    name: string;
+    email: string;
+    password: string; 
+    confirmPassword: string;
+    role: string;
+    warehouseAddress: AddressAttributes;
+};
 
 export enum MsgLevel {
     error ='error',

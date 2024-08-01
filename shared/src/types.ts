@@ -25,3 +25,10 @@ export type KeyCsvRecord = keyof CsvRecord;
 // type HeaderMappingRequired = { [k in keyof CsvRecordRequired]: string };
 // export type HeaderMapping = HeaderMappingOptional & HeaderMappingRequired;
 export type HeaderMapping = { [k in keyof CsvRecord]: string | undefined };
+
+export type ZipInfo = {
+	zip: string;
+	city: string;
+	state: string;
+	county?: string;
+};

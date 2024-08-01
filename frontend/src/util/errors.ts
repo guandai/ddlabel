@@ -1,11 +1,11 @@
 import axios, { AxiosError } from "axios";
-import { MessageContent, ResError } from "../types.d";
+import { MessageContent, PkgCsvError } from "../types.d";
 import React from "react";
 
 export type SetMessage = (value: React.SetStateAction<MessageContent>) => void;
 
 const tryError = (setMessage: SetMessage, error: any) => {
-  const errorData = ((error as AxiosError).response?.data as ResError);
+  const errorData = ((error as AxiosError).response?.data as PkgCsvError);
   let message = 'Failed to perform the operation.';
   const errors = errorData?.errors;
   if (errors && errors.length > 0) {
@@ -29,7 +29,7 @@ export const tryLoad = async <T, P = void>(
   }
 }
 
-export const loadApi = async<T>(
+const loadApi = async<T>(
   setMessage: SetMessage,
   path: string,
   params: unknown

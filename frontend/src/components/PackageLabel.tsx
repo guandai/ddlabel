@@ -5,9 +5,9 @@ import { Box, Typography } from '@mui/material';
 import { PackageType } from './PackageForm';
 import monkeyLogo from '../assets/svg/monkey_logo.jpg'; // Import the main logo
 import monkeyFont from '../assets/svg/monkey_font.jpg'; // Import the bottom-right logo
-import axios from 'axios';
-import { PostalZoneType, ZonesType } from '../types';
+import { ZonesType } from '../types';
 import styled from 'styled-components';
+import { PostalZoneApi } from '../api/PostalZone';
 
 const MonoTypoSmall = styled(Typography)(() => ({
   fontFamily: 'monospace',
@@ -23,7 +23,7 @@ interface PackageLabelProps {
   reader?: 'web' | 'pdf';
 }
 
-const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
+export const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
   const [sortCode, setSortCode] = useState<string | 'N/A'>('N/A');
   const [toProposal, setToProposal] = useState<ZonesType | 'N/A'>('N/A');
 
@@ -34,13 +34,9 @@ const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
   };
 
   useEffect(() => {
-    const path = `${process.env.REACT_APP_BE_URL}/postal_zones/get_post_zone`;
     const fetchData = async () => {
       try {
-        const response = await axios.get<PostalZoneType>(path, {
-          params: { zip_code: pkg.toAddress.zip },
-        });
-        const data = response.data;
+        const data = await new PostalZoneApi().getPostZone(pkg.toAddress.zip);
         setToProposal(data.proposal as ZonesType);
         setSortCode(data.new_sort_code);
       } catch (error) {

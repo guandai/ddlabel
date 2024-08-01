@@ -1,6 +1,7 @@
 // backend/src/controllers/postalZoneController.ts
 import { Request, Response } from 'express';
-import { PostalZone } from '../models/PostalZone';
+import { PostalZone, PostalZoneAttributes } from '../models/PostalZone';
+import { KeyZones } from '@ddlabel/shared';
 
 export const getPostalZones = async (req: Request, res: Response) => {
   try {
@@ -14,11 +15,9 @@ export const getPostalZones = async (req: Request, res: Response) => {
 export const getPostalZoneByZip = async (req: Request, res: Response) => {
   try {
     const { zip_code } = req.query as { zip_code: string };
-    // logger.info(`zip_code`, zip_code);
-    const postalZone = await PostalZone.findOne({
+    const postalZone: PostalZoneAttributes | null = await PostalZone.findOne({
       where: { zip_code },
     });
-    // logger.info(`postalZone`, postalZone);
     if (postalZone) {
       res.json(postalZone);
     } else {
@@ -59,10 +58,8 @@ export const getProposalByZip = async (req: Request, res: Response) => {
   }
 };
 
-type Zones = Pick<PostalZone ,'LAX' | 'SFO' | 'ORD' | 'JFK' | 'ATL' | 'DFW' | 'MIA' | 'SEA' | 'BOS' | 'PDX'>;
-
 export const getZoneByProposalAndZip = async (req: Request, res: Response) => {
-  const { proposal, zip_code } = req.query as { zip_code: string; proposal: string };
+  const { proposal, zip_code } = req.query as { zip_code: string; proposal: KeyZones };
 
   try {
     const postalZone: PostalZone | null = await PostalZone.findOne({
@@ -72,7 +69,7 @@ export const getZoneByProposalAndZip = async (req: Request, res: Response) => {
     });
 
     if (postalZone) {
-      res.json(postalZone[proposal as keyof Zones]);
+      res.json(postalZone[proposal]);
     } else {
       res.status(404).json({ message: 'Zone not found' });
     }

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ZipCodeData } from '../models/ZipCodeData';
 import getZipInfo from '../utils/getZipInfo';
+import { ZipInfo } from '@ddlabel/shared';
 
 export const getZipCodeData = async (req: Request, res: Response) => {
   try {
@@ -47,14 +48,12 @@ export const getAllZipCodeData = async (req: Request, res: Response) => {
   }
 };
 
-export const getZipCodeDataFromFile = async (req: Request, res: Response) => {
-	const info = getZipInfo(req.params.zip);
+export const getZipCodeDataFromFile = async (req: Request, res: Response): Promise<void> => {
+  const info = getZipInfo(req.params.zip);
   if (!info) {
-    return res.status(404).json({ message: 'Zip code not found' });
+    res.status(404).json({ message: 'Zip code not found' });
+    return;
   }
-  res.json({
-    zip: req.params.zip,
-    city: info.city,
-    state: info.state,
-  });
+  const result: ZipInfo = { zip: req.params.zip, city: info.city, state: info.state };
+  res.json(result);
 }
