@@ -5,9 +5,9 @@ import { Box, Typography } from '@mui/material';
 import { PackageType } from './PackageForm';
 import monkeyLogo from '../assets/svg/monkey_logo.jpg'; // Import the main logo
 import monkeyFont from '../assets/svg/monkey_font.jpg'; // Import the bottom-right logo
-import { ZonesType } from '../types';
 import styled from 'styled-components';
 import { PostalZoneApi } from '../api/PostalZone';
+import { KeyZones } from '@ddlabel/shared';
 
 const MonoTypoSmall = styled(Typography)(() => ({
   fontFamily: 'monospace',
@@ -25,7 +25,7 @@ interface PackageLabelProps {
 
 export const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
   const [sortCode, setSortCode] = useState<string | 'N/A'>('N/A');
-  const [toProposal, setToProposal] = useState<ZonesType | 'N/A'>('N/A');
+  const [toProposal, setToProposal] = useState<KeyZones | 'N/A'>('N/A');
 
   const { width, height } = reader === 'web' ? {
     width: '4in', height: '6in',
@@ -37,7 +37,7 @@ export const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
     const fetchData = async () => {
       try {
         const data = await new PostalZoneApi().getPostZone(pkg.toAddress.zip);
-        setToProposal(data.proposal as ZonesType);
+        setToProposal(data.proposal);
         setSortCode(data.new_sort_code);
       } catch (error) {
         setToProposal('N/A');

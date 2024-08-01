@@ -17,13 +17,8 @@ export const manualAddPackage = async (req: AuthRequest, res: Response) => {
   const tracking = trackingNo || generateTrackingNo();
 
   try {
-    const fromAddressId = (await Address.createWithInfo(fromAddress)).id;
-    const toAddressId = (await Address.createWithInfo(toAddress)).id;
-
     const pkg = await Package.create({
       userId: req.user.id,
-      fromAddressId,
-      toAddressId,
       length,
       width,
       height,
@@ -32,6 +27,10 @@ export const manualAddPackage = async (req: AuthRequest, res: Response) => {
       referenceNo,
       source: PackageSource.manual,
     });
+    fromAddress.fromPackageId = pkg.id;
+    toAddress.toAddressId = pkg.id;
+    await Address.createWithInfo(fromAddress);
+    await Address.createWithInfo(toAddress);
 
     res.status(201).json(pkg);
   } catch (error: any) {
@@ -95,15 +94,16 @@ export const updatePackage = async (req: Request, res: Response) => {
 
 export const deletePackage = async (req: Request, res: Response) => {
   try {
+    const id = req.params.id;
     const pkg = await Package.findByPk(req.params.id);
 
     if (!pkg) {
       throw new Error('Package not found');
     }
 
-    await Address.destroy({ where: { id: pkg.fromAddressId } });
-    await Address.destroy({ where: { id: pkg.toAddressId } });
-    await Package.destroy({ where: { id: req.params.id } });
+    await Address.destroy({ where: { fromPackageId: id } });
+    await Address.destroy({ where: { toPackageId: id } });
+    await Package.destroy({ where: { id } });
 
     res.json({ message: 'Package deleted' });
   } catch (error: any) {

@@ -37,9 +37,7 @@ exports.updateSortCode = async (req: Request, res: Response) => {
 
 exports.deleteSortCode = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const deleted = await SortCode.destroy({ where: { id: id } });
-    if (deleted) {
+    if (await SortCode.destroy({ where: { id: req.params } })) {
       res.status(204).send();
     } else {
       res.status(404).json({ message: 'Sort code not found' });

@@ -10,11 +10,11 @@ interface PackageCreationAttributes extends Optional<PackageAttributes, 'id'> {}
 class Package extends Model<PackageAttributes, PackageCreationAttributes> implements PackageAttributes {
   public id!: number;
   public userId!: number;
-  public fromAddressId!: number;
-  public toAddressId!: number;
-  public length?: number;
-  public width?: number;
-  public height?: number;
+  // public fromAddressId!: number;
+  // public toAddressId!: number;
+  public length!: number;
+  public width!: number;
+  public height!: number;
   public trackingNo!: string;
   public weight!: number;
   public referenceNo!: string;
@@ -39,22 +39,22 @@ Package.init(
         key: 'id',
       },
     },
-    fromAddressId: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: false,
-      references: {
-        model: Address,
-        key: 'id',
-      },
-    },
-    toAddressId: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      allowNull: false,
-      references: {
-        model: Address,
-        key: 'id',
-      },
-    },
+    // fromAddressId: {
+    //   type: DataTypes.INTEGER.UNSIGNED,
+    //   allowNull: false,
+    //   references: {
+    //     model: Address,
+    //     key: 'id',
+    //   },
+    // },
+    // toAddressId: {
+    //   type: DataTypes.INTEGER.UNSIGNED,
+    //   allowNull: false,
+    //   references: {
+    //     model: Address,
+    //     key: 'id',
+    //   },
+    // },
     length: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
