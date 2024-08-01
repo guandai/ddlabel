@@ -1,24 +1,26 @@
 // frontend/src/components/PackageForm.tsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { TextField, Button, Box, Typography, Container, Grid } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { tryLoad } from '../util/errors';
-import AddressForm, { AddressType } from './AddressForm';
+import AddressForm from './AddressForm';
+import { AddressAttributes } from "@ddlabel/shared";
 import { MessageContent } from '../types.d';
 import MessageAlert from './MessageAlert';
 import { AddressEnum } from '@ddlabel/shared';
+import PackageApi from '../api/PackageApi';
 
 type QuickFieldProp = {
   name: keyof PackageType;
   type?: 'text' | 'number';
   pattern?: string | null;
+  required?: boolean;
 };
 
 export type PackageType = {
   id: number;
-  fromAddress: AddressType;
-  toAddress: AddressType;
+  fromAddress: AddressAttributes;
+  toAddress: AddressAttributes;
   length: number;
   width: number;
   height: number;
@@ -27,7 +29,7 @@ export type PackageType = {
   referenceNo: string;
 };
 
-const defautAddress = { addressType: AddressEnum.package } as AddressType;
+const defautAddress = { addressType: AddressEnum.toPackage } as AddressAttributes;
 const initialPackage = {
   fromAddress: defautAddress, toAddress: defautAddress,
 } as PackageType;
@@ -36,12 +38,13 @@ const PackageForm: React.FC = () => {
   const [packageData, setPackageData] = useState<PackageType>(initialPackage);
   const [message, setMessage] = useState<MessageContent>(null);
   const navigate = useNavigate();
-  const { id: packageId } = useParams<{ id: string }>();
+  const { id: packageId } = useParams<{ id: string }>(); // from url params
+  // const api = useMemo(() => new PackageApi(), [])
 
-  const quickField = ({ name, type = 'number', pattern = '^[1-9][0-9]*$' }: QuickFieldProp) => (
+  const quickField = ({ name, type = 'number', pattern = '^[1-9][0-9]*$', required = true }: QuickFieldProp) => (
     <Grid item xs={12} sm={6}>
       <TextField
-        required
+        required={required}
         fullWidth
         id={name}
         label={name}
@@ -57,27 +60,19 @@ const PackageForm: React.FC = () => {
     const token = localStorage.getItem('token');
     if (!token) {
       window.location.href = '/login';
+      return;
     };
-  }, []);
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
+    
     if (!packageId) {
       return;
     }
+
     tryLoad(setMessage, async () => {
-      const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages/${packageId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setPackageData(response.data);
+      setPackageData(await PackageApi.getPackageById(packageId));
     });
   }, [packageId]);
 
   const onSubmit = async (data: Partial<PackageType>) => {
-    const token = localStorage.getItem('token');
-    const header = {
-      headers: { Authorization: `Bearer ${token}` }
-    };
     if (message?.text && message.level === 'error') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
@@ -85,11 +80,9 @@ const PackageForm: React.FC = () => {
 
     tryLoad(setMessage, async () => {
       if (packageId) {
-        // update
-        await axios.put(`${process.env.REACT_APP_BE_URL}/packages/${packageId}`, data, header)
+        await PackageApi.updatePackage(packageId, data);
       } else {
-        // create
-        await axios.post(`${process.env.REACT_APP_BE_URL}/packages`, data, header);
+        await PackageApi.createPackage(data);
         navigate('/packages');
       }
       setMessage({
@@ -160,7 +153,7 @@ const PackageForm: React.FC = () => {
               {quickField({ name: 'height' })}
               {quickField({ name: 'weight' })}
               {quickField({ name: 'referenceNo', type: 'text', pattern: null })}
-              {quickField({ name: 'trackingNo', type: 'text', pattern: null })}
+              {quickField({ name: 'trackingNo', type: 'text', pattern: null, required: false })}
               <Grid item xs={12}>
                 <Button
                   type="submit"

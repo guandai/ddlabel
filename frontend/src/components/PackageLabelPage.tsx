@@ -1,6 +1,5 @@
 // frontend/src/components/PackageLabelPage.tsx
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { PackageType } from './PackageForm';
 import PackageLabel from './PackageLabel';
@@ -8,6 +7,7 @@ import { CircularProgress } from '@mui/material';
 import { tryLoad } from '../util/errors';
 import { MessageContent } from '../types';
 import MessageAlert from './MessageAlert';
+import { PackageApi } from '../api/PackageApi';
 
 const PackageLabelPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,12 +17,8 @@ const PackageLabelPage: React.FC = () => {
 
   useEffect(() => {
     const fetchPackage = async () => {
-      const token = localStorage.getItem('token');
       tryLoad(setMessage, async () => {
-        const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setPkg(response.data);
+        id && setPkg(await new PackageApi().getPackageById(id));
         setLoading(false);
       }, async () => setLoading(false));
     };

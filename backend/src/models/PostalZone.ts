@@ -1,29 +1,7 @@
 // backend/src/models/PostalZone.ts
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../config/database';
-
-interface PostalZoneAttributes {
-  zip_code: string;
-  new_sort_code: string;
-  sort_code: string;
-  state: string;
-  city: string;
-  remote_code: string;
-  code: string;
-  proposal: string;
-  start_zip?: string;
-  open_date: string;
-  LAX?: string;
-  SFO?: string;
-  ORD?: string;
-  JFK?: string;
-  ATL?: string;
-  DFW?: string;
-  MIA?: string;
-  SEA?: string;
-  BOS?: string;
-  PDX?: string;
-}
+import { PostalZoneAttributes } from '@ddlabel/shared';
 
 class PostalZone extends Model<PostalZoneAttributes> implements PostalZoneAttributes {
   public zip_code!: string;

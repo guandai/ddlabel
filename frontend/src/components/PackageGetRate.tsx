@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box } from '@mui/material';
-import axios from 'axios';
-import { FullRateRsp } from '@ddlabel/shared';
 import { PackageType } from './PackageForm';
-import { loadApi, tryLoad } from '../util/errors';
-import { MessageContent, PostalZoneType, ZonesType } from '../types';
+import { tryLoad } from '../util/errors';
+import { MessageContent } from '../types';
+import RateApi from '../api/RateApi';
+import PostalZoneApi from '../api/PostalZone';
+import { KeyZones, PostalZoneAttributes } from '@ddlabel/shared';
 
 type PackageDialogProps = {
     setMessage: React.Dispatch<React.SetStateAction<MessageContent>>;
@@ -16,24 +17,24 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ setMessage, selectedPack
     const [sortCode, setSortCode] = useState<string | null>(null);
 
 
-    const getPostalZone = useCallback(async (): Promise<PostalZoneType | null> => {
+    const getPostalZone = useCallback(async (): Promise<PostalZoneAttributes | null> => {
         if (!selectedPackage) {
             return null;
         }
-        const postZone = await loadApi<PostalZoneType>(
-            setMessage, 'postal_zones/get_post_zone', { zip_code: selectedPackage.fromAddress.zip });
+
+        const postZone = await PostalZoneApi.getPostZone(selectedPackage.fromAddress.zip);
         if (!postZone) {
             return null;
         }
 
         setSortCode(postZone.new_sort_code);
         return postZone;
-    }, [selectedPackage]);
+    }, [selectedPackage, setMessage]);
 
-    const getZone = useCallback(async (selectedPackage: PackageType, proposal: ZonesType) => {
-        const zone = await loadApi<string | '-'>(setMessage, 'postal_zones/get_zone', { zip_code: selectedPackage.toAddress.zip, proposal });
+    const getZone = useCallback(async (selectedPackage: PackageType, proposal: KeyZones) => {
+        const zone = await PostalZoneApi.getZone(selectedPackage.toAddress.zip, proposal);
         return zone?.replace('Zone ', '');
-    }, []);
+    }, [setMessage]);
 
     const handleGetData = useCallback(async () => {
         if (!selectedPackage) {
@@ -41,24 +42,27 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ setMessage, selectedPack
         }
         tryLoad(setMessage, async () => {
             const postalZone = await getPostalZone();
-            const zone = await getZone(selectedPackage, postalZone?.proposal as ZonesType);
+            if (!postalZone) {
+                setRate('Can not deliver PostalZone not found');
+                return;
+            }
+            const zone = await getZone(selectedPackage, postalZone?.proposal);
 
             if (!zone || zone === '-') {
                 setRate('Can not deliver');
                 return;
             }
-            const response = await axios.get<FullRateRsp> (`${process.env.REACT_APP_BE_URL}/shipping_rates/full-rate`, {
-                params: {
-                    length: selectedPackage.length,
-                    width: selectedPackage.width,
-                    height: selectedPackage.height,
-                    weight: selectedPackage.weight,
-                    zone, // Replace with actual zone if available
-                    weightUnit: 'lbs',
-                    volumeUnit: 'inch',
-                },
-            });
-            const cost = response.data.totalCost;
+
+            const params = {
+                length: selectedPackage.length,
+                width: selectedPackage.width,
+                height: selectedPackage.height,
+                weight: selectedPackage.weight,
+                zone, // Replace with actual zone if available
+                weightUnit: 'lbs',
+                volumeUnit: 'inch',
+            };
+            const cost = (await RateApi.getFullRate(params)).totalCost;
             if (cost === -1){
                 setMessage({ text: 'No rate available', level: 'info' }); 
                 setRate(`N/A`);
@@ -66,13 +70,13 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ setMessage, selectedPack
             }
             setRate(`$${cost.toFixed(2)}`);
         });
-    }, [getPostalZone, getZone, selectedPackage]);
+    }, [getPostalZone, getZone, selectedPackage, setMessage]);
 
     useEffect(() => {
 		setMessage(null);
         handleGetData();
     }
-    , [selectedPackage, handleGetData]);
+    , [selectedPackage, handleGetData, setMessage]);
 
     return (
 		<Box>

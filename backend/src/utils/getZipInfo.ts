@@ -1,3 +1,4 @@
+import { ZipInfo } from '@ddlabel/shared';
 import stateData from '../data/stateSmall.json';
 
 interface StateData {
@@ -25,20 +26,9 @@ export const getCityState = (zip: string, city: string, state: string) => {
 	return info;
 }
 
-export type ZipInfo = {
-	city: string;
-	state: string;
-	county?: string;
-}
-
-
 const getZipInfo = (zip: string): ZipInfo | null => {
 	const entry = stData.find(it => it.zip === zip);
-	if (entry) {
-		const { city, state, county } = entry
-		return { city: city, state: state, county: county };
-	}
-	return null
+	return entry || null;
 }
 
 export default getZipInfo;

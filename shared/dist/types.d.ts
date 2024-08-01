@@ -21,4 +21,10 @@ export type KeyCsvRecord = keyof CsvRecord;
 export type HeaderMapping = {
     [k in keyof CsvRecord]: string | undefined;
 };
+export type ZipInfo = {
+    zip: string;
+    city: string;
+    state: string;
+    county?: string;
+};
 export {};

@@ -1,6 +1,7 @@
 // backend/src/config/database.ts
 import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
+import logger from './logger';
 
 // Load environment variables from .env file
 const env = process.env.NODE_ENV || 'development';
@@ -26,14 +27,6 @@ const sequelize = new Sequelize({
     idle: 10000,
   },
 });
-
-// Import models
-import { Package } from '../models/Package';
-import { Transaction } from '../models/Transaction';
-import logger from './logger';
-
-// Initialize model relationships if needed
-Transaction.belongsTo(Package, { foreignKey: 'packageId' });
 
 // Connect to the database and synchronize models
 const connectDB = async () => {

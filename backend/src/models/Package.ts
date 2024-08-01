@@ -3,6 +3,7 @@ import { sequelize } from '../config/database';
 import { User } from './User';
 import { Address } from './Address';
 import { PackageAttributes, PackageSource } from '@ddlabel/shared';
+import { Transaction } from './Transaction';
 
 interface PackageCreationAttributes extends Optional<PackageAttributes, 'id'> {}
 
@@ -14,8 +15,8 @@ class Package extends Model<PackageAttributes, PackageCreationAttributes> implem
   public length?: number;
   public width?: number;
   public height?: number;
+  public trackingNo!: string;
   public weight!: number;
-  public trackingNo?: string;
   public referenceNo!: string;
   public fromAddress!: Address;
   public toAddress!: Address;
@@ -89,9 +90,5 @@ Package.init(
     tableName: 'packages',
   }
 );
-
-Package.belongsTo(Address, { as: 'fromAddress', foreignKey: 'fromAddressId', onDelete: 'CASCADE' });
-Package.belongsTo(Address, { as: 'toAddress', foreignKey: 'toAddressId', onDelete: 'CASCADE' });
-Package.belongsTo(User, { as: 'user', foreignKey: 'userId' }); // Ensure alias 'owner' is defined here
 
 export { Package, PackageCreationAttributes };
