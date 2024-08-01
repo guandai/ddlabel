@@ -1,6 +1,6 @@
 // backend/src/controllers/packageBatchFuntions.ts
 import { Package } from '../models/Package';
-import { Address } from '../models/Address';
+import { Address, AddressCreationAttributes } from '../models/Address';
 import getZipInfo from '../utils/getZipInfo';
 import { isValidJSON } from '../utils/errors';
 import logger from '../config/logger';
@@ -8,28 +8,19 @@ import { CsvRecord, defaultMapping, CSV_KEYS, HeaderMapping, KeyCsvRecord, Packa
 
 export type BatchDataType = {
 	pkgBatch: PackageRoot[],
-	fromBatch: AddressData[],
-	toBatch: AddressData[],
+	fromBatch: AddressCreationAttributes[],
+	toBatch: AddressCreationAttributes[],
 }
 
 export type PackageRoot = {
 	userId: number,
-	length?: number,
-	width?: number,
-	height?: number,
+	length: number,
+	width: number,
+	height: number,
 	weight: number,
-	trackingNo?: string,
+	trackingNo: string,
 	referenceNo: string,
 	source: PackageSource
-}
-
-type AddressData = {
-	name: string,
-	address1: string,
-	address2?: string,
-	city: string,
-	state: string,
-	zip: string,
 }
 
 export type CsvData = { [k: string]: string | number };

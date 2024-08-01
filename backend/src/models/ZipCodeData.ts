@@ -81,7 +81,7 @@ ZipCodeData.init(
   {
     sequelize,
     tableName: 'zip_code_data',
-	timestamps: false, // Disable timestamps
+    timestamps: false, // Disable timestamps
   }
 );
 

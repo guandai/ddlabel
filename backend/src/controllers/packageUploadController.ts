@@ -8,11 +8,11 @@ import path from 'path';
 import { reportIoSocket } from '../utils/reportIo';
 import { AuthRequest } from '../types';
 import logger from '../config/logger';
-import { PackageSource } from '@ddlabel/shared';
+import { AddressEnum, PackageSource } from '@ddlabel/shared';
 import { BatchDataType, CsvData, getPreparedData, processBatch } from './packageBatchFuntions';
 
 type OnDataParams = {
-	req: AuthRequest, 
+	req: AuthRequest,
 	csvData: CsvData,
 	pkgAll: BatchDataType,
 }
@@ -21,7 +21,7 @@ const BATCH_SIZE = 500;
 
 const onData = (OnDataParams: OnDataParams) => {
 	const { req, csvData, pkgAll } = OnDataParams;
-	const {packageCsvLength, packageCsvMap} = req.body;
+	const { packageCsvLength, packageCsvMap } = req.body;
 
 	const prepared = getPreparedData(packageCsvMap, csvData);
 	if (!prepared) return;
@@ -29,10 +29,10 @@ const onData = (OnDataParams: OnDataParams) => {
 	const { mappedData, fromZipInfo, toZipInfo } = prepared;
 	pkgAll.pkgBatch.push({
 		userId: req.user.id,
-		length: mappedData['length'],
-		width: mappedData['width'],
-		height: mappedData['height'],
-		weight: mappedData['weight'],
+		length: mappedData['length'] || 0,
+		width: mappedData['width'] || 0,
+		height: mappedData['height'] || 0,
+		weight: mappedData['weight'] || 0,
 		trackingNo: mappedData['trackingNo'] || generateTrackingNo(),
 		referenceNo: mappedData['referenceNo'],
 		source: PackageSource.api,
@@ -43,6 +43,7 @@ const onData = (OnDataParams: OnDataParams) => {
 		address1: mappedData['fromAddress1'],
 		address2: mappedData['fromAddress2'],
 		zip: mappedData['fromAddressZip'],
+		addressType: AddressEnum.fromPackage,
 	});
 	pkgAll.toBatch.push({
 		...toZipInfo,
@@ -50,8 +51,9 @@ const onData = (OnDataParams: OnDataParams) => {
 		address1: mappedData['toAddress1'],
 		address2: mappedData['toAddress2'],
 		zip: mappedData['toAddressZip'],
+		addressType: AddressEnum.toPackage,
 	})
-	reportIoSocket( 'generate', req, pkgAll.pkgBatch.length, packageCsvLength);
+	reportIoSocket('generate', req, pkgAll.pkgBatch.length, packageCsvLength);
 	return;
 };
 
@@ -82,7 +84,7 @@ const onEndData = async (req: Request, res: Response, pkgAll: BatchDataType) => 
 			batchData.fromBatch = [];
 			batchData.toBatch = [];
 			processed += pkgDataSlice.length;
-			reportIoSocket( 'insert', req, processed, pkgBatch.length );
+			reportIoSocket('insert', req, processed, pkgBatch.length);
 		} catch (error: any) {
 			logger.error('Error processing batch', error);
 			return res.status(500).send({ message: `Error processing batch: ${error?.errors?.[0]?.message}` });
@@ -109,7 +111,7 @@ export const importPackages = async (req: Request, res: Response) => {
 	fs.createReadStream(file.path)
 		.pipe(csv())
 		.on('data', (csvData: CsvData) => onData({ req, csvData, pkgAll }))
-		.on('end', async () =>  onEndData(req, res, pkgAll))
+		.on('end', async () => onEndData(req, res, pkgAll))
 		.on('error', (err) => {
 			logger.error('Error parsing CSV:', err);
 			res.status(500).send({ message: 'Error importing pkgBatch' });

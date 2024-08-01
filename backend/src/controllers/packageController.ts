@@ -82,8 +82,8 @@ export const updatePackage = async (req: Request, res: Response) => {
       throw new Error('Package not found');
     }
 
-    await Address.updateWithInfo(fromAddress, pkg.fromAddressId );
-    await Address.updateWithInfo(toAddress, pkg.toAddressId);
+    await Address.updateWithInfo(fromAddress);
+    await Address.updateWithInfo(toAddress);
 
     await pkg.update({ length, width, height, weight });
 
@@ -133,7 +133,3 @@ export const getPackageDetails = async (req: Request, res: Response) => {
     res.status(400).json({ message: error.message });
   }
 };
-function generateTracking(): any {
-  throw new Error('Function not implemented.');
-}
-

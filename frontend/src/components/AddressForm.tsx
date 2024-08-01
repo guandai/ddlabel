@@ -1,24 +1,12 @@
 // frontend/src/components/AddressForm.tsx
 import React, { useEffect, useState } from 'react';
 import { TextField, Grid, Typography } from '@mui/material';
-import axios from 'axios';
 import { SetMessage, tryLoad } from '../util/errors';
-import { AddressEnum } from '@ddlabel/shared';
-
-export type AddressType = {
-  name: string;
-  address1: string;
-  address2?: string;
-  city: string;
-  state: string;
-  zip: string;
-  email?: string;
-  phone?: string;
-  addressType: AddressEnum;
-}
+import { AddressAttributes } from '@ddlabel/shared';
+import { ZipCodeApi } from '../api/ZipCodeApi';
 
 type QuickFieldProps = {
-  name: keyof AddressType;
+  name: keyof AddressAttributes;
   pattern?: RegExp | string;
   autoComplete: string;
   required?: boolean;
@@ -28,7 +16,7 @@ type QuickFieldProps = {
 
 interface AddressFormProps {
   setMessage: SetMessage;
-  addressData: AddressType;
+  addressData: AddressAttributes;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   title: string;
 }
@@ -42,8 +30,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onCh
       setCity('');
       setState('');
       tryLoad(setMessage, async () => {
-        const response = await axios.get(`${process.env.REACT_APP_BE_URL}/zipcodes/datafile/${addressData.zip}`)
-        const info = response.data;
+        const info = await new ZipCodeApi().getUser(addressData.zip);
         setCity(info.city);
         setState(info.state);
         setMessage(null);
@@ -54,7 +41,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onCh
   useEffect(() => {
     onChange({ target: { name: 'city', value: city } } as React.ChangeEvent<HTMLInputElement>);
     onChange({ target: { name: 'state', value: state } } as React.ChangeEvent<HTMLInputElement>);
-  }, [city, state]);
+  }, [city, state, onChange]);
 
 
   const quickField = (prop: QuickFieldProps) => {

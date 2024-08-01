@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, IconButton, Typography, Box, Container, Button,
@@ -14,43 +13,32 @@ import { useNavigate } from 'react-router-dom';
 import PackageUploadMapping from './PackageUploadMapping';
 import { MessageContent } from '../types';
 import MessageAlert from './MessageAlert';
+import PackageApi from '../api/PackageApi';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [search, setSearch] = useState(''); // Add search state
   const [totalPackages, setTotalPackages] = useState(0); // Track the total number of packages
   const [message, setMessage] = useState<MessageContent>(null);
   const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(null);
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState(''); // Add search state
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const offset = page * rowsPerPage;
-
     tryLoad(setMessage, async () => {
-      const response = await axios.get(`${process.env.REACT_APP_BE_URL}/packages`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: {
-          limit: rowsPerPage,
-          offset,
-          search, // Include search query
-        }
-      });
-      setPackages(response.data.packages);
-      setTotalPackages(response.data.total); // Set the total number of packages
+      const params = { limit: rowsPerPage, offset: page * rowsPerPage, search };
+      const response = await PackageApi.getPackages(params);
+      setPackages(response.packages);
+      setTotalPackages(response.total); // Set the total number of packages
     });
     
   }, [page, rowsPerPage, search]);
 
   const handleDelete = async (id: number) => {
-    const token = localStorage.getItem('token');
     tryLoad(setMessage, async () => {
-      await axios.delete(`${process.env.REACT_APP_BE_URL}/packages/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      id && await PackageApi.deletePackage(String(id));
       setPackages(packages.filter(pkg => pkg.id !== id));
       setMessage({ text: 'Package deleted successfully', level: 'success' });
     });

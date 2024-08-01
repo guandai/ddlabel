@@ -3,8 +3,10 @@ import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 import { getCityState } from '../utils/getZipInfo';
 import { AddressAttributes, AddressEnum } from '@ddlabel/shared';
+import { User } from './User';
+import { Package } from './Package';
 
-interface AddressCreationAttributes extends Optional<AddressAttributes, 'id'> { }
+interface AddressCreationAttributes extends Optional<AddressAttributes, 'id'> {}
 
 class Address extends Model<AddressAttributes, AddressCreationAttributes> implements AddressAttributes {
   public id!: number;
@@ -16,16 +18,20 @@ class Address extends Model<AddressAttributes, AddressCreationAttributes> implem
   public zip!: string;
   public email?: string;
   public phone?: string;
-  public addressType?: AddressEnum;
+  public addressType!: AddressEnum;
+  public userId?: number;
+  public fromPackageId?: number;
+  public toPackageId?: number;
+
 
   public static async createWithInfo(attr: AddressCreationAttributes): Promise<Address> {
     const info = await getCityState(attr.zip, attr.city, attr.state);
     return await Address.create({ ...attr, city: info.city, state: info.state });
   }
 
-  public static async updateWithInfo(attr: AddressCreationAttributes, id: number) {
+  public static async updateWithInfo(attr: AddressAttributes) {
     const info = await getCityState(attr.zip, attr.city, attr.state);
-    await Address.update({ ...attr, city: info.city, state: info.state }, { where: { id } });
+    await Address.update({ ...attr, city: info.city, state: info.state }, { where: { id: attr.id } });
   }
 }
 
@@ -72,6 +78,30 @@ Address.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    userId: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      references: {
+        model: User,
+        key: 'id',
+      },
+    },
+    fromPackageId: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: true,
+      references: {
+        model: Package,
+        key: 'id',
+      },
+    },
+    toPackageId: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: true,
+      references: {
+        model: Package,
+        key: 'id',
+      },
+    },
   },
   {
     sequelize,
@@ -79,5 +109,6 @@ Address.init(
     timestamps: false, // Disable timestamps if not needed
   }
 );
+
 
 export { Address, AddressCreationAttributes };

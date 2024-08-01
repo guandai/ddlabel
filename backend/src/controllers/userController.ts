@@ -1,24 +1,24 @@
 // backend/src/controllers/userController.ts
-import { Request, Response } from 'express';
+import { Request, Response, Errback } from 'express';
 import { User } from '../models/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Address } from '../models/Address';
 import { AuthRequest } from '../types';
 import logger from '../config/logger';
+import { UserRegisterReq, UserUpdateReq } from '@ddlabel/shared';
 
 export const registerUser = async (req: Request, res: Response) => {
-  const { name, email, password, role, warehouseAddress } = req.body;
+  const { name, email, password, role, warehouseAddress }: UserRegisterReq = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
     const warehouseAddressId = (await Address.createWithInfo(warehouseAddress)).id;
-    const user = await User.create({ name, email, password: hashedPassword, role, warehouseAddressId });
-
-    res.status(201).json(user);
+    const user = await User.create({ name: '', email, password: hashedPassword, role, warehouseAddressId });
+    res.status(201).json({ success: true, userId: user.id });
   } catch (error: any) {
     logger.error(error); // Log the detailed
-    res.status(400).json({ message: error.message, errors: error.errors });
+    res.status(400).json({ message: error.message, error });
   }
 };
 
@@ -38,15 +38,17 @@ export const loginUser = async (req: Request, res: Response) => {
 };
 
 export const updateUser = async (req: Request, res: Response) => {
-  const user: User = req.body;
+  const user: UserUpdateReq & {id: number} = req.body;
   user.id = parseInt(req.params.id, 10)
 
   try {
-    if (user && user.password) {
+    if (user.password) {
       user.password = await bcrypt.hash(user.password, 10);
+    } else {
+      delete user.password;
     }
 
-    await Address.updateWithInfo(user.warehouseAddress, user.warehouseAddressId);
+    await Address.updateWithInfo(user.warehouseAddress);
     const response = await User.update(user, { where: { id: req.params.id } });
     res.json(response);
   } catch (error: any) {
