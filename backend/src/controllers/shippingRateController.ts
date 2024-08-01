@@ -2,10 +2,10 @@
 import { Request, Response } from 'express';
 import { ShippingRate } from '../models/ShippingRate';
 import { Op } from 'sequelize';
-import { FullRateParam, VolumeUnit, WeightUnit } from '@ddlabel/shared';
+import { FullRateReq, VolumeUnit, WeightUnit } from '@ddlabel/shared';
 
 // Function to calculate shipping rate
-export const fullShippingRate = async (prop: FullRateParam): Promise<number | 'NO_RATE'> => {
+export const fullShippingRate = async (prop: FullRateReq): Promise<number | 'NO_RATE'> => {
   let { weight, weightUnit, length, width, height, volumeUnit, zone } = prop;
   if (width > 108 || height > 108 || length > 108) {
     return 1000;

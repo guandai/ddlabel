@@ -7,7 +7,7 @@ export type FullRateRsp = {
 export type WeightUnit = 'lbs' | 'oz';
 export type VolumeUnit = 'inch' | 'mm';
 
-export type FullRateParam = {
+export type FullRateReq = {
 	weight: number;
 	weightUnit: WeightUnit;
 	length: number;
