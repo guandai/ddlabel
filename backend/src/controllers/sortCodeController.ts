@@ -6,7 +6,7 @@ exports.getAllSortCodes = async (req: Request, res: Response) => {
     const sortCodes = await SortCode.findAll();
     res.json(sortCodes);
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
@@ -43,6 +43,6 @@ exports.deleteSortCode = async (req: Request, res: Response) => {
       res.status(404).json({ message: 'Sort code not found' });
     }
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };

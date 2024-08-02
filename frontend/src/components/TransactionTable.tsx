@@ -4,9 +4,10 @@ import { tryLoad } from '../util/errors';
 import MessageAlert from './MessageAlert';
 import { MessageContent } from '../types';
 import TransactionApi from '../api/TransectionApi';
+import { TransactionType } from '@ddlabel/shared';
 
 const TransactionTable: React.FC = () => {
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState<TransactionType[]>([]);
   const [message, setMessage] = useState<MessageContent>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -18,7 +19,7 @@ const TransactionTable: React.FC = () => {
       tryLoad(setMessage, async () => {
         const params = { limit: rowsPerPage, offset: page * rowsPerPage, search };
         const response = await TransactionApi.getTransactions(params);
-        setTransactions(await TransactionApi.getTransactions(params));
+        setTransactions(response.transactions || []);
         setTotalPackages(response.total); // Set the total number of packages
       });
     };

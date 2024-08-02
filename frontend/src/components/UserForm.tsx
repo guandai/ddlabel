@@ -5,7 +5,7 @@ import { tryLoad } from '../util/errors';
 import AddressForm from './AddressForm';
 import { MessageContent, ProfileType } from '../types.d';
 import MessageAlert from './MessageAlert';
-import { AddressEnum, UserUpdateReq } from '@ddlabel/shared';
+import { AddressEnum } from '@ddlabel/shared';
 import { AddressAttributes } from "@ddlabel/shared";
 import UserApi from '../api/UserApi';
 
@@ -48,10 +48,8 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
     }
 
     tryLoad(setMessage, async () => {
-      const response = await UserApi.getCurrentUser();
-      const profileData = response.data;
       setProfile({
-        ...profileData,
+        ...(await UserApi.getCurrentUser()).user,
         password: '', // Ensure password is empty initially
         confirmPassword: '',
       });

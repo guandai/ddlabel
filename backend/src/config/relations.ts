@@ -15,13 +15,12 @@ export const defineRelations = () => {
 	Transaction.belongsTo(User, { as: 'user', foreignKey: 'userId' });
 
 
-	Package.hasOne(Transaction, { as: 'transaction', foreignKey: 'packagenId', onDelete: 'CASCADE' });
+	Package.hasOne(Transaction, { as: 'transaction', foreignKey: 'packageId', onDelete: 'CASCADE' });
 	Transaction.belongsTo(Package, { as: 'package', foreignKey: 'packageId' });
 
-
-	Package.hasMany(Address, { as: 'fromAddress', foreignKey: 'fromPackageId', onDelete: 'CASCADE' });
+	Package.hasOne(Address, { as: 'fromAddress', foreignKey: 'fromPackageId', onDelete: 'CASCADE' });
 	Address.belongsTo(Package, { as: 'fromPackage', foreignKey: 'fromPackageId' });
 
-	Package.hasMany(Address, { as: 'toAddress', foreignKey: 'toPackageId', onDelete: 'CASCADE' });
+	Package.hasOne(Address, { as: 'toAddress', foreignKey: 'toPackageId', onDelete: 'CASCADE' });
 	Address.belongsTo(Package, { as: 'toPackage', foreignKey: 'toPackageId' });
 }

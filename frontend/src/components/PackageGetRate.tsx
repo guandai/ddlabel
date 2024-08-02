@@ -1,11 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box } from '@mui/material';
-import { PackageType } from './PackageForm';
 import { tryLoad } from '../util/errors';
 import { MessageContent } from '../types';
 import RateApi from '../api/RateApi';
-import PostalZoneApi from '../api/PostalZone';
-import { KeyZones, PostalZoneAttributes } from '@ddlabel/shared';
+import PostalZoneApi from '../api/PostalZoneApi';
+import { KeyZones, PackageType, PostalZoneAttributes } from '@ddlabel/shared';
 
 type PackageDialogProps = {
     setMessage: React.Dispatch<React.SetStateAction<MessageContent>>;
@@ -17,39 +16,26 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ setMessage, selectedPack
     const [sortCode, setSortCode] = useState<string | null>(null);
 
 
-    const getPostalZone = useCallback(async (): Promise<PostalZoneAttributes | null> => {
-        if (!selectedPackage) {
-            return null;
-        }
-
-        const postZone = await PostalZoneApi.getPostZone(selectedPackage.fromAddress.zip);
-        if (!postZone) {
-            return null;
-        }
-
+    const getPostalZone = useCallback(async (pkg: PackageType): Promise<PostalZoneAttributes> => {
+        const postZone = (await PostalZoneApi.getPostZone({zip: pkg.fromAddress.zip})).postalZone;
         setSortCode(postZone.new_sort_code);
         return postZone;
-    }, [selectedPackage, setMessage]);
+    }, []);
 
     const getZone = useCallback(async (selectedPackage: PackageType, proposal: KeyZones) => {
-        const zone = await PostalZoneApi.getZone(selectedPackage.toAddress.zip, proposal);
+        const zone = (await PostalZoneApi.getZone({zip: selectedPackage.toAddress.zip, proposal})).zone;
         return zone?.replace('Zone ', '');
-    }, [setMessage]);
+    }, []);
 
     const handleGetData = useCallback(async () => {
         if (!selectedPackage) {
             return;
         }
         tryLoad(setMessage, async () => {
-            const postalZone = await getPostalZone();
-            if (!postalZone) {
-                setRate('Can not deliver PostalZone not found');
-                return;
-            }
-            const zone = await getZone(selectedPackage, postalZone?.proposal);
-
-            if (!zone || zone === '-') {
-                setRate('Can not deliver');
+            const postalZone = await getPostalZone(selectedPackage);
+            const zone = await getZone(selectedPackage, postalZone.proposal);
+            if (zone === '-') {
+                setRate('Can not deliver, Zone is not avaliable now');
                 return;
             }
 
