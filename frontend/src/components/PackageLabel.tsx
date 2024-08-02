@@ -36,7 +36,7 @@ export const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const postalZone = (await new PostalZoneApi().getPostZone({zip: pkg.toAddress.zip})).postalZone;
+        const postalZone = (await new PostalZoneApi().getPostalZone({zip: pkg.toAddress.zip})).postalZone;
         setToProposal(postalZone.proposal);
         setSortCode(postalZone.new_sort_code);
       } catch (error) {

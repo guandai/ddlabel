@@ -4,7 +4,7 @@ import { tryLoad } from '../util/errors';
 import { MessageContent } from '../types';
 import RateApi from '../api/RateApi';
 import PostalZoneApi from '../api/PostalZoneApi';
-import { KeyZones, PackageType, PostalZoneAttributes } from '@ddlabel/shared';
+import { PackageType } from '@ddlabel/shared';
 
 type PackageDialogProps = {
     setMessage: React.Dispatch<React.SetStateAction<MessageContent>>;
@@ -15,48 +15,54 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ setMessage, selectedPack
     const [rate, setRate] = useState<number | string | null>(null);
     const [sortCode, setSortCode] = useState<string | null>(null);
 
-
-    const getPostalZone = useCallback(async (pkg: PackageType): Promise<PostalZoneAttributes> => {
-        const postZone = (await PostalZoneApi.getPostZone({zip: pkg.fromAddress.zip})).postalZone;
-        setSortCode(postZone.new_sort_code);
-        return postZone;
-    }, []);
-
-    const getZone = useCallback(async (selectedPackage: PackageType, proposal: KeyZones) => {
-        const zone = (await PostalZoneApi.getZone({zip: selectedPackage.toAddress.zip, proposal})).zone;
-        return zone?.replace('Zone ', '');
-    }, []);
-
+    const getZone = useCallback(async (selectedPackage: PackageType): Promise<string> => {
+        const fromZip = selectedPackage.fromAddress.zip;
+        const toZip = selectedPackage.toAddress.zip;
+        const zone = (await PostalZoneApi.getZone({fromZip, toZip})).zone?.replace('Zone ', '');
+        if (zone === '-') {
+            setRate('N/A');
+            setMessage({ text: 'Zone is not avaliable now', level: 'info' });
+            return 'N/A';
+        }
+        return zone;
+    }, [setMessage]);
+    
+    const getCost = useCallback(async (selectedPackage: PackageType, zone: string): Promise<number> => { 
+        const params = {
+            length: selectedPackage.length,
+            width: selectedPackage.width,
+            height: selectedPackage.height,
+            weight: selectedPackage.weight,
+            zone, // Replace with actual zone if available
+            weightUnit: 'lbs',
+            volumeUnit: 'inch',
+        };
+        const cost = (await RateApi.getFullRate(params)).totalCost;
+        if (cost === -1){
+            setMessage({ text: 'No rate available', level: 'info' }); 
+            setRate(`N/A`);
+            return -1;
+        }
+        return cost;
+    }, [setMessage]);
+    
     const handleGetData = useCallback(async () => {
         if (!selectedPackage) {
             return;
         }
         tryLoad(setMessage, async () => {
-            const postalZone = await getPostalZone(selectedPackage);
-            const zone = await getZone(selectedPackage, postalZone.proposal);
-            if (zone === '-') {
-                setRate('Can not deliver, Zone is not avaliable now');
-                return;
-            }
+            const zip = selectedPackage?.toAddress.zip;
+            setSortCode((await PostalZoneApi.getPostalZone({zip})).postalZone.sort_code);
 
-            const params = {
-                length: selectedPackage.length,
-                width: selectedPackage.width,
-                height: selectedPackage.height,
-                weight: selectedPackage.weight,
-                zone, // Replace with actual zone if available
-                weightUnit: 'lbs',
-                volumeUnit: 'inch',
-            };
-            const cost = (await RateApi.getFullRate(params)).totalCost;
-            if (cost === -1){
-                setMessage({ text: 'No rate available', level: 'info' }); 
-                setRate(`N/A`);
-                return;
-            }
+            const zone = await getZone(selectedPackage);
+            if (zone === 'N/A') { return }
+
+            const cost = await getCost(selectedPackage, zone);
+            if (cost === -1) { return; }
+
             setRate(`$${cost.toFixed(2)}`);
         });
-    }, [getPostalZone, getZone, selectedPackage, setMessage]);
+    }, [selectedPackage, setMessage, getCost, getZone]);
 
     useEffect(() => {
 		setMessage(null);

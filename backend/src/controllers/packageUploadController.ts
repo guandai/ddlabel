@@ -30,11 +30,12 @@ const BATCH_SIZE = 500;
 const onData = ({ req, csvData, pkgAll }: OnDataParams) => {
 	const { packageCsvLength, packageCsvMap } = req.body;
 	const prepared = getPreparedData(packageCsvMap, csvData);
+	const userId = req.user.id;
 	if (!prepared) return;
 
 	const { mappedData, fromZipInfo, toZipInfo } = prepared;
 	pkgAll.pkgBatch.push({
-		userId: req.user.id,
+		userId,
 		length: mappedData['length'] || 0,
 		width: mappedData['width'] || 0,
 		height: mappedData['height'] || 0,
@@ -46,6 +47,7 @@ const onData = ({ req, csvData, pkgAll }: OnDataParams) => {
 	pkgAll.shipFromBatch.push({
 		...fromZipInfo,
 		name: mappedData['fromName'],
+		userId,
 		address1: mappedData['fromAddress1'],
 		address2: mappedData['fromAddress2'],
 		zip: mappedData['fromAddressZip'],
@@ -54,6 +56,7 @@ const onData = ({ req, csvData, pkgAll }: OnDataParams) => {
 	pkgAll.shipToBatch.push({
 		...toZipInfo,
 		name: mappedData['toName'],
+		userId,
 		address1: mappedData['toAddress1'],
 		address2: mappedData['toAddress2'],
 		zip: mappedData['toAddressZip'],

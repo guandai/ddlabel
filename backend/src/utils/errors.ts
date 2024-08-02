@@ -1,3 +1,4 @@
+import { ResponseAdv } from "@ddlabel/shared";
 import { UniqueConstraintError } from "sequelize";
 
 export const isValidJSON = (str: string) => {
@@ -13,3 +14,5 @@ export const aggregateError = (error: UniqueConstraintError | Error) =>
 	error?.constructor.name === 'UniqueConstraintError' &&  'errors' in error
 		? error.errors.map((e: any) => e.message).join(', ')
 		: error?.message;
+
+export const Return400 = <T>(res: ResponseAdv<T>, message: string) => res.status(400).json({ message});

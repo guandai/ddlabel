@@ -1,5 +1,5 @@
 import { Optional } from 'sequelize';
-import { AddressAttributes, KeyZones, PackageAttributes, PackageType, PostalZoneAttributes, TransactionType, UserAttributes, ZipCodeAttributes } from "./models";
+import { AddressAttributes, PackageAttributes, PackageType, PostalZoneAttributes, TransactionType, UserAttributes, ZipCodeAttributes } from "./models";
 import { SimpleRes } from './types';
 export type RegisterUserReq = Pick<UserAttributes, 'name' | 'email' | 'password' | 'role'> & {
     warehouseAddress: AddressAttributes;
@@ -127,8 +127,8 @@ export type GetPostalZonesRes = {
     postalZones: PostalZoneAttributes[];
 };
 export type GetZoneReq = {
-    zip: string;
-    proposal: KeyZones;
+    fromZip: string;
+    toZip: string;
 };
 export type GetZoneRes = {
     zone: string;
