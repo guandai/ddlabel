@@ -33,3 +33,5 @@ backend/.yarn/cache/
 node_modules/
 .DS_Store
 backend/uploads/
+backend/log
+log
