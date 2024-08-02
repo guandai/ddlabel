@@ -142,5 +142,5 @@ export type GetPostalZoneRes = { postalZone: PostalZoneAttributes };;
 
 export type GetPostalZonesRes = { postalZones: PostalZoneAttributes[] };
 
-export type GetZoneReq = { zip: string; proposal: KeyZones };
+export type GetZoneReq = { fromZip: string; toZip: string };
 export type GetZoneRes = { zone: string }

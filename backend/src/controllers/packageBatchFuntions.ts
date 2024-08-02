@@ -46,15 +46,16 @@ export const getPreparedData = (packageCsvMap: string, csvData: CsvData) => {
 export const processBatch = async (batchData: BatchDataType) => {
 	const { pkgBatch, shipFromBatch, shipToBatch } = batchData;
 	try {
+		const packages = await Package.bulkCreate(pkgBatch);
+		packages.map((pkg, idx: number) => {
+			shipFromBatch[idx].fromPackageId = pkg.id;
+			shipToBatch[idx].toPackageId = pkg.id;
+			// ...pkg,
+			// fromAddressId: fromAddresses[idx].id,
+			// toAddressId: toAddresses[idx].id
+		});
 		const fromAddresses = await Address.bulkCreate(shipFromBatch);
 		const toAddresses = await Address.bulkCreate(shipToBatch);
-		const packages = pkgBatch.map((pkg: PackageRoot, index: number) => ({
-			...pkg,
-			fromAddressId: fromAddresses[index].id,
-			toAddressId: toAddresses[index].id
-		}));
-
-		await Package.bulkCreate(packages);
 	} catch (error: any) {
 		throw error;
 	}
