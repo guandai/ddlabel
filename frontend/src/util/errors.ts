@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { MessageContent, PkgCsvError } from "../types.d";
 import React from "react";
 
@@ -30,13 +30,13 @@ export const tryLoad = async <T, P = void>(
   }
 }
 
-const loadApi = async<T>(
-  setMessage: SetMessage,
-  path: string,
-  params: unknown
-) => tryLoad<T>(setMessage, async () => {
-  const responst = await axios.get<T>(
-    `${process.env.REACT_APP_BE_URL}/${path}`,
-    { params });
-  return responst.data;
-})
+// const loadApi = async<T>(
+//   setMessage: SetMessage,
+//   path: string,
+//   params: unknown
+// ) => tryLoad<T>(setMessage, async () => {
+//   const responst = await axios.get<T>(
+//     `${process.env.REACT_APP_BE_URL}/${path}`,
+//     { params });
+//   return responst.data;
+// })

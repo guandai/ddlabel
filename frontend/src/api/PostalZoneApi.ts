@@ -4,7 +4,7 @@ import axios from "axios";
 export class PostalZoneApi {
 	private config = { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } };
 	private path = `${process.env.REACT_APP_BE_URL}/postal_zones`;
-	getPostZone = async (params: GetPostalZoneReq) => (await axios.get<GetPostalZoneRes>(`${this.path}/get_postal_zone`, {
+	getPostalZone = async (params: GetPostalZoneReq) => (await axios.get<GetPostalZoneRes>(`${this.path}/get_postal_zone`, {
 		...this.config,
 		params,
 	})).data;

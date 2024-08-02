@@ -27,13 +27,11 @@ export const registerUser = async (req: Request, res: ResponseAdv<RegisterUserRe
 
 export const loginUser = async (req: AuthRequest, res: ResponseAdv<LoginUserRes>) => {
   const { email, password } = req.body;
-  console.log(req.body);
   try {
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(400).json({ message: 'user email not exist' });
     }
-    console.log(`bc`, await bcrypt.compare(password, user.password));
     
     if (user && (await bcrypt.compare(password, user.password))) {
       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: '7d' });
