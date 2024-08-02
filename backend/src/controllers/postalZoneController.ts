@@ -13,12 +13,12 @@ export const getPostalZone = async (req: Request, res: ResponseAdv<GetPostalZone
       where: { zip },
     });
     if (postalZone) {
-      res.json({ postalZone });
+      return res.json({ postalZone });
     } else {
-      res.status(404).json({ message: 'PostalZone not found' });
+      return res.status(404).json({ message: 'PostalZone not found' });
     }
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
@@ -38,8 +38,8 @@ export const getZone = async (req: Request<GetZoneReq>, res: ResponseAdv<GetZone
       return res.status(404).json({ message: 'No Avaliable Zone' });
     }
 
-    res.json({ zone });
+    return res.json({ zone });
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };

@@ -14,7 +14,6 @@ export const defineRelations = () => {
 	User.hasMany(Transaction, { as: 'transactions', foreignKey: 'userId', onDelete: 'CASCADE' });
 	Transaction.belongsTo(User, { as: 'user', foreignKey: 'userId' });
 
-
 	Package.hasOne(Transaction, { as: 'transaction', foreignKey: 'packageId', onDelete: 'CASCADE' });
 	Transaction.belongsTo(Package, { as: 'package', foreignKey: 'packageId' });
 

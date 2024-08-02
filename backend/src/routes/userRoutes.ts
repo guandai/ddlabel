@@ -6,7 +6,7 @@ const router = Router();
 
 router.get('/', authenticate, getUsers); // Add this line to fetch all users
 router.post('/register', registerUser);
-router.post('/login', authenticate, loginUser);
+router.post('/login', loginUser);
 router.get('/me', authenticate, getCurrentUser);
 router.put('/me', authenticate, updateCurrentUser);
 

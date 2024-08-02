@@ -25,6 +25,7 @@ export const tryLoad = async <T, P = void>(
     return await callback();
   } catch (error) {
     tryError(setMessage, error);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     return errorFn?.();
   }
 }

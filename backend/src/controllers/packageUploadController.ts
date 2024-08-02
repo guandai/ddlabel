@@ -10,6 +10,8 @@ import { AuthRequest } from '../types';
 import logger from '../config/logger';
 import { AddressEnum, ImportPackageRes, PackageSource, ResponseAdv } from '@ddlabel/shared';
 import { BatchDataType, CsvData, getPreparedData, processBatch } from './packageBatchFuntions';
+import { AggregateError, Sequelize, UniqueConstraintError } from 'sequelize';
+import { aggregateError } from '../utils/errors';
 
 type OnDataParams = {
 	req: AuthRequest,
@@ -17,12 +19,16 @@ type OnDataParams = {
 	pkgAll: BatchDataType,
 }
 
+type OnEndParams = {
+	stream: fs.ReadStream,
+	req: AuthRequest,
+	pkgAll: BatchDataType,
+}
+
 const BATCH_SIZE = 500;
 
-const onData = (OnDataParams: OnDataParams) => {
-	const { req, csvData, pkgAll } = OnDataParams;
+const onData = ({ req, csvData, pkgAll }: OnDataParams) => {
 	const { packageCsvLength, packageCsvMap } = req.body;
-
 	const prepared = getPreparedData(packageCsvMap, csvData);
 	if (!prepared) return;
 
@@ -57,7 +63,7 @@ const onData = (OnDataParams: OnDataParams) => {
 	return;
 };
 
-const onEndData = async (req: Request, res: ResponseAdv<ImportPackageRes>, pkgAll: BatchDataType) => {
+const onEnd = async ({ stream, req, pkgAll }: OnEndParams) => {
 	const { pkgBatch, shipFromBatch, shipToBatch } = pkgAll;
 	let processed = 0;
 	const batchData: BatchDataType = {
@@ -85,22 +91,17 @@ const onEndData = async (req: Request, res: ResponseAdv<ImportPackageRes>, pkgAl
 			batchData.shipToBatch = [];
 			processed += pkgDataSlice.length;
 			reportIoSocket('insert', req, processed, pkgBatch.length);
+			stream.emit('success');
 		} catch (error: any) {
-			logger.error('Error processing batch', error);
-			res.status(400).send({ message: `OnEnd Error processing batch: ${error?.errors?.[0]?.message}` });
+			stream.emit('error', aggregateError(error));
 		}
 	}
-
-	res.status(200).send({ message: 'OnEnd PkgBatch imported successfully' });
 };
 
-
 export const importPackages = async (req: Request, res: ResponseAdv<ImportPackageRes>) => {
-	const { body, file } = req;
-
+	const { file } = req;
 	if (!file) {
-		const result = res.status(400).send({ message: 'No file uploaded' });
-		return result
+		return res.status(400).send({ message: 'No file uploaded' });
 	}
 
 	const pkgAll: BatchDataType = {
@@ -109,14 +110,19 @@ export const importPackages = async (req: Request, res: ResponseAdv<ImportPackag
 		shipToBatch: [],
 	}
 
-	fs.createReadStream(file.path)
-		.pipe(csv())
+	const stream = fs.createReadStream(file.path);
+	stream.pipe(csv())
 		.on('data', (csvData: CsvData) => onData({ req, csvData, pkgAll }))
-		.on('end', async () => onEndData(req, res, pkgAll))
-		.on('error', (err) => {
-			logger.error('Error parsing CSV:', err);
-			return res.status(400).send({ message: 'On Error importing pkgBatch' });
-		});
+		.on('end', async () => onEnd({ stream, req, pkgAll }));
+
+	//  if .on('error')  follow the chain, the error can not be catched by stream
+	stream.on('error', err => {
+		logger.error(`onError importing pkgBatch ${err}`);
+		return res.status(400).send({ message: `Importing Error: ${err}` })
+	});
+	stream.on('success', () => {
+		return res.json({ message: `Importing Done!` });
+	});
 };
 
 const storage = multer.diskStorage({

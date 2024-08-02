@@ -38,23 +38,6 @@ export type UpdateUserRes = {
 	success: boolean;
 };
 
-// Address
-export type GetAddressRes = {
-	address: AddressAttributes;
-};
-
-export type UpdateAddressReq = {
-	address1: string;
-	address2: string;
-	city: string;
-	state: string;
-	zip: string;
-	email: string;
-	phone: string;
-};
-export type UpdateAddressRes = {
-	success: boolean;
-};
 
 // Package
 export type WeightUnit = 'lbs' | 'oz';

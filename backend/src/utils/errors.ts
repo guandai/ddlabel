@@ -1,3 +1,5 @@
+import { UniqueConstraintError } from "sequelize";
+
 export const isValidJSON = (str: string) => {
 	try {
 		JSON.parse(str);
@@ -6,3 +8,8 @@ export const isValidJSON = (str: string) => {
 		return false;
 	}
 }
+
+export const aggregateError = (error: UniqueConstraintError | Error) => 
+	error?.constructor.name === 'UniqueConstraintError' &&  'errors' in error
+		? error.errors.map((e: any) => e.message).join(', ')
+		: error?.message;

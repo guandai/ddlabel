@@ -10,9 +10,9 @@ export const getZipCode = async (req: Request, res: ResponseAdv<ZipCode>) => {
     if (!zipCode) {
       return res.status(404).json({ message: 'Zip code not found' });
     }
-    res.json(zipCode);
+    return res.json(zipCode);
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
@@ -40,18 +40,17 @@ export const getZipCodes = async (req: Request, res: ResponseAdv<GetZipCodesRes>
       totalPages: totalPages,
       data: data.rows,
     };
-    res.json(result);
+    return res.json(result);
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
 export const getZipCodeFromFile = async (req: Request, res: ResponseAdv<ZipInfo>) => {
   const info = getZipInfo(req.params.zip);
   if (!info) {
-    res.status(404).json({ message: 'Zip code not found' });
-    return;
+    return res.status(404).json({ message: 'Zip code not found' });
   }
   const result: ZipInfo = { zip: req.params.zip, city: info.city, state: info.state };
-  res.json(result);
+  return res.json(result);
 }
