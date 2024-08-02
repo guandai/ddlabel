@@ -98,7 +98,7 @@ export const getFullRate = async (req: Request, res: Response) => {
     };
     res.json({ totalCost });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 

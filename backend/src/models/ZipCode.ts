@@ -1,22 +1,9 @@
-// backend/src/models/ZipCodeData.ts
+// backend/src/models/ZipCode.ts
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../config/database';
+import { ZipCodeAttributes } from '@ddlabel/shared';
 
-interface ZipCodeDataAttributes {
-  zip: string;
-  lat: number;
-  lng: number;
-  city: string;
-  state_id: string;
-  state_name: string;
-  zcta: string;
-  parent_zcta: string;
-  county_fips: string;
-  county_name: string;
-  timezone: string;
-}
-
-class ZipCodeData extends Model<ZipCodeDataAttributes> implements ZipCodeDataAttributes {
+class ZipCode extends Model<ZipCodeAttributes> implements ZipCodeAttributes {
   public zip!: string;
   public lat!: number;
   public lng!: number;
@@ -30,7 +17,7 @@ class ZipCodeData extends Model<ZipCodeDataAttributes> implements ZipCodeDataAtt
   public timezone!: string;
 }
 
-ZipCodeData.init(
+ZipCode.init(
   {
     zip: {
       type: DataTypes.STRING(10),
@@ -80,9 +67,9 @@ ZipCodeData.init(
   },
   {
     sequelize,
-    tableName: 'zip_code_data',
+    tableName: 'zip_codes',
     timestamps: false, // Disable timestamps
   }
 );
 
-export { ZipCodeData };
+export { ZipCode };

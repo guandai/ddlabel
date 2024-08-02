@@ -1,18 +1,11 @@
 import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../config/database'; // Import your database configuration
+import { SortCodeAttributes } from '@ddlabel/shared';
 
-interface SortCodeAttributes {
-  id: number;
-  port: string;
-  zipCode: string;
-  sortCode: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
 export class SortCode extends Model<SortCodeAttributes> implements SortCodeAttributes{
   public id!: number;
   public port!: string;
-  public zipCode!: string;
+  public zip!: string;
   public sortCode!: string;
   public createdAt!: Date;
   public updatedAt!: Date;
@@ -29,7 +22,7 @@ SortCode.init({
     type: DataTypes.STRING(255),
     allowNull: false
   },
-  zipCode: {
+  zip: {
     type: DataTypes.STRING(5),
     allowNull: false
   },

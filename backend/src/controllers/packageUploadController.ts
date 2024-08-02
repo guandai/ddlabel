@@ -1,5 +1,5 @@
 // backend/src/controllers/packageUpload.ts
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { generateTrackingNo } from '../utils/generateTrackingNo';
 import multer from 'multer';
 import csv from 'csv-parser';
@@ -8,7 +8,7 @@ import path from 'path';
 import { reportIoSocket } from '../utils/reportIo';
 import { AuthRequest } from '../types';
 import logger from '../config/logger';
-import { AddressEnum, PackageSource } from '@ddlabel/shared';
+import { AddressEnum, ImportPackageRes, PackageSource, ResponseAdv } from '@ddlabel/shared';
 import { BatchDataType, CsvData, getPreparedData, processBatch } from './packageBatchFuntions';
 
 type OnDataParams = {
@@ -37,7 +37,7 @@ const onData = (OnDataParams: OnDataParams) => {
 		referenceNo: mappedData['referenceNo'],
 		source: PackageSource.api,
 	});
-	pkgAll.fromBatch.push({
+	pkgAll.shipFromBatch.push({
 		...fromZipInfo,
 		name: mappedData['fromName'],
 		address1: mappedData['fromAddress1'],
@@ -45,7 +45,7 @@ const onData = (OnDataParams: OnDataParams) => {
 		zip: mappedData['fromAddressZip'],
 		addressType: AddressEnum.fromPackage,
 	});
-	pkgAll.toBatch.push({
+	pkgAll.shipToBatch.push({
 		...toZipInfo,
 		name: mappedData['toName'],
 		address1: mappedData['toAddress1'],
@@ -57,13 +57,13 @@ const onData = (OnDataParams: OnDataParams) => {
 	return;
 };
 
-const onEndData = async (req: Request, res: Response, pkgAll: BatchDataType) => {
-	const { pkgBatch, fromBatch, toBatch } = pkgAll;
+const onEndData = async (req: Request, res: ResponseAdv<ImportPackageRes>, pkgAll: BatchDataType) => {
+	const { pkgBatch, shipFromBatch, shipToBatch } = pkgAll;
 	let processed = 0;
 	const batchData: BatchDataType = {
 		pkgBatch: [],
-		fromBatch: [],
-		toBatch: [],
+		shipFromBatch: [],
+		shipToBatch: [],
 	}
 
 	const turns = Math.ceil(pkgBatch.length / BATCH_SIZE);
@@ -71,41 +71,42 @@ const onEndData = async (req: Request, res: Response, pkgAll: BatchDataType) => 
 	for (let i = 0; i < turns; i++) {
 		const start = i * BATCH_SIZE;
 		const pkgDataSlice = pkgBatch.slice(start, start + BATCH_SIZE);
-		const fromSlice = fromBatch.slice(start, start + BATCH_SIZE);
-		const toSlice = toBatch.slice(start, start + BATCH_SIZE);
+		const fromSlice = shipFromBatch.slice(start, start + BATCH_SIZE);
+		const toSlice = shipToBatch.slice(start, start + BATCH_SIZE);
 
-		batchData.fromBatch = fromSlice;
-		batchData.toBatch = toSlice;
+		batchData.shipFromBatch = fromSlice;
+		batchData.shipToBatch = toSlice;
 		batchData.pkgBatch = pkgDataSlice;
 
 		try {
 			await processBatch(batchData);
 			batchData.pkgBatch = [];
-			batchData.fromBatch = [];
-			batchData.toBatch = [];
+			batchData.shipFromBatch = [];
+			batchData.shipToBatch = [];
 			processed += pkgDataSlice.length;
 			reportIoSocket('insert', req, processed, pkgBatch.length);
 		} catch (error: any) {
 			logger.error('Error processing batch', error);
-			return res.status(500).send({ message: `Error processing batch: ${error?.errors?.[0]?.message}` });
+			res.status(400).send({ message: `OnEnd Error processing batch: ${error?.errors?.[0]?.message}` });
 		}
 	}
 
-	res.status(200).send({ message: 'PkgBatch imported successfully' });
+	res.status(200).send({ message: 'OnEnd PkgBatch imported successfully' });
 };
 
 
-export const importPackages = async (req: Request, res: Response) => {
+export const importPackages = async (req: Request, res: ResponseAdv<ImportPackageRes>) => {
 	const { body, file } = req;
 
 	if (!file) {
-		return res.status(400).send({ message: 'No file uploaded' });
+		const result = res.status(400).send({ message: 'No file uploaded' });
+		return result
 	}
 
 	const pkgAll: BatchDataType = {
 		pkgBatch: [],
-		fromBatch: [],
-		toBatch: [],
+		shipFromBatch: [],
+		shipToBatch: [],
 	}
 
 	fs.createReadStream(file.path)
@@ -114,7 +115,7 @@ export const importPackages = async (req: Request, res: Response) => {
 		.on('end', async () => onEndData(req, res, pkgAll))
 		.on('error', (err) => {
 			logger.error('Error parsing CSV:', err);
-			res.status(500).send({ message: 'Error importing pkgBatch' });
+			return res.status(400).send({ message: 'On Error importing pkgBatch' });
 		});
 };
 

@@ -4,7 +4,7 @@ import { TextField, Button, Box, Typography, Container, Grid } from '@mui/materi
 import { useNavigate, useParams } from 'react-router-dom';
 import { tryLoad } from '../util/errors';
 import AddressForm from './AddressForm';
-import { AddressAttributes } from "@ddlabel/shared";
+import { AddressAttributes, CreatePackageReq, PackageType, UpdatePackageReq } from "@ddlabel/shared";
 import { MessageContent } from '../types.d';
 import MessageAlert from './MessageAlert';
 import { AddressEnum } from '@ddlabel/shared';
@@ -15,18 +15,6 @@ type QuickFieldProp = {
   type?: 'text' | 'number';
   pattern?: string | null;
   required?: boolean;
-};
-
-export type PackageType = {
-  id: number;
-  fromAddress: AddressAttributes;
-  toAddress: AddressAttributes;
-  length: number;
-  width: number;
-  height: number;
-  weight: number;
-  trackingNo: string;
-  referenceNo: string;
 };
 
 const defautAddress = { addressType: AddressEnum.toPackage } as AddressAttributes;
@@ -68,11 +56,11 @@ const PackageForm: React.FC = () => {
     }
 
     tryLoad(setMessage, async () => {
-      setPackageData(await PackageApi.getPackageById(packageId));
+      setPackageData((await PackageApi.getPackageById(packageId)).package);
     });
   }, [packageId]);
 
-  const onSubmit = async (data: Partial<PackageType>) => {
+  const onSubmit = async (data: UpdatePackageReq | CreatePackageReq) => {
     if (message?.text && message.level === 'error') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;

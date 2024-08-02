@@ -1,6 +1,6 @@
 // frontend/src/utils/generatePDF.ts
 import jsPDF from 'jspdf';
-import { PackageType } from '../components/PackageForm';
+import { PackageType } from '@ddlabel/shared';
 import PackageLabel from '../components/PackageLabel';
 import React from 'react';
 import { createRoot } from 'react-dom/client';

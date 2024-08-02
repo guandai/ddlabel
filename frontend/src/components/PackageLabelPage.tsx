@@ -1,7 +1,7 @@
 // frontend/src/components/PackageLabelPage.tsx
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { PackageType } from './PackageForm';
+import { PackageType } from '@ddlabel/shared';
 import PackageLabel from './PackageLabel';
 import { CircularProgress } from '@mui/material';
 import { tryLoad } from '../util/errors';
@@ -18,7 +18,7 @@ const PackageLabelPage: React.FC = () => {
   useEffect(() => {
     const fetchPackage = async () => {
       tryLoad(setMessage, async () => {
-        id && setPkg(await new PackageApi().getPackageById(id));
+        id && setPkg((await new PackageApi().getPackageById(id)).package);
         setLoading(false);
       }, async () => setLoading(false));
     };

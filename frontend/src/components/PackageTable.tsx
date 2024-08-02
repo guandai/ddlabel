@@ -5,7 +5,7 @@ import {
   TablePagination, TextField
 } from '@mui/material';
 import { Visibility, Edit, Delete, PictureAsPdf, Label, AddCircle } from '@mui/icons-material';
-import { PackageType } from './PackageForm';
+import { PackageType } from '@ddlabel/shared';
 import { tryLoad } from '../util/errors';
 import { generatePDF } from './generatePDF';
 import PackageDialog from './PackageDialog';
@@ -14,6 +14,7 @@ import PackageUploadMapping from './PackageUploadMapping';
 import { MessageContent } from '../types';
 import MessageAlert from './MessageAlert';
 import PackageApi from '../api/PackageApi';
+import { GetPackagesReq } from '@ddlabel/shared';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
@@ -28,7 +29,7 @@ const PackageTable: React.FC = () => {
 
   useEffect(() => {
     tryLoad(setMessage, async () => {
-      const params = { limit: rowsPerPage, offset: page * rowsPerPage, search };
+      const params: GetPackagesReq = { limit: rowsPerPage, offset: page * rowsPerPage, search };
       const response = await PackageApi.getPackages(params);
       setPackages(response.packages);
       setTotalPackages(response.total); // Set the total number of packages

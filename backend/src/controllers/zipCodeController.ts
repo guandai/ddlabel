@@ -1,33 +1,30 @@
-import { Request, Response } from 'express';
-import { ZipCodeData } from '../models/ZipCodeData';
+import { Request } from 'express';
+import { ZipCode } from '../models/ZipCode';
 import getZipInfo from '../utils/getZipInfo';
-import { ZipInfo } from '@ddlabel/shared';
+import { GetZipCodesRes, ResponseAdv, ZipInfo } from '@ddlabel/shared';
 
-export const getZipCodeData = async (req: Request, res: Response) => {
+export const getZipCode = async (req: Request, res: ResponseAdv<ZipCode>) => {
   try {
     const { zip } = req.params;
-    const data = await ZipCodeData.findOne({ where: { zip } });
-    if (!data) {
+    const zipCode = await ZipCode.findOne({ where: { zip } });
+    if (!zipCode) {
       return res.status(404).json({ message: 'Zip code not found' });
     }
-    res.json(data);
+    res.json(zipCode);
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
-
-export const getAllZipCodeData = async (req: Request, res: Response) => {
+export const getZipCodes = async (req: Request, res: ResponseAdv<GetZipCodesRes>) => {
   try {
     // Get the page and pageSize from the query parameters, with default values
     const page = parseInt(req.query.page as string, 10) || 1;
     const pageSize = parseInt(req.query.pageSize as string, 10) || 10;
-
-    // Calculate the offset
     const offset = (page - 1) * pageSize;
 
     // Query the database with limit and offset for pagination
-    const data = await ZipCodeData.findAndCountAll({
+    const data = await ZipCode.findAndCountAll({
       limit: pageSize,
       offset: offset,
     });
@@ -36,19 +33,20 @@ export const getAllZipCodeData = async (req: Request, res: Response) => {
     const totalPages = Math.ceil(data.count / pageSize);
 
     // Return the paginated data, total items, and total pages
-    res.json({
+    const result: GetZipCodesRes = {
       page: page,
       pageSize: pageSize,
       totalItems: data.count,
       totalPages: totalPages,
       data: data.rows,
-    });
+    };
+    res.json(result);
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
-export const getZipCodeDataFromFile = async (req: Request, res: Response): Promise<void> => {
+export const getZipCodeFromFile = async (req: Request, res: ResponseAdv<ZipInfo>) => {
   const info = getZipInfo(req.params.zip);
   if (!info) {
     res.status(404).json({ message: 'Zip code not found' });

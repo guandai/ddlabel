@@ -1,3 +1,4 @@
+import { Response } from 'express';
 type CsvRecordRequired = {
 	weight: number,
 	referenceNo: string,
@@ -32,3 +33,11 @@ export type ZipInfo = {
 	state: string;
 	county?: string;
 };
+
+export type SimpleRes = {
+	message: string;
+	success?: false;
+	error?: Error;
+};
+
+export type ResponseAdv<T> = Response<T | SimpleRes>;

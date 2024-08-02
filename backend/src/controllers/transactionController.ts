@@ -1,13 +1,14 @@
 // backend/src/controllers/transactionController.ts
-import { Response } from 'express';
 import { Transaction } from '../models/Transaction';
 import { AuthRequest } from '../types';
 import { Op } from 'sequelize';
 import { Package } from '../models/Package';
 import { Address } from '../models/Address';
 import { User } from '../models/User';
+import { get } from 'http';
+import { GetTransactionRes, GetTransactionsRes, ResponseAdv } from '@ddlabel/shared';
 
-export const getTransactions = async (req: AuthRequest, res: Response) => {
+export const getTransactions = async (req: AuthRequest, res: ResponseAdv<GetTransactionsRes>) => {
   const limit = parseInt(req.query.limit as string) || 100; // Default limit to 20 if not provided
   const offset = parseInt(req.query.offset as string) || 0; // 
   const userId = req.user.id; 
@@ -24,18 +25,34 @@ export const getTransactions = async (req: AuthRequest, res: Response) => {
       }
     : {userId};
 
-    const packages = await Transaction.findAll({
+    const transactions = await Transaction.findAll({
       include: [
-        { model: Package, as: 'fromAddress' },
-        { model: Address, as: 'toAddress' },
+        { model: Package, as: 'package' },
         { model: User, as: 'user' },
       ],
       where: whereCondition,
       limit,
       offset,
     });
-    res.json({ total, packages });
+    res.json({ total, transactions });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 };
+
+export const getTransactionById = async (req: AuthRequest, res: ResponseAdv<GetTransactionRes>) => {
+  try {
+    const transaction = await Transaction.findByPk(req.params.id, {
+      include: [
+        { model: Package, as: 'package' },
+        { model: User, as: 'user' },
+      ],
+    });
+    if (!transaction) {
+      return res.status(404).json({ message: 'Transaction not found' });
+    }
+    res.json({transaction});
+  } catch (error: any) {
+    res.status(400).json({ message: error.message });
+  }
+}

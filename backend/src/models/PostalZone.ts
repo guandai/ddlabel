@@ -4,7 +4,7 @@ import { sequelize } from '../config/database';
 import { KeyZones, PostalZoneAttributes } from '@ddlabel/shared';
 
 class PostalZone extends Model<PostalZoneAttributes> implements PostalZoneAttributes {
-  public zip_code!: string;
+  public zip!: string;
   public new_sort_code!: string;
   public sort_code!: string;
   public state!: string;
@@ -28,7 +28,7 @@ class PostalZone extends Model<PostalZoneAttributes> implements PostalZoneAttrib
 
 PostalZone.init(
   {
-    zip_code: {
+    zip: {
       type: DataTypes.STRING(5),
       primaryKey: true,
     },

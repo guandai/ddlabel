@@ -1,27 +1,18 @@
 // backend/src/controllers/packageBatchFuntions.ts
-import { Package } from '../models/Package';
+import { Package, PackageCreationAttributes } from '../models/Package';
 import { Address, AddressCreationAttributes } from '../models/Address';
 import getZipInfo from '../utils/getZipInfo';
 import { isValidJSON } from '../utils/errors';
 import logger from '../config/logger';
-import { CsvRecord, defaultMapping, CSV_KEYS, HeaderMapping, KeyCsvRecord, PackageSource } from '@ddlabel/shared';
+import { CsvRecord, defaultMapping, CSV_KEYS, HeaderMapping, KeyCsvRecord, PackageSource, PackageAttributes } from '@ddlabel/shared';
 
 export type BatchDataType = {
 	pkgBatch: PackageRoot[],
-	fromBatch: AddressCreationAttributes[],
-	toBatch: AddressCreationAttributes[],
+	shipFromBatch: AddressCreationAttributes[],
+	shipToBatch: AddressCreationAttributes[],
 }
 
-export type PackageRoot = {
-	userId: number,
-	length: number,
-	width: number,
-	height: number,
-	weight: number,
-	trackingNo: string,
-	referenceNo: string,
-	source: PackageSource
-}
+export type PackageRoot = PackageCreationAttributes;
 
 export type CsvData = { [k: string]: string | number };
 
@@ -53,10 +44,10 @@ export const getPreparedData = (packageCsvMap: string, csvData: CsvData) => {
 }
 
 export const processBatch = async (batchData: BatchDataType) => {
-	const { pkgBatch, fromBatch, toBatch } = batchData;
+	const { pkgBatch, shipFromBatch, shipToBatch } = batchData;
 	try {
-		const fromAddresses = await Address.bulkCreate(fromBatch);
-		const toAddresses = await Address.bulkCreate(toBatch);
+		const fromAddresses = await Address.bulkCreate(shipFromBatch);
+		const toAddresses = await Address.bulkCreate(shipToBatch);
 		const packages = pkgBatch.map((pkg: PackageRoot, index: number) => ({
 			...pkg,
 			fromAddressId: fromAddresses[index].id,
@@ -65,7 +56,6 @@ export const processBatch = async (batchData: BatchDataType) => {
 
 		await Package.bulkCreate(packages);
 	} catch (error: any) {
-		console.log(`errorerrorerror`, error);
 		logger.error('Error processing batch', error);
 		throw error;
 	}

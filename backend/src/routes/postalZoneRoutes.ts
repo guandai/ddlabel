@@ -1,13 +1,11 @@
 // backend/src/routes/postalZoneRoutes.ts
 import { Router } from 'express';
-import { getPostalZoneByZip, getProposalByZip, getPostalZones, getPostalZoneById, getZoneByProposalAndZip } from '../controllers/postalZoneController';
+import { getPostalZone, getZone } from '../controllers/postalZoneController';
+import { authenticate } from '../middleware/auth';
 
 const router = Router();
 
-router.get('/', getPostalZones);
-router.get('/get_post_zone', getPostalZoneByZip);
-router.get('/get_zone', getZoneByProposalAndZip);
-router.get('/:id', getPostalZoneById);
-
+router.get('/get_postal_zone', authenticate, getPostalZone);
+router.get('/get_zone', authenticate, getZone);
 
 export default router;
