@@ -4,18 +4,18 @@ import { SortCode } from '../models/SortCode';
 exports.getAllSortCodes = async (req: Request, res: Response) => {
   try {
     const sortCodes = await SortCode.findAll();
-    res.json(sortCodes);
+    return res.json(sortCodes);
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
 exports.createSortCode = async (req: Request, res: Response) => {
   try {
     const newSortCode = await SortCode.create(req.body);
-    res.status(201).json(newSortCode);
+    return res.status(201).json(newSortCode);
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
@@ -26,23 +26,23 @@ exports.updateSortCode = async (req: Request, res: Response) => {
 
     if (updated) {
       const updatedSortCode = await SortCode.findByPk(id);
-      res.json(updatedSortCode);
+      return res.json(updatedSortCode);
     } else {
-      res.status(404).json({ message: 'Sort code not found' });
+      return res.status(404).json({ message: 'Sort code not found' });
     }
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
 exports.deleteSortCode = async (req: Request, res: Response) => {
   try {
     if (await SortCode.destroy({ where: { id: req.params } })) {
-      res.status(204).send();
+      return res.status(204).send();
     } else {
-      res.status(404).json({ message: 'Sort code not found' });
+      return res.status(404).json({ message: 'Sort code not found' });
     }
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };

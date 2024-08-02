@@ -1,4 +1,4 @@
-import { KeyZones, GetZoneRes, GetPostalZoneRes, GetPostalZoneReq, GetZoneReq } from "@ddlabel/shared";
+import { GetZoneRes, GetPostalZoneRes, GetPostalZoneReq, GetZoneReq } from "@ddlabel/shared";
 import axios from "axios";
 
 export class PostalZoneApi {
