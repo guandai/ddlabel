@@ -1,22 +1,22 @@
 // backend/src/routes/packageRoutes.ts
 import { Router } from 'express';
 import {
-	manualAddPackage,
+	createPackage,
 	getPackages,
 	updatePackage,
 	deletePackage,
-	getPackageDetails,
+	getPackage,
 } from '../controllers/packageController';
 import { authenticate } from '../middleware/auth';
 import { importPackages, uploadMiddleware } from '../controllers/packageUploadController';
 
 const router = Router();
 
-router.post('/', authenticate, manualAddPackage);
+router.post('/', authenticate, createPackage);
 router.get('/', authenticate, getPackages);
 router.put('/:id', authenticate, updatePackage);
 router.delete('/:id', authenticate, deletePackage);
-router.get('/:id', authenticate, getPackageDetails);
+router.get('/:id', authenticate, getPackage);
 router.post('/import', authenticate, uploadMiddleware, importPackages);
 
 export default router;

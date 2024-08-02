@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode.react';
 import BarcodeComponent from './BarcodeComponent';
 import { Box, Typography } from '@mui/material';
-import { PackageType } from './PackageForm';
+import { PackageType } from '@ddlabel/shared';
 import monkeyLogo from '../assets/svg/monkey_logo.jpg'; // Import the main logo
 import monkeyFont from '../assets/svg/monkey_font.jpg'; // Import the bottom-right logo
 import styled from 'styled-components';
-import { PostalZoneApi } from '../api/PostalZone';
+import { PostalZoneApi } from '../api/PostalZoneApi';
 import { KeyZones } from '@ddlabel/shared';
 
 const MonoTypoSmall = styled(Typography)(() => ({
@@ -36,9 +36,9 @@ export const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await new PostalZoneApi().getPostZone(pkg.toAddress.zip);
-        setToProposal(data.proposal);
-        setSortCode(data.new_sort_code);
+        const postalZone = (await new PostalZoneApi().getPostZone({zip: pkg.toAddress.zip})).postalZone;
+        setToProposal(postalZone.proposal);
+        setSortCode(postalZone.new_sort_code);
       } catch (error) {
         setToProposal('N/A');
         setSortCode('N/A');

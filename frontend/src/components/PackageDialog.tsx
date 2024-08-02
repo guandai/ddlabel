@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
-import { PackageType } from './PackageForm';
+import { PackageType } from '@ddlabel/shared';
 import { MessageContent } from '../types';
 import MessageAlert from './MessageAlert';
 import PackageGetRate from './PackageGetRate';

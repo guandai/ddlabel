@@ -1,25 +1,19 @@
 // backend/src/controllers/postalZoneController.ts
-import { Request, Response } from 'express';
-import { PostalZone, PostalZoneAttributes } from '../models/PostalZone';
-import { KeyZones } from '@ddlabel/shared';
+import { Request } from 'express';
+import { PostalZone } from '../models/PostalZone';
+import { GetPostalZoneReq, GetPostalZoneRes, GetZoneRes, GetZoneReq, ResponseAdv, KeyZones } from '@ddlabel/shared';
 
-export const getPostalZones = async (req: Request, res: Response) => {
+export const getPostalZone = async (req: Request, res: ResponseAdv<GetPostalZoneRes>) => {
   try {
-    const postalZones = await PostalZone.findAll();
-    res.json(postalZones);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-export const getPostalZoneByZip = async (req: Request, res: Response) => {
-  try {
-    const { zip_code } = req.query as { zip_code: string };
+    const { zip } = req.query;
+    if (!zip || typeof zip !== 'string') {
+      return res.status(400).json({ message: '!Zip code is required' });
+    }
     const postalZone = await PostalZone.findOne({
-      where: { zip_code },
+      where: { zip },
     });
     if (postalZone) {
-      res.json(postalZone);
+      res.json({ postalZone });
     } else {
       res.status(404).json({ message: 'PostalZone not found' });
     }
@@ -28,51 +22,23 @@ export const getPostalZoneByZip = async (req: Request, res: Response) => {
   }
 };
 
-export const getPostalZoneById = async (req: Request, res: Response) => {
-  try {
-    const postalZone = await PostalZone.findByPk(req.params.id);
-    if (postalZone) {
-      res.json(postalZone);
-    } else {
-      res.status(404).json({ message: 'PostalZone not found' });
-    }
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+export const getZone = async (req: Request<GetZoneReq>, res: ResponseAdv<GetZoneRes>) => {
+  const { proposal, zip } = req.query;
+  if (typeof proposal !== 'string' || typeof zip !=='string') {
+    return res.status(400).json({ message: 'String Proposal and zip code are required' });
   }
-};
-
-export const getProposalByZip = async (req: Request, res: Response) => {
-  const { zip_code } = req.query as { zip_code: string };
-  try {
-    const postalZone = await PostalZone.findOne({
-      where: { zip_code }, // Cast zip to string
-    });
-
-    if (postalZone) {
-      res.json(postalZone.proposal);
-    } else {
-      res.status(404).json({ message: 'Proposal not found' });
-    }
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-export const getZoneByProposalAndZip = async (req: Request, res: Response) => {
-  const { proposal, zip_code } = req.query as { zip_code: string; proposal: KeyZones };
 
   try {
     const postalZone: PostalZone | null = await PostalZone.findOne({
-      where: {
-          zip_code,
-       },
+      where: { zip }
     });
 
-    if (postalZone) {
-      res.json(postalZone[proposal]);
-    } else {
-      res.status(404).json({ message: 'Zone not found' });
+    const zone = postalZone?.[proposal as KeyZones];
+    if (!zone) {
+      return res.status(404).json({ message: 'No Avaliable Zone' });
     }
+
+    res.json({ zone });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }

@@ -9,7 +9,6 @@ interface PackageCreationAttributes extends Optional<PackageAttributes, 'id'> {}
 
 class Package extends Model<PackageAttributes, PackageCreationAttributes> implements PackageAttributes {
   public id!: number;
-  public userId!: number;
   // public fromAddressId!: number;
   // public toAddressId!: number;
   public length!: number;
@@ -18,10 +17,12 @@ class Package extends Model<PackageAttributes, PackageCreationAttributes> implem
   public trackingNo!: string;
   public weight!: number;
   public referenceNo!: string;
+  public source!: PackageSource;
+  public userId!: number;
+
   public fromAddress!: Address;
   public toAddress!: Address;
-  public User!: User;
-  public source!: PackageSource;
+  public user!: User;
 }
 
 Package.init(

@@ -3,27 +3,23 @@ import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 import { Package } from './Package';
 import { User } from './User';
+import { TransactionAttributes } from '@ddlabel/shared';
 
-interface TransactionAttributes {
-  id: number;
-  packageId: number;
-  userId: number;
-  dateAdded: Date;
-  event: string;
-  cost: number;
-  tracking: string;
-}
 
 interface TransactionCreationAttributes extends Optional<TransactionAttributes, 'id' | 'dateAdded'> {}
 
 class Transaction extends Model<TransactionAttributes, TransactionCreationAttributes> implements TransactionAttributes {
   public id!: number;
-  public packageId!: number;
-  public userId!: number;
   public dateAdded!: Date;
   public event!: string;
   public cost!: number;
   public tracking!: string;
+  
+  public packageId!: number;
+  public userId!: number;
+
+  public package!: Package;
+  public user!: User;
 }
 
 Transaction.init(

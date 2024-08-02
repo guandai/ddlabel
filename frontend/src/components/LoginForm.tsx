@@ -2,13 +2,13 @@
 import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, Container } from '@mui/material';
 import { tryLoad } from '../util/errors';
-import { LoginReq } from "@ddlabel/shared";
+import { LoginUserReq } from "@ddlabel/shared";
 import { MessageContent } from '../types';
 import MessageAlert from './MessageAlert';
 import UserApi from '../api/UserApi';
 
 const LoginForm: React.FC = () => {
-  const [formData, setFormData] = useState<LoginReq>({ email: '', password: '' });
+  const [formData, setFormData] = useState<LoginUserReq>({ email: '', password: '' });
   const [message, setMessage] = useState<MessageContent>({ text: '', level: 'info' });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,8 +22,8 @@ const LoginForm: React.FC = () => {
     tryLoad(setMessage,
       async () => {
         const response = await UserApi.login(formData);
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('userId', response.data.userId);
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('userId', String(response.userId));
         setTimeout(() => {
           window.location.href = '/packages';
         }, 100);

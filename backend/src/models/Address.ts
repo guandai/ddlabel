@@ -19,9 +19,14 @@ class Address extends Model<AddressAttributes, AddressCreationAttributes> implem
   public email?: string;
   public phone?: string;
   public addressType!: AddressEnum;
+  
   public userId?: number;
   public fromPackageId?: number;
   public toPackageId?: number;
+
+  public user!: User;
+  public fromPackage!: Package;
+  public toPackage!: Package;
 
 
   public static async createWithInfo(attr: AddressCreationAttributes): Promise<Address> {

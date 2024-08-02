@@ -1,65 +1,64 @@
 // backend/src/controllers/packageController.ts
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { Package } from '../models/Package';
 import { Address } from '../models/Address';
 import { User } from '../models/User';
 import { AuthRequest } from '../types';
 import { Op } from 'sequelize';
 import logger from '../config/logger';
-import { PackageSource } from '@ddlabel/shared';
+import { AddressEnum, CreatePackageReq, CreatePackageRes, GetPackageRes, GetPackagesRes, PackageSource, ResponseAdv, SimpleRes, UpdatePackageReq } from '@ddlabel/shared';
 import { generateTrackingNo } from '../utils/generateTrackingNo';
 
-export const manualAddPackage = async (req: AuthRequest, res: Response) => {
+export const createPackage = async (req: AuthRequest, res: ResponseAdv<CreatePackageRes>) => {
   if (!req.user) {
     return res.status(404).json({ message: 'User not found' });
   }
-  const { fromAddress, toAddress, length, width, height, weight, referenceNo, trackingNo } = req.body;
-  const tracking = trackingNo || generateTrackingNo();
+  const { fromAddress, toAddress, length, width, height, weight, referenceNo, trackingNo }: CreatePackageReq = req.body;
+  const userId = req.user.id;
 
   try {
     const pkg = await Package.create({
-      userId: req.user.id,
-      length,
-      width,
-      height,
+      userId,
+      length: length || 0,
+      width: width || 0,
+      height: height || 0,
       weight,
-      trackingNo,
+      trackingNo: trackingNo || generateTrackingNo(),
       referenceNo,
       source: PackageSource.manual,
     });
-    fromAddress.fromPackageId = pkg.id;
-    toAddress.toAddressId = pkg.id;
+    
+
+    toAddress.toPackageId = fromAddress.fromPackageId = pkg.id;
+    toAddress.fromPackageId = fromAddress.toPackageId = undefined;
+    toAddress.userId = fromAddress.userId = userId;
+
+    toAddress.addressType = AddressEnum.toPackage;
+    fromAddress.addressType = AddressEnum.fromPackage;
+
     await Address.createWithInfo(fromAddress);
     await Address.createWithInfo(toAddress);
 
-    res.status(201).json(pkg);
+    res.status(201).json({success: true, packageId: pkg.id});
   } catch (error: any) {
     logger.error(error); // Log the detailed error
-    res.status(400).json({ message: error.message, errors: error.errors });
+    res.status(400).json({ message: error.message, error: error.errors });
   }
 };
 
-export const getPackages = async (req: AuthRequest, res: Response) => {
+export const getPackages = async (req: AuthRequest, res: ResponseAdv<GetPackagesRes>) => {
   const limit = parseInt(req.query.limit as string) || 100; // Default limit to 20 if not provided
   const offset = parseInt(req.query.offset as string) || 0; // 
   const userId = req.user.id; 
-  const search = req.query.search; // 
+  const search = req.query.search;
   try {
     const total = (await Package.count({ where: { userId } })) || 0;
-
-    const whereCondition = search
-    ? {
-        userId,
-        trackingNo: {
-          [Op.like]: `%${search}%`,
-        },
-      }
-    : {userId};
+    const whereCondition = search ? { userId, trackingNo: { [Op.like]: `%${search}%` } } : {userId};
 
     const packages = await Package.findAll({
       include: [
-        { model: Address, as: 'fromAddress' },
-        { model: Address, as: 'toAddress' },
+        { model: Address, as: 'fromAddress', where: { addressType: AddressEnum.fromPackage } },
+        { model: Address, as: 'toAddress', where: { addressType: AddressEnum.toPackage } },
         { model: User, as: 'user' },
       ],
       where: whereCondition,
@@ -72,50 +71,44 @@ export const getPackages = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updatePackage = async (req: Request, res: Response) => {
-  const { fromAddress, toAddress, length, width, height, weight } = req.body;
+export const updatePackage = async (req: Request, res: ResponseAdv<Package>) => {
+  const { fromAddress, toAddress, ...rest }: UpdatePackageReq = req.body;
   try {
     const pkg = await Package.findByPk(req.params.id);
-
     if (!pkg) {
-      throw new Error('Package not found');
+      return res.status(400).json({ message: 'Package not found' });
     }
 
     await Address.updateWithInfo(fromAddress);
     await Address.updateWithInfo(toAddress);
-
-    await pkg.update({ length, width, height, weight });
-
+    await pkg.update(rest);
     res.json(pkg);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 };
 
-export const deletePackage = async (req: Request, res: Response) => {
+export const deletePackage = async (req: Request, res: ResponseAdv<SimpleRes>) => {
   try {
-    const id = req.params.id;
     const pkg = await Package.findByPk(req.params.id);
-
     if (!pkg) {
-      throw new Error('Package not found');
+      return res.status(400).json({message: 'Package not found'});
     }
 
-    await Address.destroy({ where: { fromPackageId: id } });
-    await Address.destroy({ where: { toPackageId: id } });
-    await Package.destroy({ where: { id } });
-
+    await Address.destroy({ where: { fromPackageId: pkg.id } });
+    await Address.destroy({ where: { toPackageId: pkg.id } });
+    await Package.destroy({ where: { id: pkg.id } });
     res.json({ message: 'Package deleted' });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 };
 
-export const getPackageDetails = async (req: Request, res: Response) => {
+export const getPackage = async (req: Request, res: ResponseAdv<GetPackageRes>) => {
   const { id } = req.params;
 
   try {
-    const pkg = await Package.findOne({
+    const pkg: Package | null = await Package.findOne({
       where: { id },
       include: [
         { model: Address, as: 'fromAddress' },
@@ -125,10 +118,9 @@ export const getPackageDetails = async (req: Request, res: Response) => {
     });
 
     if (!pkg) {
-      throw new Error('Package not found');
+      return res.status(400).json({ message: 'Package not found' });
     }
-
-    res.json(pkg);
+    res.json({package: pkg});
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }

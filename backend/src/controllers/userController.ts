@@ -1,30 +1,30 @@
 // backend/src/controllers/userController.ts
-import { Request, Response, Errback } from 'express';
+import { Request } from 'express';
 import { User } from '../models/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Address } from '../models/Address';
 import { AuthRequest } from '../types';
 import logger from '../config/logger';
-import { UserRegisterReq, UserUpdateReq } from '@ddlabel/shared';
+import { AddressAttributes, GetCurrentUserRes, GetUsersRes, LoginUserRes, RegisterUserReq, RegisterUserRes, ResponseAdv, UpdateCurrentUserRes, UpdateUserReq, UpdateUserRes, UserAttributes } from '@ddlabel/shared';
+import { Optional } from 'sequelize';
 
-export const registerUser = async (req: Request, res: Response) => {
-  const { name, email, password, role, warehouseAddress }: UserRegisterReq = req.body;
+export const registerUser = async (req: Request, res: ResponseAdv<RegisterUserRes>) => {
+  const { name, email, password, role, warehouseAddress }: RegisterUserReq = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
-    const user = await User.create({ name: '', email, password: hashedPassword, role });
+    const user = await User.create({ name, email, password: hashedPassword, role });
     warehouseAddress.userId = user.id;
     await Address.createWithInfo(warehouseAddress);
-    
-    res.status(201).json({ success: true, userId: user.id });
+    return res.status(201).json({ success: true, userId: user.id });
   } catch (error: any) {
     logger.error(error); // Log the detailed
-    res.status(400).json({ message: error.message, error });
+    return res.status(400).json({ message: error.message, error });
   }
 };
 
-export const loginUser = async (req: Request, res: Response) => {
+export const loginUser = async (req: AuthRequest, res: ResponseAdv<LoginUserRes>) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ where: { email } });
@@ -39,11 +39,15 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
-export const updateUser = async (req: Request, res: Response) => {
-  const user: UserUpdateReq & {id: number} = req.body;
-  user.id = parseInt(req.params.id, 10)
+export const updateCurrentUser = async (req: AuthRequest, res: ResponseAdv<UpdateCurrentUserRes>) => {
+  if (!req.user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
 
   try {
+    const user = req.body as UpdateUserReq & { id: number };
+    user.id = req.user.id;
+
     if (user.password) {
       user.password = await bcrypt.hash(user.password, 10);
     } else {
@@ -51,44 +55,42 @@ export const updateUser = async (req: Request, res: Response) => {
     }
 
     await Address.updateWithInfo(user.warehouseAddress);
-    const response = await User.update(user, { where: { id: req.params.id } });
-    res.json(response);
+    const [affectedCount]: [affectedCount: number] = await User.update(user, { where: { id: user.id } });
+    const result: UpdateUserRes = { success: affectedCount > 0 };
+    res.json(result);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 };
 
-export const getCurrentUser = async (req: AuthRequest, res: Response) => {
-  if (!req.user) {
-    return res.status(404).json({ message: 'User not found' });
-  }
+export const getCurrentUser = async (req: AuthRequest, res: ResponseAdv<GetCurrentUserRes>) => {
+  const notFound = () => res.status(404).json({ message: 'User not found' });
 
-  const user = await User.findOne({
+  if (!req.user) { return notFound() };
+
+  type UserWithAddress = Optional<UserAttributes, 'password'> & { warehouseAddress: AddressAttributes } | null;
+  const user: UserWithAddress = await User.findOne({
     where: { id: req.user.id },
+    attributes: ['id', 'name', 'email', 'role'],
     include: [
       { model: Address, as: 'warehouseAddress' },
     ],
   });
 
-  if (!user) {
-    throw new Error('User not found');
-  }
+  if (!user) { return notFound() };
 
-  const { name, id, email, role, warehouseAddress } = user;
-  const filteredUser = { name, id, email, role, warehouseAddress };
-
-  res.json(filteredUser);
+  res.json({ user });
 };
 
-export const getUsers = async (req: Request, res: Response) => {
+export const getUsers = async (req: AuthRequest, res: ResponseAdv<GetUsersRes>) => {
   try {
     const users = await User.findAll({
       attributes: ['id', 'name', 'email', 'role'],
       include: [
         { model: Address, as: 'warehouseAddress' },
       ],
-    }); // Fetch selected attributes
-    res.json(users);
+    });
+    res.json({ users });
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
