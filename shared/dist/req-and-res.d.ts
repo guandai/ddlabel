@@ -38,21 +38,6 @@ export type UpdateUserReq = Pick<UserAttributes, 'name' | 'email' | 'role'> & {
 export type UpdateUserRes = {
     success: boolean;
 };
-export type GetAddressRes = {
-    address: AddressAttributes;
-};
-export type UpdateAddressReq = {
-    address1: string;
-    address2: string;
-    city: string;
-    state: string;
-    zip: string;
-    email: string;
-    phone: string;
-};
-export type UpdateAddressRes = {
-    success: boolean;
-};
 export type WeightUnit = 'lbs' | 'oz';
 export type VolumeUnit = 'inch' | 'mm';
 export type GetPackageRes = {

@@ -4,7 +4,7 @@ import { Address, AddressCreationAttributes } from '../models/Address';
 import getZipInfo from '../utils/getZipInfo';
 import { isValidJSON } from '../utils/errors';
 import logger from '../config/logger';
-import { CsvRecord, defaultMapping, CSV_KEYS, HeaderMapping, KeyCsvRecord, PackageSource, PackageAttributes } from '@ddlabel/shared';
+import { CsvRecord, defaultMapping, CSV_KEYS, HeaderMapping, KeyCsvRecord } from '@ddlabel/shared';
 
 export type BatchDataType = {
 	pkgBatch: PackageRoot[],
@@ -29,11 +29,11 @@ export const getPreparedData = (packageCsvMap: string, csvData: CsvData) => {
 	const fromZipInfo = getZipInfo(mappedData['fromAddressZip'] );
 	const toZipInfo = getZipInfo(mappedData['toAddressZip'] );
 	if (!fromZipInfo) { 
-		logger.error(`has no From ZipInfo for ${mappedData['fromAddressZip']}`);
+		logger.error(`has no From ZipInfo for fromAddressZip: ${mappedData['fromAddressZip']}`);
 		return;
 	}
 	if (!toZipInfo) { 
-		logger.error(`has no To ZipInfo for ${mappedData['toAddressZip']}`);
+		logger.error(`has no To ZipInfo for toAddressZip: ${mappedData['toAddressZip']}`);
 		return;
 	}
 	return {
@@ -56,7 +56,6 @@ export const processBatch = async (batchData: BatchDataType) => {
 
 		await Package.bulkCreate(packages);
 	} catch (error: any) {
-		logger.error('Error processing batch', error);
 		throw error;
 	}
 };

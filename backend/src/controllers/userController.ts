@@ -8,6 +8,7 @@ import { AuthRequest } from '../types';
 import logger from '../config/logger';
 import { AddressAttributes, GetCurrentUserRes, GetUsersRes, LoginUserRes, RegisterUserReq, RegisterUserRes, ResponseAdv, UpdateCurrentUserRes, UpdateUserReq, UpdateUserRes, UserAttributes } from '@ddlabel/shared';
 import { Optional } from 'sequelize';
+import { aggregateError } from '../utils/errors';
 
 export const registerUser = async (req: Request, res: ResponseAdv<RegisterUserRes>) => {
   const { name, email, password, role, warehouseAddress }: RegisterUserReq = req.body;
@@ -20,22 +21,28 @@ export const registerUser = async (req: Request, res: ResponseAdv<RegisterUserRe
     return res.status(201).json({ success: true, userId: user.id });
   } catch (error: any) {
     logger.error(error); // Log the detailed
-    return res.status(400).json({ message: error.message, error });
+    return res.status(400).json({ message: aggregateError(error), error });
   }
 };
 
 export const loginUser = async (req: AuthRequest, res: ResponseAdv<LoginUserRes>) => {
   const { email, password } = req.body;
+  console.log(req.body);
   try {
     const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(400).json({ message: 'user email not exist' });
+    }
+    console.log(`bc`, await bcrypt.compare(password, user.password));
+    
     if (user && (await bcrypt.compare(password, user.password))) {
       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: '7d' });
-      res.json({ token, userId: user.id });
+      return res.json({ token, userId: user.id });
     } else {
-      res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
@@ -57,9 +64,9 @@ export const updateCurrentUser = async (req: AuthRequest, res: ResponseAdv<Updat
     await Address.updateWithInfo(user.warehouseAddress);
     const [affectedCount]: [affectedCount: number] = await User.update(user, { where: { id: user.id } });
     const result: UpdateUserRes = { success: affectedCount > 0 };
-    res.json(result);
+    return res.json(result);
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
@@ -79,7 +86,7 @@ export const getCurrentUser = async (req: AuthRequest, res: ResponseAdv<GetCurre
 
   if (!user) { return notFound() };
 
-  res.json({ user });
+  return res.json({ user });
 };
 
 export const getUsers = async (req: AuthRequest, res: ResponseAdv<GetUsersRes>) => {
@@ -90,8 +97,8 @@ export const getUsers = async (req: AuthRequest, res: ResponseAdv<GetUsersRes>) 
         { model: Address, as: 'warehouseAddress' },
       ],
     });
-    res.json({ users });
+    return res.json({ users });
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };

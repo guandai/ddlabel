@@ -27,7 +27,7 @@ export const createPackage = async (req: AuthRequest, res: ResponseAdv<CreatePac
       referenceNo,
       source: PackageSource.manual,
     });
-    
+
 
     toAddress.toPackageId = fromAddress.fromPackageId = pkg.id;
     toAddress.fromPackageId = fromAddress.toPackageId = undefined;
@@ -39,35 +39,35 @@ export const createPackage = async (req: AuthRequest, res: ResponseAdv<CreatePac
     await Address.createWithInfo(fromAddress);
     await Address.createWithInfo(toAddress);
 
-    res.status(201).json({success: true, packageId: pkg.id});
+    return res.status(201).json({ success: true, packageId: pkg.id });
   } catch (error: any) {
     logger.error(error); // Log the detailed error
-    res.status(400).json({ message: error.message, error: error.errors });
+    return res.status(400).json({ message: error.message, error: error.errors });
   }
 };
 
 export const getPackages = async (req: AuthRequest, res: ResponseAdv<GetPackagesRes>) => {
   const limit = parseInt(req.query.limit as string) || 100; // Default limit to 20 if not provided
   const offset = parseInt(req.query.offset as string) || 0; // 
-  const userId = req.user.id; 
+  const userId = req.user.id;
   const search = req.query.search;
   try {
     const total = (await Package.count({ where: { userId } })) || 0;
-    const whereCondition = search ? { userId, trackingNo: { [Op.like]: `%${search}%` } } : {userId};
+    const whereCondition = search ? { userId, trackingNo: { [Op.like]: `%${search}%` } } : { userId };
 
     const packages = await Package.findAll({
       include: [
-        { model: Address, as: 'fromAddress', where: { addressType: AddressEnum.fromPackage } },
-        { model: Address, as: 'toAddress', where: { addressType: AddressEnum.toPackage } },
+        { model: Address, as: 'fromAddress', where: { addressType: 'fromPackage' } },
+        { model: Address, as: 'toAddress', where: { addressType: 'toPackage' } },
         { model: User, as: 'user' },
       ],
       where: whereCondition,
       limit,
       offset,
     });
-    res.json({ total, packages });
+    return res.json({ total, packages });
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
@@ -82,9 +82,9 @@ export const updatePackage = async (req: Request, res: ResponseAdv<Package>) => 
     await Address.updateWithInfo(fromAddress);
     await Address.updateWithInfo(toAddress);
     await pkg.update(rest);
-    res.json(pkg);
+    return res.json(pkg);
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
@@ -92,15 +92,15 @@ export const deletePackage = async (req: Request, res: ResponseAdv<SimpleRes>) =
   try {
     const pkg = await Package.findByPk(req.params.id);
     if (!pkg) {
-      return res.status(400).json({message: 'Package not found'});
+      return res.status(400).json({ message: 'Package not found' });
     }
 
     await Address.destroy({ where: { fromPackageId: pkg.id } });
     await Address.destroy({ where: { toPackageId: pkg.id } });
     await Package.destroy({ where: { id: pkg.id } });
-    res.json({ message: 'Package deleted' });
+    return res.json({ message: 'Package deleted' });
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
@@ -120,8 +120,8 @@ export const getPackage = async (req: Request, res: ResponseAdv<GetPackageRes>) 
     if (!pkg) {
       return res.status(400).json({ message: 'Package not found' });
     }
-    res.json({package: pkg});
+    return res.json({ package: pkg });
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };

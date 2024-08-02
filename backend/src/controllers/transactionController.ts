@@ -3,9 +3,7 @@ import { Transaction } from '../models/Transaction';
 import { AuthRequest } from '../types';
 import { Op } from 'sequelize';
 import { Package } from '../models/Package';
-import { Address } from '../models/Address';
 import { User } from '../models/User';
-import { get } from 'http';
 import { GetTransactionRes, GetTransactionsRes, ResponseAdv } from '@ddlabel/shared';
 
 export const getTransactions = async (req: AuthRequest, res: ResponseAdv<GetTransactionsRes>) => {
@@ -34,9 +32,9 @@ export const getTransactions = async (req: AuthRequest, res: ResponseAdv<GetTran
       limit,
       offset,
     });
-    res.json({ total, transactions });
+    return res.json({ total, transactions });
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 };
 
@@ -50,9 +48,10 @@ export const getTransactionById = async (req: AuthRequest, res: ResponseAdv<GetT
     });
     if (!transaction) {
       return res.status(404).json({ message: 'Transaction not found' });
+      return;
     }
-    res.json({transaction});
+    return res.json({transaction});
   } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   }
 }
