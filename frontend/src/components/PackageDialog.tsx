@@ -24,7 +24,7 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
                     <PackageGetRate selectedPackage={selectedPackage} />
                     <BeansStatusInfo selectedPackage={selectedPackage} />
                     <DialogContentText>
-                        <strong>Id:</strong> {selectedPackage.id}<br />
+                        <strong>Package Id:</strong> {selectedPackage.id}<br />
                         <Line />
                         <strong>Tracking Number:</strong> {selectedPackage.trackingNo}<br />
                         <strong>Reference Number:</strong> {selectedPackage.referenceNo}<br />
