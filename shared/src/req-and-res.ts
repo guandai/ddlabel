@@ -1,6 +1,7 @@
 import { Optional } from 'sequelize';
 import { AddressAttributes, KeyZones, PackageAttributes, PackageType, PostalZoneAttributes, TransactionType, UserAttributes, ZipCodeAttributes } from "./models";
 import { SimpleRes } from './types';
+import { BeansAI } from './beans';
 
 // User
 export type RegisterUserReq = Pick<UserAttributes, 'name' | 'email' | 'password' | 'role'> & { warehouseAddress: AddressAttributes };
@@ -142,5 +143,10 @@ export type GetPostalZoneRes = { postalZone: PostalZoneAttributes };;
 
 export type GetPostalZonesRes = { postalZones: PostalZoneAttributes[] };
 
-export type GetZoneReq = { fromZip: string; toZip: string };
+export type GetZoneReq = { fromZip: string; toZip: string
+ };
 export type GetZoneRes = { zone: string }
+
+// Beans
+export type GetStatusLogReq = { trackingNo: string };
+export type GetStatusLogRes = { listItemReadableStatusLogs: BeansAI.ListItemReadableStatusLogs };

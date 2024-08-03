@@ -7,6 +7,7 @@ export type SetMessage = (value: React.SetStateAction<MessageContent>) => void;
 const tryError = (setMessage: SetMessage, error: any) => {
   const errorData = ((error as AxiosError).response?.data as PkgCsvError);
   let message = 'Failed to perform the operation.';
+  console.log(`errorS`, error);
   const errors = errorData?.errors;
   if (errors && errors.length > 0) {
     message = errors[0].message;
