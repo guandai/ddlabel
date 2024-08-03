@@ -74,7 +74,7 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ selectedPackage }) => {
     return (
 		<Box>
             <MessageAlert message={message} />
-			<strong>Shipping Rate: </strong>{rate === null ? '...' : rate}<br />
+			{/* <strong>Shipping Rate: </strong>{rate === null ? '...' : rate}<br /> */}
 			<strong>Sort Code: </strong>{rate === null ? '...' : sortCode}<br />
 			{/* <Button onClick={handleGetData} color="primary">Get Rate</Button> */}
 		</Box>

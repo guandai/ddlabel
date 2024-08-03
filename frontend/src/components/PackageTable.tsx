@@ -4,9 +4,10 @@ import {
   Paper, IconButton, Typography, Box, Container, Button,
   TablePagination, TextField
 } from '@mui/material';
-import { Visibility, Edit, Delete, PictureAsPdf, Label, AddCircle } from '@mui/icons-material';
-import { PackageType } from '@ddlabel/shared';
+import { Visibility, Edit, Delete, PictureAsPdf, Label, AddCircle, PictureAsPdfRounded, PictureInPictureAltTwoTone, FolderZipRounded } from '@mui/icons-material';
+import { BeansAI, PackageType } from '@ddlabel/shared';
 import { tryLoad } from '../util/errors';
+
 import { generatePDF } from './generatePDF';
 import PackageDialog from './PackageDialog';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +16,8 @@ import { MessageContent } from '../types';
 import MessageAlert from './MessageAlert';
 import PackageApi from '../api/PackageApi';
 import { GetPackagesReq } from '@ddlabel/shared';
+import BeansStatusLogApi from '../external/beansApi';
+import { toUpdateTime } from '../util/time';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
@@ -23,6 +26,7 @@ const PackageTable: React.FC = () => {
   const [search, setSearch] = useState(''); // Add search state
   const [totalPackages, setTotalPackages] = useState(0); // Track the total number of packages
   const [message, setMessage] = useState<MessageContent>(null);
+  const [statusLogs, setStatusLogs] = useState<BeansAI.ListItemReadableStatusLogs[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(null);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
@@ -30,9 +34,13 @@ const PackageTable: React.FC = () => {
   useEffect(() => {
     tryLoad(setMessage, async () => {
       const params: GetPackagesReq = { limit: rowsPerPage, offset: page * rowsPerPage, search };
-      const response = await PackageApi.getPackages(params);
-      setPackages(response.packages);
-      setTotalPackages(response.total); // Set the total number of packages
+      const packagesRes = await PackageApi.getPackages(params);
+      setPackages(packagesRes.packages);
+      setTotalPackages(packagesRes.total); // Set the total number of packages
+      const packagesLogs = await Promise.all(packagesRes.packages.map(
+        async pkg => (await BeansStatusLogApi.getStatusLog({trackingNo: pkg.trackingNo})).listItemReadableStatusLogs
+      ));
+      setStatusLogs(packagesLogs);
     });
     
   }, [page, rowsPerPage, search]);
@@ -73,6 +81,14 @@ const PackageTable: React.FC = () => {
     setPage(0); // Reset to first page when searching
   };
 
+  const toStatus = (idx: number) => {
+    return statusLogs?.[idx]?.[0]?.item.status || 'N/A';
+  }
+
+  const tsMillis = (idx: number) => {
+    return statusLogs?.[idx]?.[0]?.tsMillis || 0;
+  }
+
   return (
     <Container component="main" maxWidth="lg">
       <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -88,6 +104,7 @@ const PackageTable: React.FC = () => {
             onChange={handleSearchChange}
             variant="outlined"
           />
+          <IconButton onClick={() => {}}><FolderZipRounded />Download Pdfs</IconButton>
         </Box>
 
         <MessageAlert message={message} />
@@ -96,18 +113,18 @@ const PackageTable: React.FC = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Ship To Address</TableCell>
-                <TableCell>State</TableCell>
-                <TableCell>Weight</TableCell>
+                <TableCell>Update Time</TableCell>
+                <TableCell>Status</TableCell>
                 <TableCell>Tracking</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {packages.map(pkg => (
+              {packages.map((pkg, idx) => (
                 <TableRow key={pkg.id}>
                   <TableCell>{pkg.toAddress.address1}</TableCell>
-                  <TableCell>{pkg.toAddress.state}</TableCell>
-                  <TableCell>{pkg.weight}</TableCell>
+                  <TableCell>{toUpdateTime(tsMillis(idx))}</TableCell>
+                  <TableCell>{toStatus(idx)}</TableCell>
                   <TableCell>{pkg.trackingNo}</TableCell>
                   <TableCell style={{ width: '200px', whiteSpace: 'nowrap' }}>
                     <IconButton onClick={() => handleViewDetails(pkg)}><Visibility /></IconButton>
