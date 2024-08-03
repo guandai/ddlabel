@@ -53,33 +53,29 @@ const getShippingRatesForWeight = (weight, unit) => __awaiter(void 0, void 0, vo
             zone8: 1000,
         };
     }
-    const data = yield ShippingRate_1.ShippingRate.findAll({
+    const data = yield ShippingRate_1.ShippingRate.findOne({
         where: {
             unit,
-            weightRange: { [sequelize_1.Op.eq]: `${weight - 1}<n=${weight}` }
+            weightRange: { [sequelize_1.Op.eq]: `${weight - 1}<n<=${weight}` }
         }
     });
-    console.log(`ShippingRate find data`, data);
-    return data.find(row => {
-        const [min, max] = row.weightRange.split('<n=').map(parseFloat);
-        return weight > min && weight <= max;
-    }) || null;
+    return data;
 });
 exports.getShippingRatesForWeight = getShippingRatesForWeight;
 const getShippingRates = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const rates = yield ShippingRate_1.ShippingRate.findAll();
-        res.json(rates);
+        return res.json(rates);
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 });
 exports.getShippingRates = getShippingRates;
 const getFullRate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let { length, width, height, weight, zone, weightUnit, volumeUnit } = req.query;
     if (!length || !width || !height || !weight || !zone || !weightUnit || !volumeUnit) {
-        return res.status(400).json({ message: 'All parameters are required: length, width, height, weight, zone, weightUnit, volumeUnit' });
+        return res.status(400).json({ message: 'getFullRate: All parameters are required: length, width, height, weight, zone, weightUnit, volumeUnit' });
     }
     try {
         const param = {
@@ -92,14 +88,14 @@ const getFullRate = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             volumeUnit: volumeUnit,
         };
         const totalCost = yield (0, exports.fullShippingRate)(param);
-        if (!totalCost) {
-            return res.status(204).json({ totalCost: -1, message: `No shipping rate found for the specified weight and zone ${weight} ${weightUnit}` });
+        if (totalCost === 'NO_RATE') {
+            return res.json({ totalCost: -1, message: `No shipping rate found for the specified weight and zone ${weight} ${weightUnit}` });
         }
         ;
-        res.json({ totalCost });
+        return res.json({ totalCost });
     }
     catch (error) {
-        res.status(500).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 });
 exports.getFullRate = getFullRate;

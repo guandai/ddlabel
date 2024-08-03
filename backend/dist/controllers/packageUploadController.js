@@ -13,139 +13,94 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadMiddleware = exports.importPackages = void 0;
-const Package_1 = require("../models/Package");
-const Address_1 = require("../models/Address");
-const generateTrackingNumber_1 = require("../utils/generateTrackingNumber");
+const generateTrackingNo_1 = require("../utils/generateTrackingNo");
 const multer_1 = __importDefault(require("multer"));
 const csv_parser_1 = __importDefault(require("csv-parser"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
-const getZipInfo_1 = __importDefault(require("../utils/getZipInfo"));
 const reportIo_1 = require("../utils/reportIo");
-const errors_1 = require("../utils/errors");
 const logger_1 = __importDefault(require("../config/logger"));
+const shared_1 = require("@ddlabel/shared");
+const packageBatchFuntions_1 = require("./packageBatchFuntions");
+const errors_1 = require("../utils/errors");
 const BATCH_SIZE = 500;
-const FIELDS = [
-    'length', 'width', 'height', 'weight', 'reference',
-    'shipFromName', 'shipFromAddressStreet', 'shipFromAddressZip',
-    'shipToName', 'shipToAddressStreet', 'shipToAddressZip'
-];
-const ExtraFields = ['shipFromAddressCity', 'shipFromAddressState', 'shipToAddressCity', 'shipToAddressState'];
-const defaultMapping = FIELDS.reduce((acc, field) => {
-    Object.assign(acc, { [field]: field });
-    return acc;
-}, {});
-const getMappingData = (data, mapping) => {
-    return FIELDS.reduce((acc, field) => {
-        const csvHeader = mapping[field];
-        return Object.assign(acc, { [field]: data[csvHeader] });
-    }, {});
+const onData = ({ req, csvData, pkgAll }) => {
+    const { packageCsvLength, packageCsvMap } = req.body;
+    const prepared = (0, packageBatchFuntions_1.getPreparedData)(packageCsvMap, csvData);
+    const userId = req.user.id;
+    if (!prepared)
+        return;
+    const { mappedData, fromZipInfo, toZipInfo } = prepared;
+    pkgAll.pkgBatch.push({
+        userId,
+        length: mappedData['length'] || 0,
+        width: mappedData['width'] || 0,
+        height: mappedData['height'] || 0,
+        weight: mappedData['weight'] || 0,
+        trackingNo: mappedData['trackingNo'] || (0, generateTrackingNo_1.generateTrackingNo)(),
+        referenceNo: mappedData['referenceNo'],
+        source: shared_1.PackageSource.api,
+    });
+    pkgAll.shipFromBatch.push(Object.assign(Object.assign({}, fromZipInfo), { name: mappedData['fromName'], userId, address1: mappedData['fromAddress1'], address2: mappedData['fromAddress2'], zip: mappedData['fromAddressZip'], addressType: shared_1.AddressEnum.fromPackage }));
+    pkgAll.shipToBatch.push(Object.assign(Object.assign({}, toZipInfo), { name: mappedData['toName'], userId, address1: mappedData['toAddress1'], address2: mappedData['toAddress2'], zip: mappedData['toAddressZip'], addressType: shared_1.AddressEnum.toPackage }));
+    (0, reportIo_1.reportIoSocket)('generate', req, pkgAll.pkgBatch.length, packageCsvLength);
+    return;
 };
-const onEndData = (req, res, pkgAll) => __awaiter(void 0, void 0, void 0, function* () {
-    const { pkgBatch, fromBatch, toBatch } = pkgAll;
+const onEnd = (_a) => __awaiter(void 0, [_a], void 0, function* ({ stream, req, pkgAll }) {
+    const { pkgBatch, shipFromBatch, shipToBatch } = pkgAll;
     let processed = 0;
     const batchData = {
         pkgBatch: [],
-        fromBatch: [],
-        toBatch: [],
+        shipFromBatch: [],
+        shipToBatch: [],
     };
     const turns = Math.ceil(pkgBatch.length / BATCH_SIZE);
     for (let i = 0; i < turns; i++) {
         const start = i * BATCH_SIZE;
         const pkgDataSlice = pkgBatch.slice(start, start + BATCH_SIZE);
-        const shipFromSlice = fromBatch.slice(start, start + BATCH_SIZE);
-        const shipToSlice = toBatch.slice(start, start + BATCH_SIZE);
-        batchData.fromBatch = shipFromSlice;
-        batchData.toBatch = shipToSlice;
+        const fromSlice = shipFromBatch.slice(start, start + BATCH_SIZE);
+        const toSlice = shipToBatch.slice(start, start + BATCH_SIZE);
+        batchData.shipFromBatch = fromSlice;
+        batchData.shipToBatch = toSlice;
         batchData.pkgBatch = pkgDataSlice;
         try {
-            yield processBatch(batchData);
+            yield (0, packageBatchFuntions_1.processBatch)(batchData);
             batchData.pkgBatch = [];
-            batchData.fromBatch = [];
-            batchData.toBatch = [];
+            batchData.shipFromBatch = [];
+            batchData.shipToBatch = [];
             processed += pkgDataSlice.length;
             (0, reportIo_1.reportIoSocket)('insert', req, processed, pkgBatch.length);
+            stream.emit('success');
         }
         catch (error) {
-            logger_1.default.error('Error processing batch', error);
-            return res.status(500).send({ message: 'Error processing batch' });
+            stream.emit('error', (0, errors_1.aggregateError)(error));
         }
     }
-    res.status(200).send({ message: 'PkgBatch imported successfully' });
 });
-const getPreparedData = (packageCsvMap, data) => {
-    const mapping = (0, errors_1.isValidJSON)(packageCsvMap) ? JSON.parse(packageCsvMap) : defaultMapping;
-    const mappedData = getMappingData(data, mapping);
-    const fromZipInfo = (0, getZipInfo_1.default)(mappedData['shipFromAddressZip']);
-    const toZipInfo = (0, getZipInfo_1.default)(mappedData['shipToAddressZip']);
-    if (!fromZipInfo) {
-        logger_1.default.error(`has no From ZipInfo for ${mappedData['shipFromAddressZip']}`);
-        return;
-    }
-    if (!toZipInfo) {
-        logger_1.default.error(`has no To ZipInfo for ${mappedData['shipToAddressZip']}`);
-        return;
-    }
-    return {
-        mappedData,
-        fromZipInfo,
-        toZipInfo,
-    };
-};
-const onData = (OnDataParams) => {
-    const { req, csvData, pkgAll } = OnDataParams;
-    const { packageCsvLength, packageCsvMap } = req.body;
-    const prepared = getPreparedData(packageCsvMap, csvData);
-    if (!prepared)
-        return;
-    const { mappedData, fromZipInfo, toZipInfo } = prepared;
-    pkgAll.pkgBatch.push({
-        userId: req.user.id,
-        length: mappedData['length'],
-        width: mappedData['width'],
-        height: mappedData['height'],
-        weight: mappedData['weight'],
-        trackingNumber: (0, generateTrackingNumber_1.generateTrackingNumber)(),
-        reference: mappedData['reference'],
-    });
-    pkgAll.fromBatch.push(Object.assign(Object.assign({}, fromZipInfo), { name: mappedData['shipFromName'], addressLine1: mappedData['shipFromAddressStreet'], zip: mappedData['shipFromAddressZip'] }));
-    pkgAll.toBatch.push(Object.assign(Object.assign({}, toZipInfo), { name: mappedData['shipToName'], addressLine1: mappedData['shipToAddressStreet'], zip: mappedData['shipToAddressZip'] }));
-    (0, reportIo_1.reportIoSocket)('generate', req, pkgAll.pkgBatch.length, packageCsvLength);
-    return;
-};
 const importPackages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { body, file } = req;
+    const { file } = req;
     if (!file) {
         return res.status(400).send({ message: 'No file uploaded' });
     }
     const pkgAll = {
         pkgBatch: [],
-        fromBatch: [],
-        toBatch: [],
+        shipFromBatch: [],
+        shipToBatch: [],
     };
-    fs_1.default.createReadStream(file.path)
-        .pipe((0, csv_parser_1.default)())
+    const stream = fs_1.default.createReadStream(file.path);
+    stream.pipe((0, csv_parser_1.default)())
         .on('data', (csvData) => onData({ req, csvData, pkgAll }))
-        .on('end', () => __awaiter(void 0, void 0, void 0, function* () { return onEndData(req, res, pkgAll); }))
-        .on('error', (err) => {
-        logger_1.default.error('Error parsing CSV:', err);
-        res.status(500).send({ message: 'Error importing pkgBatch' });
+        .on('end', () => __awaiter(void 0, void 0, void 0, function* () { return onEnd({ stream, req, pkgAll }); }));
+    //  if .on('error')  follow the chain, the error can not be catched by stream
+    stream.on('error', err => {
+        logger_1.default.error(`onError importing pkgBatch ${err}`);
+        return res.status(400).send({ message: `Importing Error: ${err}` });
+    });
+    stream.on('success', () => {
+        return res.json({ message: `Importing Done!` });
     });
 });
 exports.importPackages = importPackages;
-const processBatch = (batchData) => __awaiter(void 0, void 0, void 0, function* () {
-    const { pkgBatch, fromBatch, toBatch } = batchData;
-    try {
-        const fromAddresses = yield Address_1.Address.bulkCreate(fromBatch);
-        const toAddresses = yield Address_1.Address.bulkCreate(toBatch);
-        const packages = pkgBatch.map((pkg, index) => (Object.assign(Object.assign({}, pkg), { shipFromAddressId: fromAddresses[index].id, shipToAddressId: toAddresses[index].id })));
-        yield Package_1.Package.bulkCreate(packages);
-    }
-    catch (error) {
-        logger_1.default.error('Error processing batch', error);
-        throw new Error('Batch processing failed');
-    }
-});
 const storage = multer_1.default.diskStorage({
     destination: function (req, file, cb) {
         cb(null, './uploads/');

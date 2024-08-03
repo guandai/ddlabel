@@ -5,6 +5,7 @@ exports.Transaction = void 0;
 const sequelize_1 = require("sequelize");
 const database_1 = require("../config/database");
 const Package_1 = require("./Package");
+const User_1 = require("./User");
 class Transaction extends sequelize_1.Model {
 }
 exports.Transaction = Transaction;
@@ -19,6 +20,14 @@ Transaction.init({
         allowNull: false,
         references: {
             model: Package_1.Package,
+            key: 'id',
+        },
+    },
+    userId: {
+        type: sequelize_1.DataTypes.INTEGER.UNSIGNED,
+        allowNull: false,
+        references: {
+            model: User_1.User,
             key: 'id',
         },
     },

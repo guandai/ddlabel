@@ -9,88 +9,52 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getZoneByProposalAndZip = exports.getProposalByZip = exports.getPostalZoneById = exports.getPostalZoneByZip = exports.getPostalZones = void 0;
+exports.getZone = exports.getPostalZone = void 0;
 const PostalZone_1 = require("../models/PostalZone");
-const getPostalZones = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const errors_1 = require("../utils/errors");
+const getPostalZone = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const postalZones = yield PostalZone_1.PostalZone.findAll();
-        res.json(postalZones);
-    }
-    catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-});
-exports.getPostalZones = getPostalZones;
-const getPostalZoneByZip = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { zip_code } = req.query;
-        // logger.info(`zip_code`, zip_code);
+        const { zip } = req.query;
+        if (!zip || typeof zip !== 'string') {
+            return (0, errors_1.ReturnMsg)(res, '!Zip code is required');
+        }
         const postalZone = yield PostalZone_1.PostalZone.findOne({
-            where: { zip_code },
-        });
-        // logger.info(`postalZone`, postalZone);
-        if (postalZone) {
-            res.json(postalZone);
-        }
-        else {
-            res.status(404).json({ message: 'PostalZone not found' });
-        }
-    }
-    catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-});
-exports.getPostalZoneByZip = getPostalZoneByZip;
-const getPostalZoneById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const postalZone = yield PostalZone_1.PostalZone.findByPk(req.params.id);
-        if (postalZone) {
-            res.json(postalZone);
-        }
-        else {
-            res.status(404).json({ message: 'PostalZone not found' });
-        }
-    }
-    catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-});
-exports.getPostalZoneById = getPostalZoneById;
-const getProposalByZip = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { zip_code } = req.query;
-    try {
-        const postalZone = yield PostalZone_1.PostalZone.findOne({
-            where: { zip_code }, // Cast zip to string
+            where: { zip },
         });
         if (postalZone) {
-            res.json(postalZone.proposal);
+            return res.json({ postalZone });
         }
         else {
-            res.status(404).json({ message: 'Proposal not found' });
+            return (0, errors_1.ReturnMsg)(res, `PostalZone not found by zip ${zip}`, 422);
         }
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        return (0, errors_1.ReturnMsg)(res, `getPostalZone Err: ${error.message}`);
     }
 });
-exports.getProposalByZip = getProposalByZip;
-const getZoneByProposalAndZip = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { proposal, zip_code } = req.query;
+exports.getPostalZone = getPostalZone;
+const getZone = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { fromZip, toZip } = req.query;
+    if (typeof fromZip !== 'string' || typeof toZip !== 'string') {
+        return (0, errors_1.ReturnMsg)(res, 'fromZip and toZip code should be string');
+    }
     try {
-        const postalZone = yield PostalZone_1.PostalZone.findOne({
-            where: {
-                zip_code,
-            },
-        });
-        if (postalZone) {
-            res.json(postalZone[proposal]);
+        const fromPostalZone = yield PostalZone_1.PostalZone.findOne({ where: { zip: fromZip } });
+        const toPostalZone = yield PostalZone_1.PostalZone.findOne({ where: { zip: toZip } });
+        if (!fromPostalZone) {
+            return (0, errors_1.ReturnMsg)(res, `Can Not find From PostalZone by zip ${fromZip}`, 422);
         }
-        else {
-            res.status(404).json({ message: 'Zone not found' });
+        if (!toPostalZone) {
+            return (0, errors_1.ReturnMsg)(res, `Can Not find To PostalZone by zip ${toZip}`, 422);
         }
+        const zone = toPostalZone === null || toPostalZone === void 0 ? void 0 : toPostalZone[fromPostalZone.proposal];
+        if (!zone || zone === '-') {
+            return (0, errors_1.ReturnMsg)(res, `No Avaliable Zone from ${fromPostalZone.proposal} to ${toPostalZone.proposal}`, 422);
+        }
+        return res.json({ zone });
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        return (0, errors_1.ReturnMsg)(res, error.message);
     }
 });
-exports.getZoneByProposalAndZip = getZoneByProposalAndZip;
+exports.getZone = getZone;

@@ -8,8 +8,8 @@ const logger = winston_1.default.createLogger({
     level: 'info',
     format: winston_1.default.format.json(),
     transports: [
-        new winston_1.default.transports.File({ filename: 'error.log', level: 'error' }),
-        new winston_1.default.transports.File({ filename: 'combined.log' }),
+        new winston_1.default.transports.File({ filename: './log/error.log', level: 'error' }),
+        new winston_1.default.transports.File({ filename: './log/combined.log' }),
     ],
 });
 if (process.env.NODE_ENV !== 'production') {

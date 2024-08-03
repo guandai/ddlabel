@@ -20,10 +20,6 @@ const getCityState = (zip, city, state) => {
 exports.getCityState = getCityState;
 const getZipInfo = (zip) => {
     const entry = stData.find(it => it.zip === zip);
-    if (entry) {
-        const { city, state, county } = entry;
-        return { city: city, state: state, county: county };
-    }
-    return null;
+    return entry || null;
 };
 exports.default = getZipInfo;

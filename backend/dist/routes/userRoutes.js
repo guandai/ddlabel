@@ -8,5 +8,5 @@ router.get('/', auth_1.authenticate, userController_1.getUsers); // Add this lin
 router.post('/register', userController_1.registerUser);
 router.post('/login', userController_1.loginUser);
 router.get('/me', auth_1.authenticate, userController_1.getCurrentUser);
-router.put('/:id', userController_1.updateUser);
+router.put('/me', auth_1.authenticate, userController_1.updateCurrentUser);
 exports.default = router;

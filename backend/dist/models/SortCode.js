@@ -17,7 +17,7 @@ SortCode.init({
         type: sequelize_1.DataTypes.STRING(255),
         allowNull: false
     },
-    zipCode: {
+    zip: {
         type: sequelize_1.DataTypes.STRING(5),
         allowNull: false
     },

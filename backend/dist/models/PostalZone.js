@@ -8,7 +8,7 @@ class PostalZone extends sequelize_1.Model {
 }
 exports.PostalZone = PostalZone;
 PostalZone.init({
-    zip_code: {
+    zip: {
         type: sequelize_1.DataTypes.STRING(5),
         primaryKey: true,
     },

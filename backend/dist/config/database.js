@@ -16,6 +16,7 @@ exports.connectDB = exports.sequelize = void 0;
 // backend/src/config/database.ts
 const sequelize_1 = require("sequelize");
 const dotenv_1 = __importDefault(require("dotenv"));
+const logger_1 = __importDefault(require("./logger"));
 // Load environment variables from .env file
 const env = process.env.NODE_ENV || 'development';
 if (env === 'production') {
@@ -41,12 +42,6 @@ const sequelize = new sequelize_1.Sequelize({
     },
 });
 exports.sequelize = sequelize;
-// Import models
-const Package_1 = require("../models/Package");
-const Transaction_1 = require("../models/Transaction");
-const logger_1 = __importDefault(require("./logger"));
-// Initialize model relationships if needed
-Transaction_1.Transaction.belongsTo(Package_1.Package, { foreignKey: 'packageId' });
 // Connect to the database and synchronize models
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {

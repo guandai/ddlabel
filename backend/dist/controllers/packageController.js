@@ -8,91 +8,100 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPackageDetails = exports.deletePackage = exports.updatePackage = exports.getPackages = exports.addPackage = void 0;
+exports.getPackage = exports.deletePackage = exports.updatePackage = exports.getPackages = exports.createPackage = void 0;
 const Package_1 = require("../models/Package");
 const Address_1 = require("../models/Address");
-const generateTrackingNumber_1 = require("../utils/generateTrackingNumber");
 const User_1 = require("../models/User");
 const sequelize_1 = require("sequelize");
 const logger_1 = __importDefault(require("../config/logger"));
-const addPackage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const shared_1 = require("@ddlabel/shared");
+const generateTrackingNo_1 = require("../utils/generateTrackingNo");
+const createPackage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.user) {
         return res.status(404).json({ message: 'User not found' });
     }
-    const { shipFromAddress, shipToAddress, length, width, height, weight, reference } = req.body;
-    const trackingNumber = (0, generateTrackingNumber_1.generateTrackingNumber)();
+    const { fromAddress, toAddress, length, width, height, weight, referenceNo, trackingNo } = req.body;
+    const userId = req.user.id;
     try {
-        const shipFromAddressId = (yield Address_1.Address.createWithInfo(shipFromAddress)).id;
-        const shipToAddressId = (yield Address_1.Address.createWithInfo(shipToAddress)).id;
         const pkg = yield Package_1.Package.create({
-            userId: req.user.id,
-            shipFromAddressId,
-            shipToAddressId,
-            length,
-            width,
-            height,
+            userId,
+            length: length || 0,
+            width: width || 0,
+            height: height || 0,
             weight,
-            trackingNumber,
-            reference,
+            trackingNo: trackingNo || (0, generateTrackingNo_1.generateTrackingNo)(),
+            referenceNo,
+            source: shared_1.PackageSource.manual,
         });
-        res.status(201).json(pkg);
+        toAddress.toPackageId = fromAddress.fromPackageId = pkg.id;
+        toAddress.fromPackageId = fromAddress.toPackageId = undefined;
+        toAddress.userId = fromAddress.userId = userId;
+        toAddress.addressType = shared_1.AddressEnum.toPackage;
+        fromAddress.addressType = shared_1.AddressEnum.fromPackage;
+        yield Address_1.Address.createWithInfo(fromAddress);
+        yield Address_1.Address.createWithInfo(toAddress);
+        return res.status(201).json({ success: true, packageId: pkg.id });
     }
     catch (error) {
         logger_1.default.error(error); // Log the detailed error
-        res.status(400).json({ message: error.message, errors: error.errors });
+        return res.status(400).json({ message: error.message, error: error.errors });
     }
 });
-exports.addPackage = addPackage;
+exports.createPackage = createPackage;
 const getPackages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const limit = parseInt(req.query.limit) || 100; // Default limit to 20 if not provided
     const offset = parseInt(req.query.offset) || 0; // 
     const userId = req.user.id;
-    const search = req.query.search; // 
+    const search = req.query.search;
     try {
         const total = (yield Package_1.Package.count({ where: { userId } })) || 0;
-        const whereCondition = search
-            ? {
-                userId,
-                trackingNumber: {
-                    [sequelize_1.Op.like]: `%${search}%`,
-                },
-            }
-            : { userId };
+        const whereCondition = search ? { userId, trackingNo: { [sequelize_1.Op.like]: `%${search}%` } } : { userId };
         const packages = yield Package_1.Package.findAll({
             include: [
-                { model: Address_1.Address, as: 'shipFromAddress' },
-                { model: Address_1.Address, as: 'shipToAddress' },
+                { model: Address_1.Address, as: 'fromAddress', where: { addressType: 'fromPackage' } },
+                { model: Address_1.Address, as: 'toAddress', where: { addressType: 'toPackage' } },
                 { model: User_1.User, as: 'user' },
             ],
             where: whereCondition,
             limit,
             offset,
         });
-        res.json({ total, packages });
+        return res.json({ total, packages });
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 });
 exports.getPackages = getPackages;
 const updatePackage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { shipFromAddress, shipToAddress, length, width, height, weight } = req.body;
+    const _a = req.body, { fromAddress, toAddress } = _a, rest = __rest(_a, ["fromAddress", "toAddress"]);
     try {
         const pkg = yield Package_1.Package.findByPk(req.params.id);
         if (!pkg) {
-            throw new Error('Package not found');
+            return res.status(400).json({ message: 'Package not found' });
         }
-        yield Address_1.Address.updateWithInfo(shipFromAddress, pkg.shipFromAddressId);
-        yield Address_1.Address.updateWithInfo(shipToAddress, pkg.shipToAddressId);
-        yield pkg.update({ length, width, height, weight });
-        res.json(pkg);
+        yield Address_1.Address.updateWithInfo(fromAddress);
+        yield Address_1.Address.updateWithInfo(toAddress);
+        yield pkg.update(rest);
+        return res.json(pkg);
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 });
 exports.updatePackage = updatePackage;
@@ -100,36 +109,36 @@ const deletePackage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     try {
         const pkg = yield Package_1.Package.findByPk(req.params.id);
         if (!pkg) {
-            throw new Error('Package not found');
+            return res.status(400).json({ message: 'Package not found' });
         }
-        yield Address_1.Address.destroy({ where: { id: pkg.shipFromAddressId } });
-        yield Address_1.Address.destroy({ where: { id: pkg.shipToAddressId } });
-        yield Package_1.Package.destroy({ where: { id: req.params.id } });
-        res.json({ message: 'Package deleted' });
+        yield Address_1.Address.destroy({ where: { fromPackageId: pkg.id } });
+        yield Address_1.Address.destroy({ where: { toPackageId: pkg.id } });
+        yield Package_1.Package.destroy({ where: { id: pkg.id } });
+        return res.json({ message: 'Package deleted' });
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 });
 exports.deletePackage = deletePackage;
-const getPackageDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getPackage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
         const pkg = yield Package_1.Package.findOne({
             where: { id },
             include: [
-                { model: Address_1.Address, as: 'shipFromAddress' },
-                { model: Address_1.Address, as: 'shipToAddress' },
+                { model: Address_1.Address, as: 'fromAddress' },
+                { model: Address_1.Address, as: 'toAddress' },
                 { model: User_1.User, as: 'user' },
             ],
         });
         if (!pkg) {
-            throw new Error('Package not found');
+            return res.status(400).json({ message: 'Package not found' });
         }
-        res.json(pkg);
+        return res.json({ package: pkg });
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 });
-exports.getPackageDetails = getPackageDetails;
+exports.getPackage = getPackage;

@@ -13,19 +13,19 @@ const SortCode_1 = require("../models/SortCode");
 exports.getAllSortCodes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const sortCodes = yield SortCode_1.SortCode.findAll();
-        res.json(sortCodes);
+        return res.json(sortCodes);
     }
     catch (error) {
-        res.status(500).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 });
 exports.createSortCode = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newSortCode = yield SortCode_1.SortCode.create(req.body);
-        res.status(201).json(newSortCode);
+        return res.status(201).json(newSortCode);
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 });
 exports.updateSortCode = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -34,28 +34,26 @@ exports.updateSortCode = (req, res) => __awaiter(void 0, void 0, void 0, functio
         const updated = yield SortCode_1.SortCode.update(req.body, { where: { id: id } });
         if (updated) {
             const updatedSortCode = yield SortCode_1.SortCode.findByPk(id);
-            res.json(updatedSortCode);
+            return res.json(updatedSortCode);
         }
         else {
-            res.status(404).json({ message: 'Sort code not found' });
+            return res.status(404).json({ message: 'Sort code not found' });
         }
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 });
 exports.deleteSortCode = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { id } = req.params;
-        const deleted = yield SortCode_1.SortCode.destroy({ where: { id: id } });
-        if (deleted) {
-            res.status(204).send();
+        if (yield SortCode_1.SortCode.destroy({ where: { id: req.params } })) {
+            return res.status(200).send({ success: true });
         }
         else {
-            res.status(404).json({ message: 'Sort code not found' });
+            return res.status(422).json({ message: 'Sort code not found' });
         }
     }
     catch (error) {
-        res.status(500).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 });

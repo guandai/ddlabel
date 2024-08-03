@@ -31,7 +31,7 @@ const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         next();
     }
     catch (error) {
-        res.status(400).json({ message: 'Invalid token.' });
+        return res.status(400).json({ message: 'Invalid token.' });
     }
 });
 exports.authenticate = authenticate;

@@ -14,12 +14,8 @@ exports.Address = void 0;
 const sequelize_1 = require("sequelize");
 const database_1 = require("../config/database");
 const getZipInfo_1 = require("../utils/getZipInfo");
-var AddressEnum;
-(function (AddressEnum) {
-    AddressEnum["user"] = "user";
-    AddressEnum["package"] = "package";
-})(AddressEnum || (AddressEnum = {}));
-;
+const User_1 = require("./User");
+const Package_1 = require("./Package");
 class Address extends sequelize_1.Model {
     static createWithInfo(attr) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -27,10 +23,10 @@ class Address extends sequelize_1.Model {
             return yield Address.create(Object.assign(Object.assign({}, attr), { city: info.city, state: info.state }));
         });
     }
-    static updateWithInfo(attr, id) {
+    static updateWithInfo(attr) {
         return __awaiter(this, void 0, void 0, function* () {
             const info = yield (0, getZipInfo_1.getCityState)(attr.zip, attr.city, attr.state);
-            yield Address.update(Object.assign(Object.assign({}, attr), { city: info.city, state: info.state }), { where: { id } });
+            yield Address.update(Object.assign(Object.assign({}, attr), { city: info.city, state: info.state }), { where: { id: attr.id } });
         });
     }
 }
@@ -49,11 +45,11 @@ Address.init({
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },
-    addressLine1: {
+    address1: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },
-    addressLine2: {
+    address2: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: true,
     },
@@ -76,6 +72,30 @@ Address.init({
     phone: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: true,
+    },
+    userId: {
+        type: sequelize_1.DataTypes.INTEGER.UNSIGNED,
+        allowNull: false,
+        references: {
+            model: User_1.User,
+            key: 'id',
+        },
+    },
+    fromPackageId: {
+        type: sequelize_1.DataTypes.INTEGER.UNSIGNED,
+        allowNull: true,
+        references: {
+            model: Package_1.Package,
+            key: 'id',
+        },
+    },
+    toPackageId: {
+        type: sequelize_1.DataTypes.INTEGER.UNSIGNED,
+        allowNull: true,
+        references: {
+            model: Package_1.Package,
+            key: 'id',
+        },
     },
 }, {
     sequelize: database_1.sequelize,

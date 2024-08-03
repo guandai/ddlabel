@@ -9,15 +9,59 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTransactions = void 0;
+exports.getTransactionById = exports.getTransactions = void 0;
+// backend/src/controllers/transactionController.ts
 const Transaction_1 = require("../models/Transaction");
+const sequelize_1 = require("sequelize");
+const Package_1 = require("../models/Package");
+const User_1 = require("../models/User");
 const getTransactions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const limit = parseInt(req.query.limit) || 100; // Default limit to 20 if not provided
+    const offset = parseInt(req.query.offset) || 0; // 
+    const userId = req.user.id;
+    const search = req.query.search; // 
     try {
-        const transactions = yield Transaction_1.Transaction.findAll();
-        res.json(transactions);
+        const total = (yield Transaction_1.Transaction.count({ where: { userId } })) || 0;
+        const whereCondition = search
+            ? {
+                userId,
+                trackingNo: {
+                    [sequelize_1.Op.like]: `%${search}%`,
+                },
+            }
+            : { userId };
+        const transactions = yield Transaction_1.Transaction.findAll({
+            include: [
+                { model: Package_1.Package, as: 'package' },
+                { model: User_1.User, as: 'user' },
+            ],
+            where: whereCondition,
+            limit,
+            offset,
+        });
+        return res.json({ total, transactions });
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 });
 exports.getTransactions = getTransactions;
+const getTransactionById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const transaction = yield Transaction_1.Transaction.findByPk(req.params.id, {
+            include: [
+                { model: Package_1.Package, as: 'package' },
+                { model: User_1.User, as: 'user' },
+            ],
+        });
+        if (!transaction) {
+            return res.status(404).json({ message: 'Transaction not found' });
+            return;
+        }
+        return res.json({ transaction });
+    }
+    catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+});
+exports.getTransactionById = getTransactionById;
