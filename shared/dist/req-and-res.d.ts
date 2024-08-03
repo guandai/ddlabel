@@ -139,5 +139,5 @@ export type GetStatusLogReq = {
 };
 export type GetStatusLogRes = {
     listItemReadableStatusLogs: BeansAI.ListItemReadableStatusLogs;
-} | {};
+};
 export {};
