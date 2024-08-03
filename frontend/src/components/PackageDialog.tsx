@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 import { PackageType } from '@ddlabel/shared';
-import { MessageContent } from '../types';
-import MessageAlert from './MessageAlert';
 import PackageGetRate from './PackageGetRate';
+import BeansStatusInfo from './BeansStatusInfo';
 
 type PackageDialogProps = {
     open: boolean;
@@ -13,8 +12,6 @@ type PackageDialogProps = {
 }
 
 const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, selectedPackage }) => {
-    const [message, setMessage] = useState<MessageContent>(null);
-
     const Line = () => <>
         <i style={{ display: 'block', fontSize: '0px', height: '12px', borderBottom: '1px solid black' }}>{' '}</i>
     </>
@@ -24,8 +21,8 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, select
             <DialogTitle id="package-details-title">Package Details</DialogTitle>
             {selectedPackage && (
                 <DialogContent  sx={{width: '400px'}}>
-                    <MessageAlert message={message} />
-                    <PackageGetRate setMessage={setMessage} selectedPackage={selectedPackage} />
+                    <PackageGetRate selectedPackage={selectedPackage} />
+                    <BeansStatusInfo selectedPackage={selectedPackage} />
                     <DialogContentText>
                         <strong>Id:</strong> {selectedPackage.id}<br />
                         <Line />
