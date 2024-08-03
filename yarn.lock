@@ -1849,7 +1849,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@ddlabel/backend@workspace:backend"
   dependencies:
-    "@ddlabel/shared": "workspace:^"
+    "@ddlabel/shared": "workspace:*"
     "@types/bcryptjs": ^2.4.6
     "@types/body-parser": ^1.19.5
     "@types/compression": ^1.7.5
@@ -1923,7 +1923,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ddlabel/shared@workspace:*, @ddlabel/shared@workspace:^, @ddlabel/shared@workspace:shared":
+"@ddlabel/shared@workspace:*, @ddlabel/shared@workspace:shared":
   version: 0.0.0-use.local
   resolution: "@ddlabel/shared@workspace:shared"
   dependencies:
