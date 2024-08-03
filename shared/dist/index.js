@@ -19,3 +19,4 @@ __exportStar(require("./req-and-res"), exports);
 __exportStar(require("./types"), exports);
 __exportStar(require("./functions"), exports);
 __exportStar(require("./constants"), exports);
+__exportStar(require("./beans"), exports);

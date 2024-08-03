@@ -15,4 +15,4 @@ export const aggregateError = (error: UniqueConstraintError | Error) =>
 		? error.errors.map((e: any) => e.message).join(', ')
 		: error?.message;
 
-export const Return400 = <T>(res: ResponseAdv<T>, message: string) => res.status(400).json({ message});
+export const ReturnMsg = <T>(res: ResponseAdv<T>, message: string, code = 400) => res.status(code).json({ message});

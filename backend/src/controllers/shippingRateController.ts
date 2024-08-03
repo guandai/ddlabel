@@ -78,7 +78,7 @@ export const getFullRate = async (req: Request, res: Response) => {
   let { length, width, height, weight, zone, weightUnit, volumeUnit } = req.query;
 
   if (!length || !width || !height || !weight || !zone || !weightUnit || !volumeUnit) {
-    return res.status(400).json({ message: 'All parameters are required: length, width, height, weight, zone, weightUnit, volumeUnit' });
+    return res.status(400).json({ message: 'getFullRate: All parameters are required: length, width, height, weight, zone, weightUnit, volumeUnit' });
   }
   
   try {

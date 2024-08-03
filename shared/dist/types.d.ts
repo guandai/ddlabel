@@ -34,4 +34,4 @@ export type SimpleRes = {
     error?: Error;
 };
 export type ResponseAdv<T> = Response<T | SimpleRes>;
-
+export {};

@@ -5,21 +5,22 @@ import { MessageContent } from '../types';
 import RateApi from '../api/RateApi';
 import PostalZoneApi from '../api/PostalZoneApi';
 import { PackageType } from '@ddlabel/shared';
+import MessageAlert from './MessageAlert';
 
 type PackageDialogProps = {
-    setMessage: React.Dispatch<React.SetStateAction<MessageContent>>;
     selectedPackage: PackageType | null
 }
 
-const PackageGetRate: React.FC<PackageDialogProps> = ({ setMessage, selectedPackage }) => {
+const PackageGetRate: React.FC<PackageDialogProps> = ({ selectedPackage }) => {
     const [rate, setRate] = useState<number | string | null>(null);
     const [sortCode, setSortCode] = useState<string | null>(null);
+    const [message, setMessage] = useState<MessageContent>(null);
 
     const getZone = useCallback(async (selectedPackage: PackageType): Promise<string> => {
         const fromZip = selectedPackage.fromAddress.zip;
         const toZip = selectedPackage.toAddress.zip;
         const zone = (await PostalZoneApi.getZone({fromZip, toZip})).zone?.replace('Zone ', '');
-        if (zone === '-') {
+        if (!zone || zone === '-') {
             setRate('N/A');
             setMessage({ text: 'Zone is not avaliable now', level: 'info' });
             return 'N/A';
@@ -55,7 +56,7 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ setMessage, selectedPack
             setSortCode((await PostalZoneApi.getPostalZone({zip})).postalZone.sort_code);
 
             const zone = await getZone(selectedPackage);
-            if (zone === 'N/A') { return }
+            if (zone === 'N/A' ) { return }
 
             const cost = await getCost(selectedPackage, zone);
             if (cost === -1) { return; }
@@ -72,6 +73,7 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ setMessage, selectedPack
 
     return (
 		<Box>
+            <MessageAlert message={message} />
 			<strong>Shipping Rate: </strong>{rate === null ? '...' : rate}<br />
 			<strong>Sort Code: </strong>{rate === null ? '...' : sortCode}<br />
 			{/* <Button onClick={handleGetData} color="primary">Get Rate</Button> */}

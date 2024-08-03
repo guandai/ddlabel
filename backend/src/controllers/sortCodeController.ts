@@ -38,9 +38,9 @@ exports.updateSortCode = async (req: Request, res: Response) => {
 exports.deleteSortCode = async (req: Request, res: Response) => {
   try {
     if (await SortCode.destroy({ where: { id: req.params } })) {
-      return res.status(204).send();
+      return res.status(200).send({success: true});
     } else {
-      return res.status(404).json({ message: 'Sort code not found' });
+      return res.status(422).json({ message: 'Sort code not found' });
     }
   } catch (error: any) {
     return res.status(400).json({ message: error.message });
