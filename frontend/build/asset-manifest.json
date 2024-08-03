@@ -1,9 +1,9 @@
 {
   "files": {
     "main.css": "/static/css/main.4efb37a3.css",
-    "main.js": "/static/js/main.a572b4a0.js",
+    "main.js": "/static/js/main.c81bb577.js",
     "static/js/968.3a30b0a6.chunk.js": "/static/js/968.3a30b0a6.chunk.js",
-    "static/js/881.a2e3d86a.chunk.js": "/static/js/881.a2e3d86a.chunk.js",
+    "static/js/881.f8b540b5.chunk.js": "/static/js/881.f8b540b5.chunk.js",
     "static/js/510.ea6af220.chunk.js": "/static/js/510.ea6af220.chunk.js",
     "static/media/monkey_font.jpg": "/static/media/monkey_font.04a56397a70367a33f5b.jpg",
     "static/media/monkey_logo.jpg": "/static/media/monkey_logo.c84446c82982c94782f2.jpg",
@@ -12,6 +12,6 @@
   },
   "entrypoints": [
     "static/css/main.4efb37a3.css",
-    "static/js/main.a572b4a0.js"
+    "static/js/main.c81bb577.js"
   ]
 }
