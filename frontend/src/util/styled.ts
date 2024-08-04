@@ -8,6 +8,9 @@ export const StyledBox = styled(Box)({
 	display: 'flex',
 	flexDirection: 'column',
 	alignItems: 'center',
+	width: '100%', 
+	flex: 8,
+	padding: '0 2em',
 });
 
 export const FlexBox = styled(Box) ({
