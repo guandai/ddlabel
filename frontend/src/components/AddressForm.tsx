@@ -24,6 +24,18 @@ interface AddressFormProps {
 const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onChange, title }) => {
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
+  const [address1, setAddress1] = useState('');
+  const [address2, setAddress2] = useState('');
+
+  const getZipFromAddress = (address: string): string => {
+    const zip = address?.trim().match(/\b\d{5}$/);
+    return zip ? zip[0] : '';
+  }
+
+  useEffect(() => {
+    const zip = getZipFromAddress(addressData.address2 || '') || getZipFromAddress(addressData.address1);
+    onChange({ target: { name: 'zip', value: zip } } as React.ChangeEvent<HTMLInputElement>);
+  }, [addressData.address1, addressData.address2, setMessage]);
 
   useEffect(() => {
     setCity('');
