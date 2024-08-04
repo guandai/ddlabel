@@ -5,11 +5,11 @@ import { PackageType, GetPackagesReq } from '@ddlabel/shared';
 import PackageApi from '../api/PackageApi';
 import { MessageContent } from '../types';
 import { tryLoad } from '../util/errors';
-import { Button, Container, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import MessageAlert from './MessageAlert';
 import PackageLabel from './PackageLabel';
-import { DownloadForOfflineRounded } from '@mui/icons-material';
 import { FlexBox, StyledBox } from '../util/styled';
+import ExportPdfSideBar from './ExportPdfSideBar';
 
 const PdfExporter: React.FC = () => {
   const [packages, setPackages] = useState<PackageType[]>([]);
@@ -71,17 +71,16 @@ const PdfExporter: React.FC = () => {
       </div> )
     
   return (
-    <Container component="main" maxWidth="lg">
+    <FlexBox component="main" maxWidth="lg" >
+      <ExportPdfSideBar capturePages={capturePages} search={search} setSearch={setSearch} setPage={setPage} />
       <StyledBox >
-        <Typography align="center" variant="h4">Export to PDF</Typography>
-        <Button sx={{my: 2}} variant="contained" onClick={capturePages}><DownloadForOfflineRounded />Export to PDF</Button>
+        <Typography component="h1" variant="h4" align='center'>Export to PDF</Typography>
+        <MessageAlert message={message} />
+        <FlexBox component="main" maxWidth="lg" sx={{mt: 3, flexDirection: 'row', flexWrap: 'wrap'}}>
+          {getLabels()}
+        </FlexBox>
       </StyledBox>
-      
-      <MessageAlert message={message} />
-      <FlexBox component="main" maxWidth="lg" sx={{flexDirection: 'row', flexWrap: 'wrap'}}>
-        {getLabels()}
-      </FlexBox>
-    </Container>
+    </FlexBox>
   );
 };
 

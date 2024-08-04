@@ -89,12 +89,10 @@ const PackageTable: React.FC = () => {
   return (
     <FlexBox component="main" maxWidth="lg" >
         <PackageTableSideBar search={search} setSearch={setSearch} setPage={setPage} />
-
-        <StyledBox sx={{ width: '100%', flex: 8, px: 4 }}>
+        <StyledBox>
             <Typography component="h1" variant="h4" align='center'>Packages</Typography>
             <MessageAlert message={message} />
-            <br />
-            <TableContainer component={Paper}>
+            <TableContainer component={Paper} sx={{ mt: 3 }}>
               <Table>
                 <TableHead>
                   <TableRow>
