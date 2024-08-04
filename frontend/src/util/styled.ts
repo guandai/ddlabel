@@ -1,6 +1,6 @@
 
 
-import { styled } from '@mui/material/styles';
+import { styled, Theme } from '@mui/material/styles';
 import { Box } from '@mui/material';
 
 export const StyledBox = styled(Box)({
@@ -20,3 +20,5 @@ export const FlexBox = styled(Box) ({
 	margin: 0,
 	padding: 0,
 });
+
+export const backDropStyle = { color: '#fff', zIndex: (theme: Theme) => theme.zIndex.drawer + 1 }
