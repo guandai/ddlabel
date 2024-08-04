@@ -44,7 +44,7 @@ const PdfExporter: React.FC = () => {
   const capturePages = () => {
     const pages = pagesRef.current;
     const pdf = new jsPDF('p', 'in', [4, 6]); // Set size to 4in x 6in
-  
+
     // Create an array of promises for rendering each page
     const renderPromises = pages.map((page, idx) => {
       if (!page) return Promise.resolve(); // Skip if the page is not rendered yet
@@ -58,25 +58,27 @@ const PdfExporter: React.FC = () => {
         pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
       });
     });
-  
+
     // Wait for all renderings to finish
     Promise.all(renderPromises).then(() => {
       pdf.save('combined.pdf');
     });
   };
+
   const getLabels = () =>
-    packages.map((pkg, idx) => 
-      <div style={ {width: '4in' }} ref={(el) => (pagesRef.current[idx] = el)}>
-          <PackageLabel pkg={pkg} />
-      </div> )
-    
+    packages.map((pkg, idx) =>
+      <div key={pkg.id} style={{ width: '4in' }} ref={(el) => (pagesRef.current[idx] = el)}>
+        <PackageLabel pkg={pkg} />
+      </div>
+    );
+
   return (
-    <FlexBox component="main" maxWidth="lg" >
+    <FlexBox component="main" maxWidth="lg">
       <ExportPdfSideBar capturePages={capturePages} search={search} setSearch={setSearch} setPage={setPage} />
-      <StyledBox >
+      <StyledBox>
         <Typography component="h1" variant="h4" align='center'>Export to PDF</Typography>
         <MessageAlert message={message} />
-        <FlexBox component="main" maxWidth="lg" sx={{mt: 3, flexDirection: 'row', flexWrap: 'wrap'}}>
+        <FlexBox component="main" maxWidth="lg" sx={{ mt: 3, flexDirection: 'row', flexWrap: 'wrap' }}>
           {getLabels()}
         </FlexBox>
       </StyledBox>
