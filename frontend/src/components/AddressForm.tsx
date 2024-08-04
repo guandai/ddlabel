@@ -29,12 +29,13 @@ const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onCh
     setCity('');
     setState('');
     if (addressData?.zip && addressData?.zip.length === 5) {
-      tryLoad(setMessage, async () => {
+      const getZipInfo = async () => {
         const info = await new ZipCodeApi().getZipOnfo(addressData.zip);
         setCity(info.city);
         setState(info.state);
         setMessage(null);
-      })
+      };
+      tryLoad(setMessage, getZipInfo)
     }
   }, [addressData.zip, setMessage]);
 

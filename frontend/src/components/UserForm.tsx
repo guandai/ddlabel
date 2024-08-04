@@ -8,6 +8,7 @@ import MessageAlert from './MessageAlert';
 import { AddressEnum } from '@ddlabel/shared';
 import { AddressAttributes } from "@ddlabel/shared";
 import UserApi from '../api/UserApi';
+import { StyledBox } from '../util/styled';
 
 type QuickFieldProp = {
   name: keyof ProfileType;
@@ -46,14 +47,14 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
     if (isRegister) {
       return;
     }
-
-    tryLoad(setMessage, async () => {
+    const getCurrentUser = async () => {
       setProfile({
         ...(await UserApi.getCurrentUser()).user,
         password: '', // Ensure password is empty initially
         confirmPassword: '',
       });
-    });
+    };
+    tryLoad(setMessage, getCurrentUser);
   }, [isRegister]);
 
   useEffect(() => {
@@ -101,16 +102,18 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
     const profileCopy = { ...profile };
 
     if (isRegister) {
-      tryLoad(setMessage, async () => {
+      const registerUser = async () => {
         await UserApi.register(profileCopy);
         window.location.href = '/login';
-      });
+      };
+      tryLoad(setMessage, registerUser);
     } else {
-      tryLoad(setMessage, async () => {
+      const updateUser = async () => {
         await UserApi.updateUser(profileCopy);
         setMessage({ text: 'Profile updated successfully', level: 'success' });
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
+      }
+      tryLoad(setMessage, updateUser);
     }
   };
 
@@ -134,25 +137,18 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
     )
   };
   return (
-    <Container component="main" maxWidth="sm">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Typography component="h1" variant="h5">
+    <Container component="main" maxWidth="md">
+      <StyledBox>
+        <Typography component="h1" variant="h4">
           {isRegister ? 'Register' : 'User Profile'}
         </Typography>
         <MessageAlert message={message} />
 
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-          <Typography variant="h6">User Info:</Typography>
+          <Typography variant="h6">User Info</Typography>
           {quickField({ name: 'name', autoComplete: 'name' })}
           {quickField({ name: 'email', autoComplete: 'email' })}
-          {quickField({ name: 'password', autoComplete: 'off', type: 'password', required: isRegister })}
+          {quickField({ name: 'password', autoComplete: 'new-password', type: 'password', required: isRegister })}
           {quickField({ name: 'confirmPassword', autoComplete: 'off', type: 'password', required: isRegister })}
           <AddressForm
             setMessage={setMessage}
@@ -183,7 +179,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
             {isRegister ? 'Register' : 'Update Profile'}
           </Button>
         </Box>
-      </Box>
+      </StyledBox>
     </Container>
   );
 };

@@ -2,11 +2,10 @@
 import jsPDF from 'jspdf';
 import { PackageType } from '@ddlabel/shared';
 import PackageLabel from '../components/PackageLabel';
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 import html2canvas from 'html2canvas';
 
-export const generatePDF = async (pkg: PackageType) => {
+export const getLabelContainer = (pkg: PackageType) => {
   const PPI = 300; // Desired PPI for the PDF
   const mmToInch = 25.4; // Conversion factor from mm to inches
   const widthInInches = 4; // Width of the label in inches
@@ -29,14 +28,18 @@ export const generatePDF = async (pkg: PackageType) => {
   // Create a root for React rendering
   const labelRoot = createRoot(labelContainer);
   labelRoot.render(<PackageLabel pkg={pkg} />);
-  
+  return { labelRoot, labelContainer, scaleFactor };
+};
+
+export const generatePDF = async (pkg: PackageType) => {
+  const { labelContainer, scaleFactor } = getLabelContainer(pkg);
   // Wait for the component to render
   await new Promise(resolve => setTimeout(resolve, 1000));
-  
+
   // Convert the label to a canvas
   const canvas = await html2canvas(labelContainer, { scale: scaleFactor });
   const imgData = canvas.toDataURL('image/png');
-  
+
   // Create a new PDF document
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -44,10 +47,10 @@ export const generatePDF = async (pkg: PackageType) => {
     format: [4, 6] // 4 inches x 6 inches
   });
   doc.addImage(imgData, 'PNG', 0, 0, 4, 6); // Add the image to the PDF
-  
+
   // Clean up by removing the label container
   document.body.removeChild(labelContainer);
-  
+
   // Save the PDF
   doc.save(`package_${pkg.id}_label.pdf`);
-  };
+};

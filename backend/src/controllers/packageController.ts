@@ -36,7 +36,7 @@ export const createPackage = async (req: AuthRequest, res: ResponseAdv<CreatePac
     toAddress.addressType = AddressEnum.toPackage;
     fromAddress.addressType = AddressEnum.fromPackage;
 
-    await Address.createWithInfo(fromAddress);
+    const a = await Address.createWithInfo(fromAddress);
     await Address.createWithInfo(toAddress);
 
     return res.status(201).json({ success: true, packageId: pkg.id });

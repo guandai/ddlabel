@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Container, TablePagination, TextField } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, TablePagination } from '@mui/material';
 import { tryLoad } from '../util/errors';
 import MessageAlert from './MessageAlert';
 import { MessageContent } from '../types';
 import TransactionApi from '../api/TransectionApi';
 import { TransactionType } from '@ddlabel/shared';
+import { FlexBox, StyledBox } from '../util/styled';
+import TransactionTableSideBar from './TransactionTableSideBar';
 
 const TransactionTable: React.FC = () => {
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
@@ -16,12 +18,13 @@ const TransactionTable: React.FC = () => {
 
   useEffect(() => {
     const fetchTransactions = async () => {
-      tryLoad(setMessage, async () => {
+      const getTransactions = async () => {
         const params = { limit: rowsPerPage, offset: page * rowsPerPage, search };
         const response = await TransactionApi.getTransactions(params);
         setTransactions(response.transactions || []);
         setTotalPackages(response.total); // Set the total number of packages
-      });
+      };
+      tryLoad(setMessage, getTransactions);
     };
     fetchTransactions();
   }, [page, rowsPerPage, search]);
@@ -35,30 +38,12 @@ const TransactionTable: React.FC = () => {
     setPage(newPage);
   };
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(event.target.value);
-    setPage(0); // Reset to first page when searching
-  };
-
   return (
-    <Container component="main" maxWidth="lg">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '600px' }}>
-          <Typography component="h1" variant="h5">Transactions</Typography>
-          <TextField
-            label="Search Transactions"
-            value={search}
-            onChange={handleSearchChange}
-            variant="outlined"
-          />
-        </Box>
+    <FlexBox component="main" maxWidth="lg" >
+      <TransactionTableSideBar search={search} setSearch={setSearch} setPage={setPage} />
+
+      <StyledBox sx={{ width: '100%', flex: 8, px: 4 }}>
+        <Typography component="h1" variant="h4">Transactions</Typography>
         <MessageAlert message={message} />
         <TableContainer component={Paper} sx={{ mt: 3 }}>
           <Table>
@@ -93,8 +78,8 @@ const TransactionTable: React.FC = () => {
             showLastButton // Show the last page button
           />
         </TableContainer>
-      </Box>
-    </Container>
+      </StyledBox>
+    </FlexBox>
   );
 };
 

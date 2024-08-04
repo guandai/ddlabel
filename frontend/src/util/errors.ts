@@ -4,40 +4,28 @@ import React from "react";
 
 export type SetMessage = (value: React.SetStateAction<MessageContent>) => void;
 
-const tryError = (setMessage: SetMessage, error: any) => {
+const tryError = (setMessage: SetMessage, name: string, error: AxiosError) => {
   const errorData = ((error as AxiosError).response?.data as PkgCsvError);
   let message = 'Failed to perform the operation.';
-  console.log(`errorS`, error);
-  const errors = errorData?.errors;
-  if (errors && errors.length > 0) {
-    message = errors[0].message;
-  } else if (errorData?.message) {
-    message = errorData.message;
+  if (errorData && errorData.errors &&Array.isArray(errorData.errors)) {
+    message = errorData.errors.map((err) => err.message).join('\n');
+  } else {
+    message = errorData?.message || error?.message || message;
   }
-  setMessage({ text: message, level: 'error' });
+  setMessage({ text: `${name} has ${message}`, level: 'error' });
 }
 
 export const tryLoad = async <T, P = void>(
   setMessage: SetMessage,
   callback: () => Promise<T>,
-  errorFn?: (() => Promise<P>) | (() => void)
+  errorCallback?: (() => Promise<P>) | (() => void)
 ) => {
   try {
     return await callback();
   } catch (error) {
-    tryError(setMessage, error);
+    const err = error as AxiosError;
+    tryError(setMessage, callback.name, err);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    return errorFn?.();
+    return errorCallback?.();
   }
 }
-
-// const loadApi = async<T>(
-//   setMessage: SetMessage,
-//   path: string,
-//   params: unknown
-// ) => tryLoad<T>(setMessage, async () => {
-//   const responst = await axios.get<T>(
-//     `${process.env.REACT_APP_BE_URL}/${path}`,
-//     { params });
-//   return responst.data;
-// })

@@ -9,6 +9,7 @@ import { MessageContent } from '../types.d';
 import MessageAlert from './MessageAlert';
 import { AddressEnum } from '@ddlabel/shared';
 import PackageApi from '../api/PackageApi';
+import { StyledBox } from '../util/styled';
 
 type QuickFieldProp = {
   name: keyof PackageType;
@@ -54,10 +55,10 @@ const PackageForm: React.FC = () => {
     if (!packageId) {
       return;
     }
-
-    tryLoad(setMessage, async () => {
+    const getPackageById = async () => {
       setPackageData((await PackageApi.getPackageById(packageId)).package);
-    });
+    }
+    tryLoad(setMessage, getPackageById);
   }, [packageId]);
 
   const onSubmit = async (data: UpdatePackageReq | CreatePackageReq) => {
@@ -65,8 +66,7 @@ const PackageForm: React.FC = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-
-    tryLoad(setMessage, async () => {
+    const createOrUpdatePackage = async () => {
       if (packageId) {
         await PackageApi.updatePackage(packageId, data);
       } else {
@@ -78,7 +78,8 @@ const PackageForm: React.FC = () => {
         text: packageId ? 'Package updated successfully' : 'Package added successfully'
       });
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    };
+    tryLoad(setMessage, createOrUpdatePackage);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,20 +104,13 @@ const PackageForm: React.FC = () => {
 
   return (
     <Container component="main" maxWidth="md" sx={{maxHeight: "100%", overflow: "scroll"}}>
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Typography component="h1" variant="h5">
+      <StyledBox>
+        <Typography component="h1" variant="h4">
           {packageId ? 'Edit Package' : 'Add Package'}
         </Typography>
         <MessageAlert message={message} />
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-          <Grid item xs={12} mt="1.5em">
+          <Grid item xs={12}>
             <AddressForm
               setMessage={setMessage}
               addressData={packageData.fromAddress}
@@ -155,7 +149,7 @@ const PackageForm: React.FC = () => {
             </Grid>
           </Grid>
         </Box>
-      </Box>
+      </StyledBox>
     </Container>
   );
 };
