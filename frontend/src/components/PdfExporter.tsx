@@ -38,11 +38,6 @@ const PdfExporter: React.FC = () => {
     setPage(0);
   };
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(event.target.value);
-    setPage(0);
-  };
-
   // Create refs for each page
   const pagesRef = useRef<(HTMLDivElement | null)[]>([]);
 

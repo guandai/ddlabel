@@ -15,6 +15,10 @@ type DataStructure = StateData[];
 const stData = stateData as DataStructure;
 
 export const fixCityState = (attr: AddressCreationAttributes): AddressCreationAttributes => {
+	if (attr.city && attr.state) {
+		return attr;
+	}
+
 	const info = getZipInfo(attr.zip) 
 		|| getZipInfo(getZipFromAddress(attr.address2 || '')) 
 		|| getZipInfo(getZipFromAddress(attr.address1));

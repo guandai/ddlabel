@@ -38,6 +38,11 @@ class Address extends Model<AddressAttributes, AddressCreationAttributes> implem
     const fixedAttr = await fixCityState(attr);
     await Address.update(fixedAttr,  { where: { id: attr.id } });
   }
+
+  public static async bulkCreateWithInfo(attrs: AddressCreationAttributes[]) {
+    const fixedAttrs = await Promise.all(attrs.map(async (attr) => await fixCityState(attr))); 
+    await Address.bulkCreate(fixedAttrs);
+  }
 }
 
 Address.init(

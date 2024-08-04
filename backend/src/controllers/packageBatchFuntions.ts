@@ -2,7 +2,7 @@
 import { Package, PackageCreationAttributes } from '../models/Package';
 import { Address, AddressCreationAttributes } from '../models/Address';
 import getZipInfo from '../utils/getZipInfo';
-import { isValidJSON } from '../utils/errors';
+import { aggregateError, isValidJSON, reducedError } from '../utils/errors';
 import logger from '../config/logger';
 import { CsvRecord, defaultMapping, CSV_KEYS, HeaderMapping, KeyCsvRecord } from '@ddlabel/shared';
 
@@ -13,7 +13,6 @@ export type BatchDataType = {
 }
 
 export type PackageRoot = PackageCreationAttributes;
-
 export type CsvData = { [k: string]: string | number };
 
 const getMappingData = (headers: CsvData, headerMapping: HeaderMapping): CsvRecord => {
@@ -29,11 +28,11 @@ export const getPreparedData = (packageCsvMap: string, csvData: CsvData) => {
 	const fromZipInfo = getZipInfo(mappedData['fromAddressZip'] );
 	const toZipInfo = getZipInfo(mappedData['toAddressZip'] );
 	if (!fromZipInfo) { 
-		logger.error(`has no From ZipInfo for fromAddressZip: ${mappedData['fromAddressZip']}`);
+		logger.error(`Error in getPreparedData: no fromAddressZip, ${mappedData['fromAddressZip']}`);
 		return;
 	}
 	if (!toZipInfo) { 
-		logger.error(`has no To ZipInfo for toAddressZip: ${mappedData['toAddressZip']}`);
+		logger.error(`Error in getPreparedData: no toAddressZip, ${mappedData['toAddressZip']}`);
 		return;
 	}
 	return {
@@ -50,13 +49,11 @@ export const processBatch = async (batchData: BatchDataType) => {
 		packages.map((pkg, idx: number) => {
 			shipFromBatch[idx].fromPackageId = pkg.id;
 			shipToBatch[idx].toPackageId = pkg.id;
-			// ...pkg,
-			// fromAddressId: fromAddresses[idx].id,
-			// toAddressId: toAddresses[idx].id
 		});
-		const fromAddresses = await Address.bulkCreate(shipFromBatch);
-		const toAddresses = await Address.bulkCreate(shipToBatch);
+		await Address.bulkCreate(shipFromBatch);
+		await Address.bulkCreate(shipToBatch);
 	} catch (error: any) {
+		logger.error(`Error in processBatch: ${reducedError(error)}`);
 		throw error;
 	}
 };
