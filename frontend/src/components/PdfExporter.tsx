@@ -17,30 +17,31 @@ const PdfExporter: React.FC = () => {
   // Create refs for each page
   const pagesRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  const capturePages = () => {
+  const capturePages = async () => {
+    setLoading(true);
     const pages = pagesRef.current;
-    const pdf = new jsPDF('p', 'in', [4, 6]); // Set size to 4in x 6in
+    const pdf = new jsPDF('p', 'in', [4, 6]);
 
     // Create an array of promises for rendering each page
     const renderPromises = pages.map((page, idx) => {
-      if (!page) return Promise.resolve(); // Skip if the page is not rendered yet
-      return html2canvas(page).then((canvas) => {
-        setLoading(true);
-        const imgData = canvas.toDataURL('image/png');
-        const imgWidth = 4; // 4 inches
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        if (idx !== 0) {
-          pdf.addPage();
-        }
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      });
+      if (!page) return Promise.resolve();
+      return html2canvas(page)
+        .then((canvas) => {
+          const imgData = canvas.toDataURL('image/png');
+          const imgWidth = 4;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          if (idx !== 0) {
+            pdf.addPage();
+          }
+          pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        })
     });
 
     // Wait for all renderings to finish
-    Promise.all(renderPromises).then(() => {
+    await Promise.all(renderPromises).then(() => {
       pdf.save('combined.pdf');
+      setLoading(false);
     });
-    setLoading(false);
   };
 
   const getLabels = () =>
@@ -52,9 +53,10 @@ const PdfExporter: React.FC = () => {
 
   return (
     <FlexBox component="main" maxWidth="lg">
-      {loading && <Backdrop open={loading} sx={backDropStyle} ><CircularProgress /></Backdrop>}
-      <ExportPdfSideBar capturePages={capturePages} setPackages={setPackages} setMessage={setMessage}/>
+      <Backdrop open={loading} sx={backDropStyle} ><CircularProgress /></Backdrop>
+      <ExportPdfSideBar capturePages={capturePages} setPackages={setPackages} setMessage={setMessage} />
       <StyledBox>
+        <button onClick={capturePages}>aaaaa</button>
         <Typography component="h1" variant="h4" align='center'>Export to PDF</Typography>
         <MessageAlert message={message} />
         <FlexBox component="main" maxWidth="lg" sx={{ mt: 3, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
