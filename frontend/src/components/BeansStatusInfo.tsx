@@ -18,7 +18,7 @@ const BeansStatusInfo: React.FC<PackageDialogProps> = ({ selectedPackage }) => {
         if (!selectedPackage) {
             return;
         }
-        tryLoad(setMessage, async () => {
+        const  getStatusLog = async () => {
 			const statusLog = (await BeansStatusLogApi.getStatusLog({trackingNo: selectedPackage.trackingNo}));
 			if (!('listItemReadableStatusLogs' in statusLog)) {
 				setStatus('N/A');
@@ -26,7 +26,8 @@ const BeansStatusInfo: React.FC<PackageDialogProps> = ({ selectedPackage }) => {
 			}
 			const status = statusLog.listItemReadableStatusLogs?.[0].item.status;
 			setStatus(status);
-        });
+        };
+        tryLoad(setMessage, getStatusLog);
     }, [selectedPackage, setMessage]);
 
     useEffect(() => {

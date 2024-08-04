@@ -1,12 +1,12 @@
 // backend/src/models/Address.ts
 import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
-import { getCityState } from '../utils/getZipInfo';
+import { fixCityState } from '../utils/getZipInfo';
 import { AddressAttributes, AddressEnum } from '@ddlabel/shared';
 import { User } from './User';
 import { Package } from './Package';
 
-interface AddressCreationAttributes extends Optional<AddressAttributes, 'id'> {}
+interface AddressCreationAttributes extends Optional<AddressAttributes, 'id'> { }
 
 class Address extends Model<AddressAttributes, AddressCreationAttributes> implements AddressAttributes {
   public id!: number;
@@ -19,7 +19,7 @@ class Address extends Model<AddressAttributes, AddressCreationAttributes> implem
   public email?: string;
   public phone?: string;
   public addressType!: AddressEnum;
-  
+
   public userId?: number;
   public fromPackageId?: number;
   public toPackageId?: number;
@@ -30,13 +30,13 @@ class Address extends Model<AddressAttributes, AddressCreationAttributes> implem
 
 
   public static async createWithInfo(attr: AddressCreationAttributes): Promise<Address> {
-    const info = await getCityState(attr.zip, attr.city, attr.state);
-    return await Address.create({ ...attr, city: info.city, state: info.state });
+    const fixedAttr = await fixCityState(attr);
+    return await Address.create(fixedAttr);
   }
 
   public static async updateWithInfo(attr: AddressAttributes) {
-    const info = await getCityState(attr.zip, attr.city, attr.state);
-    await Address.update({ ...attr, city: info.city, state: info.state }, { where: { id: attr.id } });
+    const fixedAttr = await fixCityState(attr);
+    await Address.update(fixedAttr,  { where: { id: attr.id } });
   }
 }
 

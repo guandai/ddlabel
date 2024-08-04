@@ -51,7 +51,7 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ selectedPackage }) => {
         if (!selectedPackage) {
             return;
         }
-        tryLoad(setMessage, async () => {
+        const getZoneAndCost = async () => {
             const zip = selectedPackage?.toAddress.zip;
             setSortCode((await PostalZoneApi.getPostalZone({zip})).postalZone.sort_code);
 
@@ -62,7 +62,8 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ selectedPackage }) => {
             if (cost === -1) { return; }
 
             setRate(`$${cost.toFixed(2)}`);
-        });
+        };
+        tryLoad(setMessage, getZoneAndCost);
     }, [selectedPackage, setMessage, getCost, getZone]);
 
     useEffect(() => {
