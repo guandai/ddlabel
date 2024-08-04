@@ -42,7 +42,7 @@ const TransactionTable: React.FC = () => {
     <FlexBox component="main" maxWidth="lg" >
       <TransactionTableSideBar search={search} setSearch={setSearch} setPage={setPage} />
 
-      <StyledBox sx={{ width: '100%', flex: 8, px: 4 }}>
+      <StyledBox>
         <Typography component="h1" variant="h4">Transactions</Typography>
         <MessageAlert message={message} />
         <TableContainer component={Paper} sx={{ mt: 3 }}>
