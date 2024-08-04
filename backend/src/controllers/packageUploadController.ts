@@ -10,7 +10,6 @@ import { AuthRequest } from '../types';
 import logger from '../config/logger';
 import { AddressEnum, ImportPackageRes, PackageSource, ResponseAdv } from '@ddlabel/shared';
 import { BatchDataType, CsvData, getPreparedData, processBatch } from './packageBatchFuntions';
-import { AggregateError, Sequelize, UniqueConstraintError } from 'sequelize';
 import { aggregateError } from '../utils/errors';
 
 type OnDataParams = {
@@ -96,6 +95,7 @@ const onEnd = async ({ stream, req, pkgAll }: OnEndParams) => {
 			reportIoSocket('insert', req, processed, pkgBatch.length);
 			stream.emit('success');
 		} catch (error: any) {
+			logger.error(`Error in onEnd: ${error}`); // Log the detailed
 			stream.emit('error', aggregateError(error));
 		}
 	}
@@ -119,9 +119,9 @@ export const importPackages = async (req: Request, res: ResponseAdv<ImportPackag
 		.on('end', async () => onEnd({ stream, req, pkgAll }));
 
 	//  if .on('error')  follow the chain, the error can not be catched by stream
-	stream.on('error', err => {
-		logger.error(`onError importing pkgBatch ${err}`);
-		return res.status(400).send({ message: `Importing Error: ${err}` })
+	stream.on('error', error => {
+		logger.error(`Error in importPackages: ${error}`);
+		return res.status(400).send({ message: `Importing Error: ${error}` })
 	});
 	stream.on('success', () => {
 		return res.json({ message: `Importing Done!` });

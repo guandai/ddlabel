@@ -41,7 +41,7 @@ export const createPackage = async (req: AuthRequest, res: ResponseAdv<CreatePac
 
     return res.status(201).json({ success: true, packageId: pkg.id });
   } catch (error: any) {
-    logger.error(error); // Log the detailed error
+    logger.error(`Error in createPackage: ${error}`);
     return res.status(400).json({ message: error.message, error: error.errors });
   }
 };
@@ -67,6 +67,7 @@ export const getPackages = async (req: AuthRequest, res: ResponseAdv<GetPackages
     });
     return res.json({ total, packages });
   } catch (error: any) {
+    logger.error(`Error in getPackages: ${error}`);
     return res.status(400).json({ message: error.message });
   }
 };

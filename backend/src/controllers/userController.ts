@@ -20,7 +20,7 @@ export const registerUser = async (req: Request, res: ResponseAdv<RegisterUserRe
     await Address.createWithInfo(warehouseAddress);
     return res.status(201).json({ success: true, userId: user.id });
   } catch (error: any) {
-    logger.error(error); // Log the detailed
+    logger.error(`Error in registerUser: ${error}`);
     return res.status(400).json({ message: aggregateError(error), error });
   }
 };
