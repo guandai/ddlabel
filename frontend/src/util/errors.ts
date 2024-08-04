@@ -6,13 +6,13 @@ export type SetMessage = (value: React.SetStateAction<MessageContent>) => void;
 
 const tryError = (setMessage: SetMessage, name: string, error: AxiosError) => {
   const errorData = ((error as AxiosError).response?.data as PkgCsvError);
-  let message = 'Failed to perform the operation.';
+  let message = `${name} met error: ${error}`;
   if (errorData && errorData.errors &&Array.isArray(errorData.errors)) {
     message = errorData.errors.map((err) => err.message).join('\n');
   } else {
     message = errorData?.message || error?.message || message;
   }
-  setMessage({ text: `${name} has ${message}`, level: 'error' });
+  setMessage({ text: message, level: 'error' });
 }
 
 export const tryLoad = async <T, P = void>(
