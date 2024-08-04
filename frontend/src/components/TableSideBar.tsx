@@ -15,7 +15,7 @@ const TableSideBar: React.FC<Props> = ({search, setSearch, setPage, children}) =
   };
   
   return (
-	<Box sx={{ backgroundColor: '#DDDDDD', flex: 1.5, height: '100vh', padding: 2 }}>
+	<Box sx={{ backgroundColor: '#DDDDDD', flex: 1.5, height: '100hv', overflowY: "auto", padding: 2 }}>
 		<List>
 			{children}
 			<ListItem>
