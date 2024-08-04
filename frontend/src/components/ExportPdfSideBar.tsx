@@ -42,6 +42,9 @@ const ExportPdfSideBar: React.FC<Props> = (prop) => {
 	return (
 		<TableSideBar search={search} setSearch={setSearch} setPage={setPage} >
 			<ListItem>
+				Total Packages: {total}
+			</ListItem>
+			<ListItem>
 				<Button sx={{ my: 2 }} fullWidth variant="contained" onClick={capturePages}><DownloadForOfflineRounded />Export to PDF</Button>
 			</ListItem>
 			<ListItem>
