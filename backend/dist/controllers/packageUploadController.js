@@ -73,6 +73,7 @@ const onEnd = (_a) => __awaiter(void 0, [_a], void 0, function* ({ stream, req, 
             stream.emit('success');
         }
         catch (error) {
+            logger_1.default.error(`Error in onEnd: ${error}`); // Log the detailed
             stream.emit('error', (0, errors_1.aggregateError)(error));
         }
     }
@@ -92,9 +93,9 @@ const importPackages = (req, res) => __awaiter(void 0, void 0, void 0, function*
         .on('data', (csvData) => onData({ req, csvData, pkgAll }))
         .on('end', () => __awaiter(void 0, void 0, void 0, function* () { return onEnd({ stream, req, pkgAll }); }));
     //  if .on('error')  follow the chain, the error can not be catched by stream
-    stream.on('error', err => {
-        logger_1.default.error(`onError importing pkgBatch ${err}`);
-        return res.status(400).send({ message: `Importing Error: ${err}` });
+    stream.on('error', error => {
+        logger_1.default.error(`Error in importPackages: ${error}`);
+        return res.status(400).send({ message: `Importing Error: ${error}` });
     });
     stream.on('success', () => {
         return res.json({ message: `Importing Done!` });

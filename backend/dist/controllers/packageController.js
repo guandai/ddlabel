@@ -53,12 +53,12 @@ const createPackage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         toAddress.userId = fromAddress.userId = userId;
         toAddress.addressType = shared_1.AddressEnum.toPackage;
         fromAddress.addressType = shared_1.AddressEnum.fromPackage;
-        yield Address_1.Address.createWithInfo(fromAddress);
+        const a = yield Address_1.Address.createWithInfo(fromAddress);
         yield Address_1.Address.createWithInfo(toAddress);
         return res.status(201).json({ success: true, packageId: pkg.id });
     }
     catch (error) {
-        logger_1.default.error(error); // Log the detailed error
+        logger_1.default.error(`Error in createPackage: ${error}`);
         return res.status(400).json({ message: error.message, error: error.errors });
     }
 });
@@ -84,6 +84,7 @@ const getPackages = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         return res.json({ total, packages });
     }
     catch (error) {
+        logger_1.default.error(`Error in getPackages: ${error}`);
         return res.status(400).json({ message: error.message });
     }
 });

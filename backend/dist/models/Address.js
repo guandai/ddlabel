@@ -19,14 +19,20 @@ const Package_1 = require("./Package");
 class Address extends sequelize_1.Model {
     static createWithInfo(attr) {
         return __awaiter(this, void 0, void 0, function* () {
-            const info = yield (0, getZipInfo_1.getCityState)(attr.zip, attr.city, attr.state);
-            return yield Address.create(Object.assign(Object.assign({}, attr), { city: info.city, state: info.state }));
+            const fixedAttr = yield (0, getZipInfo_1.fixCityState)(attr);
+            return yield Address.create(fixedAttr);
         });
     }
     static updateWithInfo(attr) {
         return __awaiter(this, void 0, void 0, function* () {
-            const info = yield (0, getZipInfo_1.getCityState)(attr.zip, attr.city, attr.state);
-            yield Address.update(Object.assign(Object.assign({}, attr), { city: info.city, state: info.state }), { where: { id: attr.id } });
+            const fixedAttr = yield (0, getZipInfo_1.fixCityState)(attr);
+            yield Address.update(fixedAttr, { where: { id: attr.id } });
+        });
+    }
+    static bulkCreateWithInfo(attrs) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const fixedAttrs = yield Promise.all(attrs.map((attr) => __awaiter(this, void 0, void 0, function* () { return yield (0, getZipInfo_1.fixCityState)(attr); })));
+            yield Address.bulkCreate(fixedAttrs);
         });
     }
 }

@@ -32,11 +32,11 @@ const getPreparedData = (packageCsvMap, csvData) => {
     const fromZipInfo = (0, getZipInfo_1.default)(mappedData['fromAddressZip']);
     const toZipInfo = (0, getZipInfo_1.default)(mappedData['toAddressZip']);
     if (!fromZipInfo) {
-        logger_1.default.error(`has no From ZipInfo for fromAddressZip: ${mappedData['fromAddressZip']}`);
+        logger_1.default.error(`Error in getPreparedData: no fromAddressZip, ${mappedData['fromAddressZip']}`);
         return;
     }
     if (!toZipInfo) {
-        logger_1.default.error(`has no To ZipInfo for toAddressZip: ${mappedData['toAddressZip']}`);
+        logger_1.default.error(`Error in getPreparedData: no toAddressZip, ${mappedData['toAddressZip']}`);
         return;
     }
     return {
@@ -53,14 +53,12 @@ const processBatch = (batchData) => __awaiter(void 0, void 0, void 0, function* 
         packages.map((pkg, idx) => {
             shipFromBatch[idx].fromPackageId = pkg.id;
             shipToBatch[idx].toPackageId = pkg.id;
-            // ...pkg,
-            // fromAddressId: fromAddresses[idx].id,
-            // toAddressId: toAddresses[idx].id
         });
-        const fromAddresses = yield Address_1.Address.bulkCreate(shipFromBatch);
-        const toAddresses = yield Address_1.Address.bulkCreate(shipToBatch);
+        yield Address_1.Address.bulkCreate(shipFromBatch);
+        yield Address_1.Address.bulkCreate(shipToBatch);
     }
     catch (error) {
+        logger_1.default.error(`Error in processBatch: ${(0, errors_1.reducedError)(error)}`);
         throw error;
     }
 });

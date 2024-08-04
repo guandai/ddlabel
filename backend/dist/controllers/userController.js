@@ -29,7 +29,7 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         return res.status(201).json({ success: true, userId: user.id });
     }
     catch (error) {
-        logger_1.default.error(error); // Log the detailed
+        logger_1.default.error(`Error in registerUser: ${error}`);
         return res.status(400).json({ message: (0, errors_1.aggregateError)(error), error });
     }
 });
