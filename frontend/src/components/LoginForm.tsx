@@ -18,20 +18,20 @@ const LoginForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage({ text: '', level: 'info' });
-
-    tryLoad(setMessage,
-      async () => {
-        const response = await UserApi.login(formData);
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('userId', String(response.userId));
-        setTimeout(() => {
-          window.location.href = '/packages';
-        }, 100);
-      })
+    const login = async () => {
+      const response = await UserApi.login(formData);
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('userId', String(response.userId));
+      setTimeout(() => {
+        window.location.href = '/packages';
+      }, 100);
+    };
+    tryLoad(setMessage, login);
   };
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="lg">
+       
       <Box
         sx={{
           marginTop: 8,
@@ -40,11 +40,15 @@ const LoginForm: React.FC = () => {
           alignItems: 'center',
         }}
       >
-        <Typography component="h1" variant="h5">
-          Login
+        <Typography component="h1" variant="h4">
+          Welcome to TMS Labeling System
         </Typography>
+        <Typography component="p" sx={{ mt: 2 }}>
+          This system allows you to manage your shipping packages, generate logistic labels, and track your shipments.
+        </Typography>
+        
         <MessageAlert message={message} />
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
           <TextField
             margin="normal"
             required

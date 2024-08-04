@@ -18,11 +18,11 @@ const Header: React.FC = () => {
     if (!isAuthenticated) {
       navigate('/login');
     }
-    
+
   }, [isAuthenticated, navigate]);
 
   return (
-    <AppBar position="static">
+    <AppBar position="relative" sx={{ zIndex: 1000 }}>
       <Toolbar>
         <img src={MonkeyLogo} width="48px" alt="Monkey Logo" />
         <Typography variant="h6" sx={{ marginLeft: '0.5em', flexGrow: 1 }}>
@@ -42,6 +42,11 @@ const Header: React.FC = () => {
             <Button color="inherit" component={Link} to="/packages">
               PACKAGES
             </Button>
+
+            <Button color="inherit" component={Link} to="/pdfs">
+              LABELS
+            </Button>
+
             <Button color="inherit" component={Link} to="/transactions">
               TRANSACTIONS
             </Button>

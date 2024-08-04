@@ -85,7 +85,7 @@ const PackageUploadMapping: React.FC = () => {
 
   return (
     <>
-      <Button variant="contained" disabled={runStatus === RunStatus.running} color="secondary" startIcon={<Upload />} component="label" >
+      <Button variant="contained" disabled={runStatus === RunStatus.running} startIcon={<Upload />} component="label" fullWidth >
         {'Upload CSV'}
         <input type="file" required accept=".csv" style={{ display: 'none' }} onChange={handleFileChange} />
       </Button>

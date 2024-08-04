@@ -10,6 +10,7 @@ import TransactionTable from './components/TransactionTable';
 import PackageLabelPage from './components/PackageLabelPage';
 import PrivateRoute from './components/PrivateRoute';
 import Header from './components/Header';
+import PdfExporter from './components/PdfExporter';
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -21,6 +22,7 @@ const AppContent: React.FC = () => {
       {showHeader && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/pdfs" element={<PdfExporter />} />
         <Route path="/home" element={<Home />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<UserForm isRegister={true} />} />

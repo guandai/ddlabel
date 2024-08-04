@@ -1,5 +1,6 @@
 import { ZipInfo } from '@ddlabel/shared';
 import stateData from '../data/stateSmall.json';
+import { AddressCreationAttributes } from '../models/Address';
 
 interface StateData {
 	zip: string;
@@ -13,20 +14,26 @@ type DataStructure = StateData[];
 
 const stData = stateData as DataStructure;
 
-export const getCityState = (zip: string, city: string, state: string) => {
-	let info;
-	if (city && state) {
-		return { city, state }
-	}
+export const fixCityState = (attr: AddressCreationAttributes): AddressCreationAttributes => {
+	const info = getZipInfo(attr.zip) 
+		|| getZipInfo(getZipFromAddress(attr.address2 || '')) 
+		|| getZipInfo(getZipFromAddress(attr.address1));
 
-	info = getZipInfo(zip);
 	if (!info) {
-		throw new Error('Invalid zip code to get city and state');
+		throw new Error('Zip code not found')
 	}
-	return info;
+	return { ...attr, city: info.city, state: info.state };
+}
+
+const getZipFromAddress = (address: string): string => {
+	const zip = address.match(/\b\d{5}\b/);
+	return zip ? zip[0] : '';
 }
 
 const getZipInfo = (zip: string): ZipInfo | null => {
+	if (!zip) {
+		return null;
+	}
 	const entry = stData.find(it => it.zip === zip);
 	return entry || null;
 }
