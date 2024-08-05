@@ -1,5 +1,6 @@
+// shared/src/req-and-res.ts
 import { Optional } from 'sequelize';
-import { AddressAttributes, KeyZones, PackageAttributes, PackageType, PostalZoneAttributes, TransactionType, UserAttributes, ZipCodeAttributes } from "./models";
+import { AddressAttributes, AddressModel, PackageModel, PostalZoneAttributes, TransactionModel, UserAttributes, UserModel, UserRolesEnum } from "./models";
 import { SimpleRes } from './types';
 import { BeansAI } from './beans';
 
@@ -10,60 +11,82 @@ export type RegisterUserRes = {
 	userId: number;
 };
 
-export type UpdateCurrentUserReq = Pick<UserAttributes, 'name' | 'email' | 'role'> & {
+export type UpdateUserReq = Omit<UserAttributes, 'password' > & {
 	password?: string;
 } & {
 	warehouseAddress: AddressAttributes;
 };
-export type UpdateCurrentUserRes = {
+export type UpdateUserRes = {
 	success: boolean;
 };
 
-type UserClean = Omit<UserAttributes, 'password'> & { warehouseAddress: AddressAttributes };
+export type GetUsersReq = GetRecordsReq;
+
 export type GetUsersRes = {
-	users: UserClean[]
+	users: UserModel[],
+	total: number;
 };
 
-export type GetCurrentUserRes = {
-	user: UserClean;
+export type GetUserRes = {
+	user: UserModel
 };
 
 export type LoginUserReq = Pick<UserAttributes, 'email' | 'password'>;
 export type LoginUserRes = {
 	token: string;
 	userId: number;
+	userRole: UserRolesEnum;
 };
 
-export type UpdateUserReq = Pick<UserAttributes, 'name' | 'email' | 'role'> & { password?: string } & { warehouseAddress: AddressAttributes };
-export type UpdateUserRes = {
-	success: boolean;
-};
+export type Models = UserAttributes | PackageModel | TransactionModel | AddressModel
+export type ModelNames = 'user' | 'package' | 'transaction' | 'address';
 
+export enum ModelEnum {
+	user = 'user',
+	package = 'package',
+	transaction = 'transaction',
+	address = 'address',
+}
 
 // Package
 export type WeightUnit = 'lbs' | 'oz';
 export type VolumeUnit = 'inch' | 'mm';
 
-export type GetPackageRes = {
-	package: PackageAttributes & {
-		fromAddress: AddressAttributes;
-		toAddress: AddressAttributes;
-		user: UserAttributes;
-	}
-};
+export type GetRecordsRes = GetPackagesRes | GetTransactionsRes | GetUsersRes;
+export type GetRecordRes = GetPackageRes | GetTransactionRes | GetUserRes;
 
-export type GetPackagesReq = {
+export type PaginationRecordReq = {
 	limit: number;
 	offset: number;
-	search: string;
-}
-export type GetPackagesRes = {
-	packages: PackageType[],
-	total: number,
 };
 
-type PackageClean = Omit<PackageAttributes, 'id' | 'userId'> & { fromAddress: AddressAttributes, toAddress: AddressAttributes };
-export type CreatePackageReq = Optional<PackageClean, 'length' | 'width' | 'height' | 'trackingNo'>;
+export type SearchRecordReq = {
+	trackingNo?: string;
+	email?: string;
+	role?: UserRolesEnum;
+	name?: string;
+	address?: string;
+};
+
+export type DateRecordReq = {
+	startDate: string;
+    endDate: string;
+};
+
+export type GetRecordsReq = PaginationRecordReq & SearchRecordReq & DateRecordReq;
+
+export type GetPackagesReq = GetRecordsReq;
+export type GetPackagesCsvReq = SearchRecordReq & DateRecordReq;
+export type GetPackagesCsvRes = string;
+export type GetPackagesRes = {
+	packages: PackageModel[];
+	total: number;	
+};
+export type GetPackageRes = {
+	package: PackageModel;
+};
+
+export type CreatePackageReq = Optional<PackageModel, 'length' | 'width' | 'height' | 'trackingNo'>;
 export type CreatePackageRes = {
 	success: boolean;
 	packageId: number;
@@ -79,18 +102,14 @@ export type ImportPackageReq = FormData;
 export type ImportPackageRes = SimpleRes;
 
 // Transaction
-export type GetTransactionsReq = {
-	limit: number;
-	offset: number;
-	search: string;
-};
+export type GetTransactionsReq = GetRecordsReq;
 export type GetTransactionsRes = {
+	transactions: TransactionModel[];
 	total: number;
-	transactions: TransactionType[];
-};
+};	
 
 export type GetTransactionRes = {
-	transaction: TransactionType;
+	transaction: TransactionModel;
 };
 
 
@@ -108,36 +127,12 @@ export type GetRatesRes = {
 	rates: number[];
 };
 
-export type FullRateReq = {
-	weight: number;
-	weightUnit: WeightUnit;
-	length: number;
-	width: number;
-	height: number;
-	volumeUnit: VolumeUnit;
-	zone: number;
-};
+export type FullRateReq = GetRatesReq;
 export type FullRateRes = {
 	totalCost: number;
 }
 
-
-// AuthRequest
-export type AuthRequest = import("express-serve-static-core").Request & {
-	user: UserAttributes;
-};
-
-
 // Postal zip
-
-export type GetZipCodesRes = {
-	page: number;
-	pageSize: number;
-	totalItems: number;
-	totalPages: number;
-	data: ZipCodeAttributes[];
-};
-
 export type GetPostalZoneReq = { zip: string };
 export type GetPostalZoneRes = { postalZone: PostalZoneAttributes };;
 
@@ -150,3 +145,24 @@ export type GetZoneRes = { zone: string }
 // Beans
 export type GetStatusLogReq = { trackingNo: string };
 export type GetStatusLogRes = { listItemReadableStatusLogs: BeansAI.ListItemReadableStatusLogs };
+
+
+export const isGetPackageRes = (res: GetRecordRes): res is GetPackageRes => {
+	return (res as GetPackageRes).package !== undefined;
+};
+export const isGetPackagesRes = (res: GetRecordsRes): res is GetPackagesRes => {
+	return (res as GetPackagesRes).packages !== undefined;
+};
+
+export const isGetTransactionsRes = (res: GetRecordsRes): res is GetTransactionsRes => {
+	return (res as GetTransactionsRes).transactions !== undefined;
+};
+export const isGetTransactionRes = (res: GetRecordRes): res is GetTransactionRes => {
+	return (res as GetTransactionRes).transaction !== undefined;
+};
+export const isGetUsersRes = (res: GetRecordsRes): res is GetUsersRes => {
+	return (res as GetUsersRes).users !== undefined;
+};
+export const isGetUserRes = (res: GetRecordRes): res is GetUserRes => {
+	return (res as GetUserRes).user !== undefined;
+};

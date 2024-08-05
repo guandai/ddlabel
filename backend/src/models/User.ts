@@ -1,20 +1,22 @@
 // backend/src/models/User.ts
-import { Model, DataTypes, Optional } from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../config/database';
 import { Address } from './Address';
-import { UserAttributes } from '@ddlabel/shared/dist/models';
+import { Transaction } from './Transaction';
+import { UserAttributes, UserCreationAttributes, UserRolesEnum } from '@ddlabel/shared';
 import { defineRelations } from '../config/relations';
-
-interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
+import { Package } from './Package';
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   public id!: number;
   public name!: string;
   public email!: string;
   public password!: string;
-  public role!: string;
+  public role!: UserRolesEnum
+
+  public transactions!: Transaction[];
+  public packages!: Package[];
   public warehouseAddress!: Address;
-  // public warehouseAddressId!: number;
 }
 
 User.init(
@@ -41,14 +43,6 @@ User.init(
       type: DataTypes.ENUM('admin', 'worker'),
       allowNull: false,
     },
-    // warehouseAddressId: {
-    //   type: DataTypes.INTEGER.UNSIGNED,
-    //   allowNull: false,
-    //   references: {
-    //     model: Address,
-    //     key: 'id',
-    //   },
-    // },
   },
   {
     sequelize,

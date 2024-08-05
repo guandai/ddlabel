@@ -1,5 +1,5 @@
 import { Optional } from 'sequelize';
-import { AddressAttributes, PackageAttributes, PackageType, PostalZoneAttributes, TransactionType, UserAttributes, ZipCodeAttributes } from "./models";
+import { AddressAttributes, AddressModel, PackageModel, PostalZoneAttributes, TransactionModel, UserAttributes, UserModel, UserRolesEnum } from "./models";
 import { SimpleRes } from './types';
 import { BeansAI } from './beans';
 export type RegisterUserReq = Pick<UserAttributes, 'name' | 'email' | 'password' | 'role'> & {
@@ -9,29 +9,7 @@ export type RegisterUserRes = {
     success: boolean;
     userId: number;
 };
-export type UpdateCurrentUserReq = Pick<UserAttributes, 'name' | 'email' | 'role'> & {
-    password?: string;
-} & {
-    warehouseAddress: AddressAttributes;
-};
-export type UpdateCurrentUserRes = {
-    success: boolean;
-};
-type UserClean = Omit<UserAttributes, 'password'> & {
-    warehouseAddress: AddressAttributes;
-};
-export type GetUsersRes = {
-    users: UserClean[];
-};
-export type GetCurrentUserRes = {
-    user: UserClean;
-};
-export type LoginUserReq = Pick<UserAttributes, 'email' | 'password'>;
-export type LoginUserRes = {
-    token: string;
-    userId: number;
-};
-export type UpdateUserReq = Pick<UserAttributes, 'name' | 'email' | 'role'> & {
+export type UpdateUserReq = Omit<UserAttributes, 'password'> & {
     password?: string;
 } & {
     warehouseAddress: AddressAttributes;
@@ -39,29 +17,59 @@ export type UpdateUserReq = Pick<UserAttributes, 'name' | 'email' | 'role'> & {
 export type UpdateUserRes = {
     success: boolean;
 };
-export type WeightUnit = 'lbs' | 'oz';
-export type VolumeUnit = 'inch' | 'mm';
-export type GetPackageRes = {
-    package: PackageAttributes & {
-        fromAddress: AddressAttributes;
-        toAddress: AddressAttributes;
-        user: UserAttributes;
-    };
-};
-export type GetPackagesReq = {
-    limit: number;
-    offset: number;
-    search: string;
-};
-export type GetPackagesRes = {
-    packages: PackageType[];
+export type GetUsersReq = GetRecordsReq;
+export type GetUsersRes = {
+    users: UserModel[];
     total: number;
 };
-type PackageClean = Omit<PackageAttributes, 'id' | 'userId'> & {
-    fromAddress: AddressAttributes;
-    toAddress: AddressAttributes;
+export type GetUserRes = {
+    user: UserModel;
 };
-export type CreatePackageReq = Optional<PackageClean, 'length' | 'width' | 'height' | 'trackingNo'>;
+export type LoginUserReq = Pick<UserAttributes, 'email' | 'password'>;
+export type LoginUserRes = {
+    token: string;
+    userId: number;
+    userRole: UserRolesEnum;
+};
+export type Models = UserAttributes | PackageModel | TransactionModel | AddressModel;
+export type ModelNames = 'user' | 'package' | 'transaction' | 'address';
+export declare enum ModelEnum {
+    user = "user",
+    package = "package",
+    transaction = "transaction",
+    address = "address"
+}
+export type WeightUnit = 'lbs' | 'oz';
+export type VolumeUnit = 'inch' | 'mm';
+export type GetRecordsRes = GetPackagesRes | GetTransactionsRes | GetUsersRes;
+export type GetRecordRes = GetPackageRes | GetTransactionRes | GetUserRes;
+export type PaginationRecordReq = {
+    limit: number;
+    offset: number;
+};
+export type SearchRecordReq = {
+    trackingNo?: string;
+    email?: string;
+    role?: UserRolesEnum;
+    name?: string;
+    address?: string;
+};
+export type DateRecordReq = {
+    startDate: string;
+    endDate: string;
+};
+export type GetRecordsReq = PaginationRecordReq & SearchRecordReq & DateRecordReq;
+export type GetPackagesReq = GetRecordsReq;
+export type GetPackagesCsvReq = SearchRecordReq & DateRecordReq;
+export type GetPackagesCsvRes = string;
+export type GetPackagesRes = {
+    packages: PackageModel[];
+    total: number;
+};
+export type GetPackageRes = {
+    package: PackageModel;
+};
+export type CreatePackageReq = Optional<PackageModel, 'length' | 'width' | 'height' | 'trackingNo'>;
 export type CreatePackageRes = {
     success: boolean;
     packageId: number;
@@ -72,17 +80,13 @@ export type UpdatePackageRes = {
 };
 export type ImportPackageReq = FormData;
 export type ImportPackageRes = SimpleRes;
-export type GetTransactionsReq = {
-    limit: number;
-    offset: number;
-    search: string;
-};
+export type GetTransactionsReq = GetRecordsReq;
 export type GetTransactionsRes = {
+    transactions: TransactionModel[];
     total: number;
-    transactions: TransactionType[];
 };
 export type GetTransactionRes = {
-    transaction: TransactionType;
+    transaction: TransactionModel;
 };
 export type GetRatesReq = {
     weight: number;
@@ -96,27 +100,9 @@ export type GetRatesReq = {
 export type GetRatesRes = {
     rates: number[];
 };
-export type FullRateReq = {
-    weight: number;
-    weightUnit: WeightUnit;
-    length: number;
-    width: number;
-    height: number;
-    volumeUnit: VolumeUnit;
-    zone: number;
-};
+export type FullRateReq = GetRatesReq;
 export type FullRateRes = {
     totalCost: number;
-};
-export type AuthRequest = import("express-serve-static-core").Request & {
-    user: UserAttributes;
-};
-export type GetZipCodesRes = {
-    page: number;
-    pageSize: number;
-    totalItems: number;
-    totalPages: number;
-    data: ZipCodeAttributes[];
 };
 export type GetPostalZoneReq = {
     zip: string;
@@ -140,4 +126,9 @@ export type GetStatusLogReq = {
 export type GetStatusLogRes = {
     listItemReadableStatusLogs: BeansAI.ListItemReadableStatusLogs;
 };
-export {};
+export declare const isGetPackageRes: (res: GetRecordRes) => res is GetPackageRes;
+export declare const isGetPackagesRes: (res: GetRecordsRes) => res is GetPackagesRes;
+export declare const isGetTransactionsRes: (res: GetRecordsRes) => res is GetTransactionsRes;
+export declare const isGetTransactionRes: (res: GetRecordRes) => res is GetTransactionRes;
+export declare const isGetUsersRes: (res: GetRecordsRes) => res is GetUsersRes;
+export declare const isGetUserRes: (res: GetRecordRes) => res is GetUserRes;

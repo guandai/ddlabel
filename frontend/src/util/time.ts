@@ -1,6 +1,6 @@
-export const toUpdateTime = (time: number) => {
+export const unixTimeToString = (time: number) => {
 	if (!time) {
-		return 'N/A';
+		return '';
 	}
 	const date = new Date(time);
 	const timeZone = "America/New_York";
@@ -21,3 +21,24 @@ export const toUpdateTime = (time: number) => {
 	const isoString = `${parts[4].value}-${parts[0].value}-${parts[2].value} ${parts[6].value}:${parts[8].value}`;
 	return isoString;
 }
+
+
+export const toDateTime = (date?: string | number | Date | null, showTime = true): string => {
+    // Parse the string into a Date object
+	if (!date) return '';
+    let dateObject = typeof date === 'string' ||  typeof date === 'number' ? new Date(date) : date;
+
+    // Extract the date components
+    let year = dateObject.getUTCFullYear();
+    let month = String(dateObject.getMonth() + 1).padStart(2, '0');
+    let day = String(dateObject.getDate()).padStart(2, '0');
+
+    // Extract the time components
+    let hours = String(dateObject.getHours()).padStart(2, '0');
+    let minutes = String(dateObject.getMinutes()).padStart(2, '0');
+
+	const timeString = showTime ? ` ${hours}:${minutes}` : '';
+    // Return the formatted date-time string
+    return `${year}-${month}-${day}${timeString}`;
+}
+

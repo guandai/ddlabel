@@ -1,56 +1,27 @@
-import { Request } from 'express';
 import { ZipCode } from '../models/ZipCode';
-import getZipInfo from '../utils/getZipInfo';
-import { GetZipCodesRes, ResponseAdv, ZipInfo } from '@ddlabel/shared';
+import getZipInfo from '../utils/getInfo';
+import { ResponseAdv, ZipInfo } from '@ddlabel/shared';
+import { AuthRequest } from '../types';
+import { resHeaderError } from '../utils/errors';
+import { NotFoundError } from '../utils/errorClasses';
 
-export const getZipCode = async (req: Request, res: ResponseAdv<ZipCode>) => {
+export const getZipCode = async (req: AuthRequest, res: ResponseAdv<ZipCode>) => {
+  const { zip } = req.params;
   try {
-    const { zip } = req.params;
     const zipCode = await ZipCode.findOne({ where: { zip } });
     if (!zipCode) {
-      return res.status(404).json({ message: 'Zip code not found' });
+      throw new NotFoundError(`Zip code not found - ${zip}`);
     }
     return res.json(zipCode);
   } catch (error: any) {
-    return res.status(400).json({ message: error.message });
+    return resHeaderError('getZipCode', error, req.params, res);
   }
 };
 
-export const getZipCodes = async (req: Request, res: ResponseAdv<GetZipCodesRes>) => {
-  try {
-    // Get the page and pageSize from the query parameters, with default values
-    const page = parseInt(req.query.page as string, 10) || 1;
-    const pageSize = parseInt(req.query.pageSize as string, 10) || 10;
-    const offset = (page - 1) * pageSize;
-
-    // Query the database with limit and offset for pagination
-    const data = await ZipCode.findAndCountAll({
-      limit: pageSize,
-      offset: offset,
-    });
-
-    // Calculate total pages
-    const totalPages = Math.ceil(data.count / pageSize);
-
-    // Return the paginated data, total items, and total pages
-    const result: GetZipCodesRes = {
-      page: page,
-      pageSize: pageSize,
-      totalItems: data.count,
-      totalPages: totalPages,
-      data: data.rows,
-    };
-    return res.json(result);
-  } catch (error: any) {
-    return res.status(400).json({ message: error.message });
-  }
-};
-
-export const getZipCodeFromFile = async (req: Request, res: ResponseAdv<ZipInfo>) => {
+export const getZipCodeFromFile = async (req: AuthRequest, res: ResponseAdv<ZipInfo>) => {
   const info = getZipInfo(req.params.zip);
   if (!info) {
     return res.status(404).json({ message: 'Zip code not found' });
   }
-  const result: ZipInfo = { zip: req.params.zip, city: info.city, state: info.state };
-  return res.json(result);
+  return res.json({ zip: req.params.zip, city: info.city, state: info.state });
 }

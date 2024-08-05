@@ -1,37 +1,42 @@
 // frontend/src/App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import Home from './components/Home';
-import LoginForm from './components/LoginForm';
-import UserForm from './components/UserForm';
-import PackageForm from './components/PackageForm';
-import PackageTable from './components/PackageTable';
-import TransactionTable from './components/TransactionTable';
-import PackageLabelPage from './components/PackageLabelPage';
+import UsersTable from './components/user/UsersTable';
+import LoginForm from './components/user/LoginForm';
+import UserForm from './components/user/UserForm';
+import PackageForm from './components/package/PackageForm';
+import PackageTable from './components/package/PackageTable';
+import TransactionTable from './components/transaction/TransactionTable';
+import PackageLabelPage from './components/label/PackageLabelPage';
 import PrivateRoute from './components/PrivateRoute';
-import Header from './components/Header';
-import PdfExporter from './components/PdfExporter';
+import Header from './components/share/Header';
+import PdfExporter from './components/label/PdfExporter';
+import BeansItemsTable from './components/beans/BeansItemsTable';
+import BeansRoutesTable from './components/beans/BeansRoutesTable';
 
 const AppContent: React.FC = () => {
   const location = useLocation();
-
   const showHeader = !(location.pathname.startsWith('/packages/') && location.pathname.match(/\/packages\/\d+\/label/));
 
   return (
     <>
       {showHeader && <Header />}
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<LoginForm />} />
         <Route path="/pdfs" element={<PdfExporter />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/users" element={<UsersTable />} />
+        <Route path="/users/edit/:id" element={<PrivateRoute component={UserForm} />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<UserForm isRegister={true} />} />
-        <Route path="/profile" element={<PrivateRoute component={UserForm} />} />
+        <Route path="/profile" element={<UserForm/>} />
         <Route path="/packages/create" element={<PrivateRoute component={PackageForm} />} />
         <Route path="/packages/edit/:id" element={<PrivateRoute component={PackageForm} />} />
         <Route path="/packages" element={<PrivateRoute component={PackageTable} />} />
         <Route path="/transactions" element={<PrivateRoute component={TransactionTable} />} />
         <Route path="/packages/:id/label" element={<PrivateRoute component={PackageLabelPage} />} />
+        <Route path="/beans/items" element={<PrivateRoute component={BeansItemsTable} />} />
+        <Route path="/beans/routes" element={<PrivateRoute component={BeansRoutesTable} />} />
+        <Route path="/beans/routes/:listRouteId/items" element={<PrivateRoute component={BeansItemsTable} />} />
       </Routes>
     </>
   );

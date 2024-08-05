@@ -1,8 +1,11 @@
 // backend/src/controllers/shippingRateController.ts
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { ShippingRate } from '../models/ShippingRate';
 import { Op } from 'sequelize';
 import { FullRateReq, VolumeUnit, WeightUnit } from '@ddlabel/shared';
+import { AuthRequest } from '../types';
+import { resHeaderError } from '../utils/errors';
+import { InvalidInputError, NotFoundError } from '../utils/errorClasses';
 
 // Function to calculate shipping rate
 export const fullShippingRate = async (prop: FullRateReq): Promise<number | 'NO_RATE'> => {
@@ -31,11 +34,8 @@ export const fullShippingRate = async (prop: FullRateReq): Promise<number | 'NO_
   const rate = Number(shippingRates[`zone${zone}` as keyof ShippingRate]); // Convert rate to a number
 
   const pickupCharge = Math.max(125, 0.065 * weight);
-
   const fuelSurcharge = 0.10 * rate; // Use the converted rate
-
   const totalCost = rate + pickupCharge + fuelSurcharge;
-
   return totalCost;
 }
 
@@ -65,20 +65,20 @@ export const getShippingRatesForWeight = async (weight: number, unit: string): P
   return data;
 }
 
-export const getShippingRates = async (req: Request, res: Response) => {
+export const getShippingRates = async (req: AuthRequest, res: Response) => {
   try {
     const rates = await ShippingRate.findAll();
     return res.json(rates);
   } catch (error: any) {
-    return res.status(400).json({ message: error.message });
+    return resHeaderError('getShippingRates', error, req.params, res);
   }
 };
 
-export const getFullRate = async (req: Request, res: Response) => {
+export const getFullRate = async (req: AuthRequest, res: Response) => {
   let { length, width, height, weight, zone, weightUnit, volumeUnit } = req.query;
 
   if (!length || !width || !height || !weight || !zone || !weightUnit || !volumeUnit) {
-    return res.status(400).json({ message: 'getFullRate: All parameters are required: length, width, height, weight, zone, weightUnit, volumeUnit' });
+    throw new InvalidInputError('getFullRate: All parameters are required');
   }
   
   try {
@@ -94,11 +94,11 @@ export const getFullRate = async (req: Request, res: Response) => {
 
     const totalCost = await fullShippingRate(param);
     if (totalCost === 'NO_RATE') {
-      return res.json({ totalCost: -1, message: `No shipping rate found for the specified weight and zone ${weight} ${weightUnit}` });
+      throw new NotFoundError(`No shipping rate found for weight and zone ${weight} ${weightUnit}`)
     };
     return res.json({ totalCost });
   } catch (error: any) {
-    return res.status(400).json({ message: error.message });
+    return resHeaderError('getFullRate', error, req.params, res);
   }
 };
 

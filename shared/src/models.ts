@@ -1,3 +1,10 @@
+
+import { Optional } from 'sequelize';
+export enum UserRolesEnum {
+	worker = 'worker',
+	admin = 'admin',
+}
+
 // Packages
 export enum PackageSource {
 	manual = 'manual',
@@ -5,11 +12,19 @@ export enum PackageSource {
 	api = 'api',
 }
 
+export type PackageCreationAttributes = Optional<PackageAttributes, 'id'>
+export type UserCreationAttributes = Optional<UserAttributes, 'id'>
+export type AddressCreationAttributes = Optional<AddressAttributes, 'id'>
+export type TransactionCreationAttributes = Optional<TransactionAttributes, 'id'>
+
+export type PackageChange = PackageAttributes | PackageCreationAttributes;
+export type AddressChange = AddressAttributes | AddressCreationAttributes;
+export type UserChange = UserAttributes | UserCreationAttributes;
+export type TransactionChange = TransactionAttributes | TransactionCreationAttributes;
+
 export type PackageAttributes = {
 	id: number;
 	userId: number;
-	// fromAddressId: number;
-	// toAddressId: number;
 	length: number;
 	width: number;
 	height: number;
@@ -19,12 +34,48 @@ export type PackageAttributes = {
 	source: PackageSource;
 }
 
-export type PackageType = PackageAttributes & {
+export type UserModel = UserAttributes & {
+	warehouseAddress: AddressAttributes;
+	transactions: TransactionAttributes[];
+	packages: PackageAttributes[];
+	createdAt?: string
+}
+
+export type PackageModel = PackageAttributes & {
+	user: UserAttributes;
 	fromAddress: AddressAttributes;
 	toAddress: AddressAttributes;
+	transaction: TransactionAttributes;
+	createdAt?: string
+};
+
+export type AddressModel = AddressAttributes & {
+	user: UserAttributes;
+	fromPackage: PackageAttributes;
+	toPackage: PackageAttributes;
+	createdAt?: string
+};
+
+export type TransactionModel = TransactionAttributes & {	
+	package: PackageAttributes;
+	user: UserAttributes;
+	createdAt?: string
 };
 
 // Address
+
+export enum PortEnum {
+	LAX = 'LAX',
+	JFK = 'JFK',
+	ORD = 'ORD',
+	SFO = 'SFO',
+	DFW = 'DFW',
+	MIA = 'MIA',
+	ATL = 'ATL',
+	BOS = 'BOS',
+	SEA = 'SEA',
+}
+
 export enum AddressEnum {
 	user = 'user',
 	toPackage = 'toPackage',
@@ -39,6 +90,8 @@ export type AddressAttributes = {
 	city: string;
 	state: string;
 	zip: string;
+	proposal?: PortEnum;
+	sortCode?: string;
 	email?: string;
 	phone?: string;
 	addressType?: AddressEnum;
@@ -53,9 +106,7 @@ export type UserAttributes = {
 	name: string;
 	email: string;
 	password: string;
-	role: string;
-	// warehouseAddress: AddressAttributes
-	// warehouseAddressId: number;
+	role: UserRolesEnum;
 }
 
 export type UserType = UserAttributes & {
@@ -101,11 +152,6 @@ export type TransactionAttributes = {
 	tracking: string;
 }
 
-export type TransactionType = TransactionAttributes & {
-	package: PackageAttributes;
-};
-
-
 // ZipCode
 
 export type ZipCodeAttributes = {
@@ -114,19 +160,20 @@ export type ZipCodeAttributes = {
 	lng: number;
 	city: string;
 	state_id: string;
-	state_name: string;
+	state: string;
 	zcta: string;
 	parent_zcta: string;
 	county_fips: string;
-	county_name: string;
+	county: string;
 	timezone: string;
   }
 
   export type SortCodeAttributes = {
 	id: number;
-	port: string;
+	proposal: string;
 	zip: string;
 	sortCode: string;
 	createdAt: Date;
 	updatedAt: Date;
   }
+

@@ -4,7 +4,7 @@ import { SortCodeAttributes } from '@ddlabel/shared';
 
 export class SortCode extends Model<SortCodeAttributes> implements SortCodeAttributes{
   public id!: number;
-  public port!: string;
+  public proposal!: string;
   public zip!: string;
   public sortCode!: string;
   public createdAt!: Date;
@@ -18,7 +18,7 @@ SortCode.init({
     autoIncrement: true,
     allowNull: false
   },
-  port: {
+  proposal: {
     type: DataTypes.STRING(255),
     allowNull: false
   },

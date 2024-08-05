@@ -1,19 +1,12 @@
 // backend/src/controllers/packageBatchFuntions.ts
-import { Package, PackageCreationAttributes } from '../models/Package';
-import { Address, AddressCreationAttributes } from '../models/Address';
-import getZipInfo from '../utils/getZipInfo';
-import { aggregateError, isValidJSON, reducedError } from '../utils/errors';
-import logger from '../config/logger';
+import { Package } from '../models/Package';
+import { Address } from '../models/Address';
+import getZipInfo, { getFromAddressZip, getToAddressZip } from '../utils/getInfo';
+import { isValidJSON } from '../utils/errors';
 import { CsvRecord, defaultMapping, CSV_KEYS, HeaderMapping, KeyCsvRecord } from '@ddlabel/shared';
-
-export type BatchDataType = {
-	pkgBatch: PackageRoot[],
-	shipFromBatch: AddressCreationAttributes[],
-	shipToBatch: AddressCreationAttributes[],
-}
-
-export type PackageRoot = PackageCreationAttributes;
-export type CsvData = { [k: string]: string | number };
+import { CsvData, PreparedData, BatchDataType } from '../types';
+import { getErrorRes } from '../utils/getErrorRes';
+import { InvalidInputError } from '../utils/errorClasses';
 
 const getMappingData = (headers: CsvData, headerMapping: HeaderMapping): CsvRecord => {
 	return CSV_KEYS.reduce((acc: CsvRecord, csvKey: KeyCsvRecord) => {
@@ -22,38 +15,35 @@ const getMappingData = (headers: CsvData, headerMapping: HeaderMapping): CsvReco
 	}, {} as CsvRecord);
 }
 
-export const getPreparedData = (packageCsvMap: string, csvData: CsvData) => {
+
+export const getPreparedData = async (packageCsvMap: string, csvData: CsvData): Promise<PreparedData> => {
 	const headerMapping: HeaderMapping = isValidJSON(packageCsvMap) ? JSON.parse(packageCsvMap) : defaultMapping;
 	const mappedData = getMappingData(csvData, headerMapping);
-	const fromZipInfo = getZipInfo(mappedData['fromAddressZip'] );
-	const toZipInfo = getZipInfo(mappedData['toAddressZip'] );
+	const fromZipInfo = getZipInfo(getFromAddressZip(mappedData));
+	const toZipInfo = getZipInfo(getToAddressZip(mappedData));
+
 	if (!fromZipInfo) { 
-		logger.error(`Error in getPreparedData: no fromAddressZip, ${mappedData['fromAddressZip']}`);
-		return;
+		const error = new InvalidInputError(`getPreparedData has no fromAddressZip`, 'missingFromZip');
+		return { csvUploadError: getErrorRes({ fnName: 'getPreparedData:missingFromZip', error, data: csvData, disableLog: true } ) };
 	}
 	if (!toZipInfo) { 
-		logger.error(`Error in getPreparedData: no toAddressZip, ${mappedData['toAddressZip']}`);
-		return;
+		const error = new InvalidInputError(`getPreparedData has no toAddressZip`, "missingToZip");
+		return { csvUploadError: getErrorRes( { fnName: 'getPreparedData:missingToZip', error, data: mappedData['toAddress1'], disableLog: true } ) };
 	}
-	return {
-		mappedData,
-		fromZipInfo,
-		toZipInfo,
-	};
+	return { mappedData, fromZipInfo, toZipInfo };
 }
 
 export const processBatch = async (batchData: BatchDataType) => {
-	const { pkgBatch, shipFromBatch, shipToBatch } = batchData;
+	const { pkgArr, shipFromArr, shipToArr } = batchData;
 	try {
-		const packages = await Package.bulkCreate(pkgBatch);
+		const packages = await Package.bulkCreate(pkgArr);
 		packages.map((pkg, idx: number) => {
-			shipFromBatch[idx].fromPackageId = pkg.id;
-			shipToBatch[idx].toPackageId = pkg.id;
+			shipFromArr[idx].fromPackageId = pkg.id;
+			shipToArr[idx].toPackageId = pkg.id;
 		});
-		await Address.bulkCreate(shipFromBatch);
-		await Address.bulkCreate(shipToBatch);
+		await Address.bulkCreateWithInfo(shipFromArr);
+		await Address.bulkCreateWithInfo(shipToArr);
 	} catch (error: any) {
-		logger.error(`Error in processBatch: ${reducedError(error)}`);
 		throw error;
 	}
 };
