@@ -22,11 +22,11 @@ const getMappingData = (headers: CsvData, headerMapping: HeaderMapping): CsvReco
 	}, {} as CsvRecord);
 }
 
-export const getPreparedData = (packageCsvMap: string, csvData: CsvData) => {
+export const getPreparedData = async (packageCsvMap: string, csvData: CsvData) => {
 	const headerMapping: HeaderMapping = isValidJSON(packageCsvMap) ? JSON.parse(packageCsvMap) : defaultMapping;
 	const mappedData = getMappingData(csvData, headerMapping);
-	const fromZipInfo = getZipInfo(getFromZip(mappedData));
-	const toZipInfo = getZipInfo(getToZip(mappedData));
+	const fromZipInfo = await getZipInfo(getFromZip(mappedData));
+	const toZipInfo = await getZipInfo(getToZip(mappedData));
 	if (!fromZipInfo) { 
 		logger.error(`Error in getPreparedData: no fromAddressZip, ${mappedData['fromAddressZip']}`);
 		return;

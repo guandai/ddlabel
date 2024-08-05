@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { TextField, Grid, Typography } from '@mui/material';
 import { SetMessage, tryLoad } from '../util/errors';
-import { AddressAttributes } from '@ddlabel/shared';
+import { AddressAttributes, extractAddressZip } from '@ddlabel/shared';
 import { ZipCodeApi } from '../api/ZipCodeApi';
 
 type QuickFieldProps = {
@@ -24,18 +24,13 @@ interface AddressFormProps {
 const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onChange, title }) => {
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
-  const [address1, setAddress1] = useState('');
-  const [address2, setAddress2] = useState('');
-
-  const getZipFromAddress = (address: string): string => {
-    const zip = address?.trim().match(/\b\d{5}$/);
-    return zip ? zip[0] : '';
-  }
 
   useEffect(() => {
-    const zip = getZipFromAddress(addressData.address2 || '') || getZipFromAddress(addressData.address1);
-    onChange({ target: { name: 'zip', value: zip } } as React.ChangeEvent<HTMLInputElement>);
-  }, [addressData.address1, addressData.address2, setMessage]);
+    const zip = extractAddressZip(addressData.address2) || extractAddressZip(addressData.address1);
+    if (zip.length === 5) {
+        onChange({ target: { name: 'zip', value: zip } } as React.ChangeEvent<HTMLInputElement>);
+    }
+  }, [addressData.address1, addressData.address2, onChange]);
 
   useEffect(() => {
     setCity('');
@@ -85,9 +80,9 @@ const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onCh
       <Typography variant="h6" mb='1em'>{title}</Typography>
       <Grid container spacing={2}>
         {quickField({ name: 'name', autoComplete: 'name' })}
-        {quickField({ name: 'address1', autoComplete: 'address-line1' })}
-        {quickField({ name: 'address2', autoComplete: 'address-line2', required: false })}
-        {quickField({ name: 'zip', autoComplete: 'postal-code', pattern: '[0-9]{5}' })}
+        {quickField({ name: 'address1', autoComplete: 'address-line1', value: addressData.address1 })}
+        {quickField({ name: 'address2', autoComplete: 'address-line2', value: addressData.address2, required: false })}
+        {quickField({ name: 'zip', autoComplete: 'postal-code', pattern: '[0-9]{5}', value: addressData.zip })}
         {quickField({ name: 'state', autoComplete: 'address-level1', readOnly: true, value: state })}
         {quickField({ name: 'city', autoComplete: 'address-level2', readOnly: true, value: city })}
         {quickField({ name: 'phone', autoComplete: 'tel', required: false, pattern: '[+]?[0-9]{5,}' })}
