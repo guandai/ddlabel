@@ -69,11 +69,12 @@ export const getStateId = (state: string): string =>
 
 export const cleanAddress = (pkg: PackageType, dest: 'to' | 'from',  addressString?: string) => {
 	const addressObj = dest === 'to' ? pkg.toAddress : pkg.fromAddress;
-	return !addressString ? '' : (addressString)
-		.replace(addressObj.city, '')
-		.replace(addressObj.state, '')
-		.replace(addressObj.zip, '')
-		.replace(`${getStateId(addressObj.state)} `, '')
-		.trim()
-		.replace(/[,\s]+$/ , '');
+	if (!addressString) { return addressString; };
+
+	[addressObj.city, addressObj.state, addressObj.zip, getStateId(addressObj.state)]
+		.forEach((str) => 
+			addressString = addressString?.replace(new RegExp(`\\b${str}\\b`, 'i'), '')
+		)
+
+	return addressString.trim().replace(/[,\s]+$/ , '');
 }
