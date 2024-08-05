@@ -17,11 +17,7 @@ const PdfExporter: React.FC = () => {
   // Create refs for each page
   const pagesRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  const capturePages = async () => {
-    setLoading(true);
-    const pages = pagesRef.current;
-    const pdf = new jsPDF('p', 'in', [4, 6]);
-
+  const preparePromises = async (pdf: jsPDF, pages: (HTMLDivElement | null)[]) => {
     // Create an array of promises for rendering each page
     const renderPromises = pages.map((page, idx) => {
       if (!page) return Promise.resolve();
@@ -36,12 +32,22 @@ const PdfExporter: React.FC = () => {
           pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
         })
     });
+    return renderPromises;
+  }
 
-    // Wait for all renderings to finish
-    await Promise.all(renderPromises).then(() => {
-      pdf.save('combined.pdf');
-      setLoading(false);
-    });
+  const capturePages = async () => {
+    setLoading(true);
+    const pages = pagesRef.current;
+    const pdf = new jsPDF('p', 'in', [4, 6]);
+
+    setTimeout(async () => {
+      const renderPromises = await preparePromises(pdf, pages);
+      // Wait for all renderings to finish
+      await Promise.all(renderPromises).then(() => {
+        pdf.save('combined.pdf');
+        setLoading(false);
+      });
+    } , 100);
   };
 
   const getLabels = () =>
@@ -56,7 +62,6 @@ const PdfExporter: React.FC = () => {
       <Backdrop open={loading} sx={backDropStyle} ><CircularProgress /></Backdrop>
       <ExportPdfSideBar capturePages={capturePages} setPackages={setPackages} setMessage={setMessage} />
       <StyledBox>
-        <button onClick={capturePages}>aaaaa</button>
         <Typography component="h1" variant="h4" align='center'>Export to PDF</Typography>
         <MessageAlert message={message} />
         <FlexBox component="main" maxWidth="lg" sx={{ mt: 3, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>

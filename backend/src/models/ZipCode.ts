@@ -9,11 +9,11 @@ class ZipCode extends Model<ZipCodeAttributes> implements ZipCodeAttributes {
   public lng!: number;
   public city!: string;
   public state_id!: string;
-  public state_name!: string;
+  public state!: string;
   public zcta!: string;
   public parent_zcta!: string;
   public county_fips!: string;
-  public county_name!: string;
+  public county!: string;
   public timezone!: string;
 }
 
@@ -40,7 +40,7 @@ ZipCode.init(
       type: DataTypes.STRING(2),
       allowNull: true,
     },
-    state_name: {
+    state: {
       type: DataTypes.STRING(100),
       allowNull: true,
     },
@@ -56,7 +56,7 @@ ZipCode.init(
       type: DataTypes.STRING(10),
       allowNull: true,
     },
-    county_name: {
+    county: {
       type: DataTypes.STRING(100),
       allowNull: true,
     },

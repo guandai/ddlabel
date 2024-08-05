@@ -1,5 +1,5 @@
 import { Optional } from 'sequelize';
-import { AddressAttributes, PackageAttributes, PackageType, PostalZoneAttributes, TransactionType, UserAttributes, ZipCodeAttributes } from "./models";
+import { AddressAttributes, PackageAttributes, PackageType, PostalZoneAttributes, TransactionType, UserAttributes } from "./models";
 import { SimpleRes } from './types';
 import { BeansAI } from './beans';
 export type RegisterUserReq = Pick<UserAttributes, 'name' | 'email' | 'password' | 'role'> & {
@@ -110,13 +110,6 @@ export type FullRateRes = {
 };
 export type AuthRequest = import("express-serve-static-core").Request & {
     user: UserAttributes;
-};
-export type GetZipCodesRes = {
-    page: number;
-    pageSize: number;
-    totalItems: number;
-    totalPages: number;
-    data: ZipCodeAttributes[];
 };
 export type GetPostalZoneReq = {
     zip: string;

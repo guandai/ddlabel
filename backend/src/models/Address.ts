@@ -2,7 +2,7 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 import { fixCityState } from '../utils/getZipInfo';
-import { AddressAttributes, AddressEnum } from '@ddlabel/shared';
+import { AddressAttributes, AddressEnum, PortEnum } from '@ddlabel/shared';
 import { User } from './User';
 import { Package } from './Package';
 
@@ -16,6 +16,8 @@ class Address extends Model<AddressAttributes, AddressCreationAttributes> implem
   public city!: string;
   public state!: string;
   public zip!: string;
+  public port?: PortEnum;
+  public sortCode?: string;
   public email?: string;
   public phone?: string;
   public addressType!: AddressEnum;
@@ -79,6 +81,10 @@ Address.init(
     zip: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    port: { 
+      type: DataTypes.ENUM('LAX', 'JFK', 'ORD', 'SFO', 'DFW', 'MIA', 'ATL', 'BOS', 'SEA'),
+      allowNull: true,
     },
     email: {
       type: DataTypes.STRING,

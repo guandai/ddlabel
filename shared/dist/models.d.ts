@@ -18,6 +18,17 @@ export type PackageType = PackageAttributes & {
     fromAddress: AddressAttributes;
     toAddress: AddressAttributes;
 };
+export declare enum PortEnum {
+    LAX = "LAX",
+    JFK = "JFK",
+    ORD = "ORD",
+    SFO = "SFO",
+    DFW = "DFW",
+    MIA = "MIA",
+    ATL = "ATL",
+    BOS = "BOS",
+    SEA = "SEA"
+}
 export declare enum AddressEnum {
     user = "user",
     toPackage = "toPackage",
@@ -31,6 +42,8 @@ export type AddressAttributes = {
     city: string;
     state: string;
     zip: string;
+    port?: PortEnum;
+    sortCode?: string;
     email?: string;
     phone?: string;
     addressType?: AddressEnum;
@@ -90,11 +103,11 @@ export type ZipCodeAttributes = {
     lng: number;
     city: string;
     state_id: string;
-    state_name: string;
+    state: string;
     zcta: string;
     parent_zcta: string;
     county_fips: string;
-    county_name: string;
+    county: string;
     timezone: string;
 };
 export type SortCodeAttributes = {

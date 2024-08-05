@@ -1,6 +1,6 @@
 import React from 'react';
-import { Box, Select, MenuItem, Typography, Grid, FormControl } from '@mui/material';
-import { KeyCsvRecord, HeaderMapping, CSV_KEYS, CSV_KEYS_REQUIRED } from '@ddlabel/shared';
+import { Box, Select, MenuItem, Typography, Grid, FormControl, InputLabel } from '@mui/material';
+import { KeyCsvRecord, HeaderMapping, CSV_KEYS, CSV_KEYS_REQUIRED, CsvRecord } from '@ddlabel/shared';
 
 type Prop = {
 	csvHeaders: string[];
@@ -16,30 +16,40 @@ const CsvHeaderList: React.FC<Prop> = (prop) => {
 	const lastThird = CSV_KEYS.slice(third * 2);
 	const keysRows = [firstThird, secondThird, lastThird];
 
-	return (<Grid container spacing={2}>{keysRows.map((keysRow, idx) => (
-		<Grid key={idx} item xs={4}>
-			{keysRow.map((key) => (
-				<Box key={key} mb={2}>
-					<Typography variant="body2">{key}</Typography>
-					<FormControl fullWidth>
-						<Select
-							variant="standard"
-							required={CSV_KEYS_REQUIRED.includes(key)}
-							value={headerMapping && headerMapping[key] ? headerMapping[key] : ''}
-							onChange={e => handleMappingChange(key, String(e.target.value))}
-						>
-							<MenuItem key='empty' value=""><em>None</em></MenuItem>
-							{csvHeaders.map((header) => (
-								<MenuItem key={header} value={header}>
-									{header}
-								</MenuItem>
-							))}
-						</Select>
-					</FormControl>
-				</Box>
-			))}
-		</Grid>
-	))}
-	</Grid>);
+	const selectKey = (key: keyof CsvRecord, required: boolean) =>
+		<Box key={key} mb={2}>
+			<FormControl fullWidth>
+				<InputLabel id={`${key}-label`}>{key} {required && '*'}</InputLabel>
+				<Select
+					variant="outlined"
+					label={key}
+					labelId={`${key}-label`}
+					required={required}
+					placeholder={undefined}
+					value={headerMapping && headerMapping[key] ? headerMapping[key] : ''}
+					onChange={e => handleMappingChange(key, String(e.target.value))}
+				>
+					<MenuItem key='empty' value={undefined}><em>None</em></MenuItem>
+					{csvHeaders.map((header) => (
+						<MenuItem key={header} value={header}>
+							{header}
+						</MenuItem>
+					))}
+				</Select>
+			</FormControl>
+		</Box>
+
+	return (
+		<Grid container spacing={2}>{
+			keysRows.map((keysRow, idx) => (
+				<Grid key={idx} item xs={4}>{
+					keysRow.map((key) => {
+						const required = CSV_KEYS_REQUIRED.includes(key)
+						return selectKey(key, required);
+					})
+				}</Grid>
+			))
+		}</Grid>
+	);
 }
 export default CsvHeaderList;

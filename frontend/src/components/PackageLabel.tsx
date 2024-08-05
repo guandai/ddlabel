@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode.react';
 import BarcodeComponent from './BarcodeComponent';
 import { Box, Typography } from '@mui/material';
-import { PackageType } from '@ddlabel/shared';
+import { cleanAddress, getStateId, PackageType } from '@ddlabel/shared';
 import monkeyLogo from '../assets/svg/monkey_logo.jpg'; // Import the main logo
 import monkeyFont from '../assets/svg/monkey_font.jpg'; // Import the bottom-right logo
 import styled from 'styled-components';
@@ -28,9 +28,9 @@ export const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
   const [toProposal, setToProposal] = useState<KeyZones | 'N/A'>('N/A');
 
   const { width, height } = reader === 'web' ? {
-    width: '4in', height: '6in',
+    width: '4in', height: 'auto',
   } : {
-    width: '4in', height: '6in',
+    width: '4in', height: 'auto',
   };
 
   useEffect(() => {
@@ -65,9 +65,9 @@ export const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
           <Box sx={{ height: '1.05in', textAlign: 'left' }}>
             <MonoTypoSmall variant='body1'>Return to:</MonoTypoSmall>
             <MonoTypoSmall >{pkg.fromAddress.name}</MonoTypoSmall>
-            <MonoTypoSmall >{pkg.fromAddress.address1}</MonoTypoSmall>
-            <MonoTypoSmall >{pkg.fromAddress.address2}</MonoTypoSmall>
-            <MonoTypoSmall >{pkg.fromAddress.city} {pkg.fromAddress.state} {pkg.fromAddress.zip}</MonoTypoSmall>
+            <MonoTypoSmall >{cleanAddress(pkg, 'from', pkg.fromAddress.address1)}</MonoTypoSmall>
+            <MonoTypoSmall >{cleanAddress(pkg, 'from', pkg.fromAddress.address2)}</MonoTypoSmall>
+            <MonoTypoSmall >{pkg.fromAddress.city}, {getStateId(pkg.fromAddress.state)}, {pkg.fromAddress.zip}</MonoTypoSmall>
           </Box>
         </Box>
 
@@ -83,9 +83,9 @@ export const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
       <Box mt={1} sx={{ height: '1.15in', borderTop : 'solid' }}>
         <Typography variant="body1" sx={{ fontWeight: 'bold' }}>SHIP TO:</Typography>
         <MonoTypoNormal >{pkg.toAddress.name}</MonoTypoNormal>
-        <MonoTypoNormal >{pkg.toAddress.address1}</MonoTypoNormal>
-        <MonoTypoNormal >{pkg.toAddress.address2}</MonoTypoNormal>
-        <MonoTypoNormal >{pkg.toAddress.city} {pkg.toAddress.state} {pkg.toAddress.zip}</MonoTypoNormal>
+        <MonoTypoNormal >{cleanAddress(pkg,'to', pkg.toAddress.address1)}</MonoTypoNormal>
+        <MonoTypoNormal >{cleanAddress(pkg, 'to', pkg.toAddress.address2)}</MonoTypoNormal>
+        <MonoTypoNormal >{pkg.toAddress.city}, {getStateId(pkg.toAddress.state)}, {pkg.toAddress.zip}</MonoTypoNormal>
       </Box>
 
       {/* lbs weight number */}
@@ -100,9 +100,12 @@ export const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
 
       {/* under barcode spacing */}
       <Box sx={{ height: '0.7in' }}>
-        {" "}
+        <Typography variant="body2" sx={{ textAlign: 'left', fontSize: '0.8rem' }}>
+          Please return all packages instead of leaving them after finishing the Proof of Delivery (POD).
+          <br />
+          Pod check email : monkeyexp100@gmail.com
+      </Typography>
       </Box>
-
       {/* bottom line */}
       <Box sx={{ height: '0.2in', display: 'flex', justifyContent: 'space-between', alignItems: "end", }}>
         <Box> Reference No: {pkg.referenceNo}</Box>
