@@ -26,9 +26,9 @@ type OnEndParams = {
 
 const BATCH_SIZE = 500;
 
-const onData = ({ req, csvData, pkgAll }: OnDataParams) => {
+const onData = async ({ req, csvData, pkgAll }: OnDataParams) => {
 	const { packageCsvLength, packageCsvMap } = req.body;
-	const prepared = getPreparedData(packageCsvMap, csvData);
+	const prepared = await getPreparedData(packageCsvMap, csvData);
 	const userId = req.user.id;
 	if (!prepared) return;
 
@@ -40,7 +40,7 @@ const onData = ({ req, csvData, pkgAll }: OnDataParams) => {
 		height: mappedData['height'] || 0,
 		weight: mappedData['weight'] || 0,
 		trackingNo: mappedData['trackingNo'] || generateTrackingNo(),
-		referenceNo: mappedData['referenceNo'],
+		referenceNo: mappedData['referenceNo'] || '',
 		source: PackageSource.api,
 	});
 	pkgAll.shipFromBatch.push({
@@ -49,7 +49,6 @@ const onData = ({ req, csvData, pkgAll }: OnDataParams) => {
 		userId,
 		address1: mappedData['fromAddress1'],
 		address2: mappedData['fromAddress2'],
-		zip: mappedData['fromAddressZip'],
 		addressType: AddressEnum.fromPackage,
 	});
 	pkgAll.shipToBatch.push({
@@ -58,7 +57,6 @@ const onData = ({ req, csvData, pkgAll }: OnDataParams) => {
 		userId,
 		address1: mappedData['toAddress1'],
 		address2: mappedData['toAddress2'],
-		zip: mappedData['toAddressZip'],
 		addressType: AddressEnum.toPackage,
 	})
 	reportIoSocket('generate', req, pkgAll.pkgBatch.length, packageCsvLength);
