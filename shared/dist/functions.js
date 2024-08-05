@@ -70,12 +70,14 @@ var getStateId = function (state) {
 exports.getStateId = getStateId;
 var cleanAddress = function (pkg, dest, addressString) {
     var addressObj = dest === 'to' ? pkg.toAddress : pkg.fromAddress;
-    return !addressString ? '' : (addressString)
-        .replace(addressObj.city, '')
-        .replace(addressObj.state, '')
-        .replace(addressObj.zip, '')
-        .replace("".concat((0, exports.getStateId)(addressObj.state), " "), '')
-        .trim()
-        .replace(/[,\s]+$/, '');
+    if (!addressString) {
+        return addressString;
+    }
+    ;
+    [addressObj.city, addressObj.state, addressObj.zip, (0, exports.getStateId)(addressObj.state)]
+        .forEach(function (str) {
+        return addressString = addressString === null || addressString === void 0 ? void 0 : addressString.replace(new RegExp("\\b".concat(str, "\\b"), 'i'), '');
+    });
+    return addressString.trim().replace(/[,\s]+$/, '');
 };
 exports.cleanAddress = cleanAddress;
