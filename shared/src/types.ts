@@ -1,16 +1,16 @@
 import { Response } from 'express';
 type CsvRecordRequired = {
 	weight: number,
-	referenceNo: string,
 	fromName: string,
-	fromAddressZip: string,
 	fromAddress1: string,
 	toName: string,
-	toAddressZip: string,
 	toAddress1: string,
 }
 
 type CsvRecordOptional = {
+	referenceNo?: string,
+	fromAddressZip?: string,
+	toAddressZip?: string,
 	trackingNo?: string,
 	length?: number,
 	width?: number,

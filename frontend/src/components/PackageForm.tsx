@@ -103,7 +103,7 @@ const PackageForm: React.FC = () => {
   };
 
   return (
-    <Container component="main" maxWidth="md" sx={{maxHeight: "100%", overflow: "scroll"}}>
+    <Container component="main" maxWidth="md">
       <StyledBox>
         <Typography component="h1" variant="h4">
           {packageId ? 'Edit Package' : 'Add Package'}

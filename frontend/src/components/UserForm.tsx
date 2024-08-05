@@ -160,6 +160,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
             <InputLabel id="role-label">Role</InputLabel>
             <Select
               labelId="role-label"
+              required
               id="role"
               name="role"
               value={profile.role}

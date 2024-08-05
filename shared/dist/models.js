@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AddressEnum = exports.PackageSource = void 0;
+exports.AddressEnum = exports.PortEnum = exports.PackageSource = void 0;
 // Packages
 var PackageSource;
 (function (PackageSource) {
@@ -9,6 +9,18 @@ var PackageSource;
     PackageSource["api"] = "api";
 })(PackageSource = exports.PackageSource || (exports.PackageSource = {}));
 // Address
+var PortEnum;
+(function (PortEnum) {
+    PortEnum["LAX"] = "LAX";
+    PortEnum["JFK"] = "JFK";
+    PortEnum["ORD"] = "ORD";
+    PortEnum["SFO"] = "SFO";
+    PortEnum["DFW"] = "DFW";
+    PortEnum["MIA"] = "MIA";
+    PortEnum["ATL"] = "ATL";
+    PortEnum["BOS"] = "BOS";
+    PortEnum["SEA"] = "SEA";
+})(PortEnum = exports.PortEnum || (exports.PortEnum = {}));
 var AddressEnum;
 (function (AddressEnum) {
     AddressEnum["user"] = "user";

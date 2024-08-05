@@ -1,8 +1,8 @@
 // backend/src/controllers/packageBatchFuntions.ts
 import { Package, PackageCreationAttributes } from '../models/Package';
 import { Address, AddressCreationAttributes } from '../models/Address';
-import getZipInfo from '../utils/getZipInfo';
-import { aggregateError, isValidJSON, reducedError } from '../utils/errors';
+import getZipInfo, { getFromZip, getToZip } from '../utils/getZipInfo';
+import { isValidJSON, reducedError } from '../utils/errors';
 import logger from '../config/logger';
 import { CsvRecord, defaultMapping, CSV_KEYS, HeaderMapping, KeyCsvRecord } from '@ddlabel/shared';
 
@@ -25,8 +25,8 @@ const getMappingData = (headers: CsvData, headerMapping: HeaderMapping): CsvReco
 export const getPreparedData = (packageCsvMap: string, csvData: CsvData) => {
 	const headerMapping: HeaderMapping = isValidJSON(packageCsvMap) ? JSON.parse(packageCsvMap) : defaultMapping;
 	const mappedData = getMappingData(csvData, headerMapping);
-	const fromZipInfo = getZipInfo(mappedData['fromAddressZip'] );
-	const toZipInfo = getZipInfo(mappedData['toAddressZip'] );
+	const fromZipInfo = getZipInfo(getFromZip(mappedData));
+	const toZipInfo = getZipInfo(getToZip(mappedData));
 	if (!fromZipInfo) { 
 		logger.error(`Error in getPreparedData: no fromAddressZip, ${mappedData['fromAddressZip']}`);
 		return;

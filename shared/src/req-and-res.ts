@@ -129,15 +129,6 @@ export type AuthRequest = import("express-serve-static-core").Request & {
 
 
 // Postal zip
-
-export type GetZipCodesRes = {
-	page: number;
-	pageSize: number;
-	totalItems: number;
-	totalPages: number;
-	data: ZipCodeAttributes[];
-};
-
 export type GetPostalZoneReq = { zip: string };
 export type GetPostalZoneRes = { postalZone: PostalZoneAttributes };;
 
