@@ -1,7 +1,6 @@
 // frontend/src/components/BarcodeComponent.tsx
 import React, { useRef, useEffect } from 'react';
 import JsBarcode from 'jsbarcode';
-import { scaleStyle } from '../util/styled';
 
 interface BarcodeComponentProps {
   value: string;
@@ -11,14 +10,19 @@ interface BarcodeComponentProps {
   fontSize?: number;
 }
 
-const BarcodeComponent: React.FC<BarcodeComponentProps> = ({ value, factor=1, width=2.7, height=65, fontSize=20 }) => {
+const BarcodeComponent: React.FC<BarcodeComponentProps> = (prop) => {
+  const { value, factor=1, width=2.7, height=65, fontSize=20 } = prop;
   const barcodeRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (barcodeRef.current) {
-      JsBarcode(barcodeRef.current, value, { format: 'CODE128', width: width * factor, height: height * factor, fontSize: fontSize * factor });
+      JsBarcode(barcodeRef.current, value, {
+        format: 'CODE128',
+        width: width * factor,
+        height: height * factor,
+        fontSize: fontSize * factor });
     }
-  }, [value]);
+  }, [value, factor, width, height, fontSize]);
 
   return <canvas ref={barcodeRef} />;
 };

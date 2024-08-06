@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Select, MenuItem, Typography, Grid, FormControl, InputLabel } from '@mui/material';
+import { Box, Select, MenuItem, Grid, FormControl, InputLabel } from '@mui/material';
 import { KeyCsvRecord, HeaderMapping, CSV_KEYS, CSV_KEYS_REQUIRED, CsvRecord } from '@ddlabel/shared';
 
 type Prop = {

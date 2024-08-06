@@ -29,7 +29,7 @@ const ExportPdfSideBar: React.FC<Props> = (prop) => {
 			setTotal(packagesRes.total);
 		}
 		tryLoad(setMessage, getPackages);
-	}, [page, perPage, search]);
+	}, [page, perPage, search, setPackages, setMessage]);
 	
 	const changePerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setPerPage(parseInt(event.target.value, 10));
