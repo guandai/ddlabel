@@ -21,22 +21,6 @@ Package.init({
             key: 'id',
         },
     },
-    // fromAddressId: {
-    //   type: DataTypes.INTEGER.UNSIGNED,
-    //   allowNull: false,
-    //   references: {
-    //     model: Address,
-    //     key: 'id',
-    //   },
-    // },
-    // toAddressId: {
-    //   type: DataTypes.INTEGER.UNSIGNED,
-    //   allowNull: false,
-    //   references: {
-    //     model: Address,
-    //     key: 'id',
-    //   },
-    // },
     length: {
         type: sequelize_1.DataTypes.DECIMAL(10, 2),
         allowNull: false,

@@ -26,6 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPackage = exports.deletePackage = exports.updatePackage = exports.getPackages = exports.createPackage = void 0;
 const Package_1 = require("../models/Package");
 const Address_1 = require("../models/Address");
+const Transaction_1 = require("../models/Transaction");
 const User_1 = require("../models/User");
 const sequelize_1 = require("sequelize");
 const logger_1 = __importDefault(require("../config/logger"));
@@ -76,6 +77,7 @@ const getPackages = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 { model: Address_1.Address, as: 'fromAddress', where: { addressType: 'fromPackage' } },
                 { model: Address_1.Address, as: 'toAddress', where: { addressType: 'toPackage' } },
                 { model: User_1.User, as: 'user' },
+                { model: Transaction_1.Transaction, as: 'transaction' },
             ],
             where: whereCondition,
             limit,

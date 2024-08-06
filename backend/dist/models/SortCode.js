@@ -13,7 +13,7 @@ SortCode.init({
         autoIncrement: true,
         allowNull: false
     },
-    port: {
+    proposal: {
         type: sequelize_1.DataTypes.STRING(255),
         allowNull: false
     },

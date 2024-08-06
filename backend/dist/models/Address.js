@@ -13,26 +13,30 @@ exports.Address = void 0;
 // backend/src/models/Address.ts
 const sequelize_1 = require("sequelize");
 const database_1 = require("../config/database");
-const getZipInfo_1 = require("../utils/getZipInfo");
+const getInfo_1 = require("../utils/getInfo");
 const User_1 = require("./User");
 const Package_1 = require("./Package");
 class Address extends sequelize_1.Model {
     static createWithInfo(attr) {
         return __awaiter(this, void 0, void 0, function* () {
-            const fixedAttr = yield (0, getZipInfo_1.fixCityState)(attr);
-            return yield Address.create(fixedAttr);
+            attr = yield (0, getInfo_1.fixCityState)(attr);
+            attr = yield (0, getInfo_1.fixPort)(attr);
+            return yield Address.create(attr);
         });
     }
     static updateWithInfo(attr) {
         return __awaiter(this, void 0, void 0, function* () {
-            const fixedAttr = yield (0, getZipInfo_1.fixCityState)(attr);
-            yield Address.update(fixedAttr, { where: { id: attr.id } });
+            attr = yield (0, getInfo_1.fixCityState)(attr);
+            attr = yield (0, getInfo_1.fixPort)(attr);
+            yield Address.update(attr, { where: { id: attr.id } });
         });
     }
     static bulkCreateWithInfo(attrs) {
         return __awaiter(this, void 0, void 0, function* () {
-            const fixedAttrs = yield Promise.all(attrs.map((attr) => __awaiter(this, void 0, void 0, function* () { return yield (0, getZipInfo_1.fixCityState)(attr); })));
-            yield Address.bulkCreate(fixedAttrs);
+            // attrs = await Promise.all(attrs.map(async (attr) => await fixCityState(attr))); 
+            // fixCityState by getZipInfo already done is getPreparedData()
+            attrs = yield Promise.all(attrs.map((attr) => __awaiter(this, void 0, void 0, function* () { return yield (0, getInfo_1.fixPort)(attr); })));
+            yield Address.bulkCreate(attrs);
         });
     }
 }
@@ -70,6 +74,14 @@ Address.init({
     zip: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
+    },
+    proposal: {
+        type: sequelize_1.DataTypes.ENUM('LAX', 'JFK', 'ORD', 'SFO', 'DFW', 'MIA', 'ATL', 'BOS', 'SEA'),
+        allowNull: true,
+    },
+    sortCode: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
     },
     email: {
         type: sequelize_1.DataTypes.STRING,

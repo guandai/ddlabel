@@ -24,9 +24,9 @@ const shared_1 = require("@ddlabel/shared");
 const packageBatchFuntions_1 = require("./packageBatchFuntions");
 const errors_1 = require("../utils/errors");
 const BATCH_SIZE = 500;
-const onData = ({ req, csvData, pkgAll }) => {
+const onData = (_a) => __awaiter(void 0, [_a], void 0, function* ({ req, csvData, pkgAll }) {
     const { packageCsvLength, packageCsvMap } = req.body;
-    const prepared = (0, packageBatchFuntions_1.getPreparedData)(packageCsvMap, csvData);
+    const prepared = yield (0, packageBatchFuntions_1.getPreparedData)(packageCsvMap, csvData);
     const userId = req.user.id;
     if (!prepared)
         return;
@@ -38,14 +38,14 @@ const onData = ({ req, csvData, pkgAll }) => {
         height: mappedData['height'] || 0,
         weight: mappedData['weight'] || 0,
         trackingNo: mappedData['trackingNo'] || (0, generateTrackingNo_1.generateTrackingNo)(),
-        referenceNo: mappedData['referenceNo'],
+        referenceNo: mappedData['referenceNo'] || '',
         source: shared_1.PackageSource.api,
     });
-    pkgAll.shipFromBatch.push(Object.assign(Object.assign({}, fromZipInfo), { name: mappedData['fromName'], userId, address1: mappedData['fromAddress1'], address2: mappedData['fromAddress2'], zip: mappedData['fromAddressZip'], addressType: shared_1.AddressEnum.fromPackage }));
-    pkgAll.shipToBatch.push(Object.assign(Object.assign({}, toZipInfo), { name: mappedData['toName'], userId, address1: mappedData['toAddress1'], address2: mappedData['toAddress2'], zip: mappedData['toAddressZip'], addressType: shared_1.AddressEnum.toPackage }));
+    pkgAll.shipFromBatch.push(Object.assign(Object.assign({}, fromZipInfo), { name: mappedData['fromName'], userId, address1: mappedData['fromAddress1'], address2: mappedData['fromAddress2'], addressType: shared_1.AddressEnum.fromPackage }));
+    pkgAll.shipToBatch.push(Object.assign(Object.assign({}, toZipInfo), { name: mappedData['toName'], userId, address1: mappedData['toAddress1'], address2: mappedData['toAddress2'], addressType: shared_1.AddressEnum.toPackage }));
     (0, reportIo_1.reportIoSocket)('generate', req, pkgAll.pkgBatch.length, packageCsvLength);
     return;
-};
+});
 const onEnd = (_a) => __awaiter(void 0, [_a], void 0, function* ({ stream, req, pkgAll }) {
     const { pkgBatch, shipFromBatch, shipToBatch } = pkgAll;
     let processed = 0;

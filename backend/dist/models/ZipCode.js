@@ -29,7 +29,7 @@ ZipCode.init({
         type: sequelize_1.DataTypes.STRING(2),
         allowNull: true,
     },
-    state_name: {
+    state: {
         type: sequelize_1.DataTypes.STRING(100),
         allowNull: true,
     },
@@ -45,7 +45,7 @@ ZipCode.init({
         type: sequelize_1.DataTypes.STRING(10),
         allowNull: true,
     },
-    county_name: {
+    county: {
         type: sequelize_1.DataTypes.STRING(100),
         allowNull: true,
     },

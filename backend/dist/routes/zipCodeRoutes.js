@@ -7,5 +7,4 @@ const auth_1 = require("../middleware/auth");
 const router = (0, express_1.Router)();
 router.get('/datafile/:zip', auth_1.authenticate, zipCodeController_1.getZipCodeFromFile); // Get data for all zip codes
 router.get('/:zip', auth_1.authenticate, zipCodeController_1.getZipCode); // Get data for a specific zip code
-router.get('/', auth_1.authenticate, zipCodeController_1.getZipCodes); // Get data for all zip codes
 exports.default = router;
