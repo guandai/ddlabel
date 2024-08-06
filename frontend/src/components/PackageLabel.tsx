@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import QRCode from 'qrcode.react';
 import BarcodeComponent from './BarcodeComponent';
 import { Box, Typography } from '@mui/material';
@@ -6,16 +6,21 @@ import { cleanAddress, getStateId, PackageModel } from '@ddlabel/shared';
 import monkeyLogo from '../assets/svg/monkey_logo.jpg'; // Import the main logo
 import monkeyFont from '../assets/svg/monkey_font.jpg'; // Import the bottom-right logo
 import styled from 'styled-components';
-import { PostalZoneApi } from '../api/PostalZoneApi';
-import { KeyZones } from '@ddlabel/shared';
+import { scaleStyle } from '../util/styled';
 
-const MonoTypoSmall = styled(Typography)(() => ({
+type MonoSmallProp = {
+  factor: number;
+}
+type MonoNormalProp = {
+  factor: number;
+}
+const MonoTypoSmall = styled(Typography)<MonoSmallProp>(({ factor }) => ({
   fontFamily: 'monospace',
-  fontSize: '0.11in'
+  fontSize: `${0.11 * factor}in`
 }));
-const MonoTypoNormal = styled(Typography)(() => ({
+const MonoTypoNormal = styled(Typography)<MonoNormalProp>(({ factor }) => ({
   fontFamily: 'monospace',
-  fontSize: '0.15in'
+  fontSize: `${0.15 * factor}in`
 }));
 
 interface PackageLabelProps {
@@ -25,86 +30,71 @@ interface PackageLabelProps {
   height?: string;
 }
 
-export const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, width = '4in', height = '6in', factor=1 }) => {
-  // const [sortCode, setSortCode] = useState<string | 'N/A'>('N/A');
-  // const [toProposal, setToProposal] = useState<KeyZones | 'N/A'>('N/A');
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const postalZone = (await new PostalZoneApi().getPostalZone({zip: pkg.toAddress.zip})).postalZone;
-  //       setToProposal(postalZone.proposal);
-  //       setSortCode(postalZone.new_sort_code);
-  //     } catch (error) {
-  //       setToProposal('N/A');
-  //       setSortCode('N/A');
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, [pkg]);
-
+export const PackageLabel: React.FC<PackageLabelProps> = (prop) => {
+  const { width, height,  pkg, factor = 1 } = prop;
+  const scaledWidth = scaleStyle(width || '4in', factor);
+  const scaledHeight = scaleStyle(height || '6in', factor);
   return (
-    <Box sx={{ width, height, padding: '0.1in', margin: 0, border: '0.02in solid black', boxSizing: 'border-box' }}>
+    <Box sx={{ width: scaledWidth, height: scaledHeight, padding: `${0.1 * factor}in`, margin: 0, border: `${0.02 * factor}in solid black`, boxSizing: 'border-box' }}>
       {/* main upper */}
-      <Box sx={{ height: '1.9in', display: 'flex', justifyContent: 'space-between', alignItems: 'top', }}>
+      <Box sx={{ height: `${1.9 * factor}in`, display: 'flex', justifyContent: 'space-between', alignItems: 'top', }}>
         {/* top left part */}
-        <Box sx={{ textAlign: 'left', mr: '8px', width: '70%' }}>
+        <Box sx={{ textAlign: 'left', mr: `${8 * factor}px`, width: '70%' }}>
           {/* logo part */}
-          <Box >
-            <img src={monkeyLogo} alt="Monkey Logo" style={{ display: 'inline', width: '0.7in'}} />
-            <Typography variant="h4" sx={{ float: 'right', display: 'inline', fontWeight: 'bold' }}>{pkg.toAddress.sortCode}</Typography>
+          <Box>
+            <img src={monkeyLogo} alt="Monkey Logo" style={{ display: 'inline', width: `${0.7 * factor}in`}} />
+            <Typography variant="h4" sx={{ fontSize: `${2 * factor }rem`, float: 'right', display: 'inline', fontWeight: 'bold' }}>{pkg.toAddress.sortCode}</Typography>
           </Box>
 
           {/* Return to part */}
-          <Box sx={{ height: '1.05in', textAlign: 'left' }}>
-            <MonoTypoSmall variant='body1'>Return to:</MonoTypoSmall>
-            <MonoTypoSmall >{pkg.fromAddress.name}</MonoTypoSmall>
-            <MonoTypoSmall >{cleanAddress(pkg, 'from', pkg.fromAddress.address1)}</MonoTypoSmall>
-            <MonoTypoSmall >{cleanAddress(pkg, 'from', pkg.fromAddress.address2)}</MonoTypoSmall>
-            <MonoTypoSmall >{pkg.fromAddress.city}, {getStateId(pkg.fromAddress.state)}, {pkg.fromAddress.zip}</MonoTypoSmall>
+          <Box sx={{ height: `${1.05 * factor}in`, textAlign: 'left' }}>
+            <MonoTypoSmall factor={factor} variant='body1'>Return to:</MonoTypoSmall>
+            <MonoTypoSmall factor={factor} >{pkg.fromAddress.name}</MonoTypoSmall>
+            <MonoTypoSmall factor={factor} >{cleanAddress(pkg, 'from', pkg.fromAddress.address1)}</MonoTypoSmall>
+            <MonoTypoSmall factor={factor} >{cleanAddress(pkg, 'from', pkg.fromAddress.address2)}</MonoTypoSmall>
+            <MonoTypoSmall factor={factor} >{pkg.fromAddress.city}, {getStateId(pkg.fromAddress.state)}, {pkg.fromAddress.zip}</MonoTypoSmall>
           </Box>
         </Box>
 
         {/* top right part */}
         <Box sx={{ textAlign: 'right', width: '30%' }}>
-          <QRCode value={`${process.env.REACT_APP_FE_URL}/packages/${pkg.id}`} size={100} /> {/* Increase QR code size */}
-          <Typography sx={{ textAlign: 'center', fontSize: '3rem', fontWeight: 'bold', lineHeight: 1 }}>{pkg.toAddress.proposal}</Typography>
-          <Typography sx={{ textAlign: 'center', fontSize: '2rem', color: 'white', backgroundColor: 'black', lineHeight: 1 }}>{pkg.toAddress.zip}</Typography>
+          <QRCode value={`${process.env.REACT_APP_FE_URL}/packages/${pkg.id}`} size={100 * factor} /> {/* Increase QR code size */}
+          <Typography sx={{ textAlign: 'center', fontSize: `${3 * factor}rem`, fontWeight: 'bold', lineHeight: 1 }}>{pkg.toAddress.proposal}</Typography>
+          <Typography sx={{ textAlign: 'center', fontSize: `${2 * factor}rem`, color: 'white', backgroundColor: 'black', lineHeight: 1 }}>{pkg.toAddress.zip}</Typography>
         </Box>
       </Box>
 
       {/* Ship to part */}
-      <Box mt={1} sx={{ height: '1.15in', borderTop : 'solid' }}>
+      <Box mt={1} sx={{ height: `${1.15 * factor}in`, borderTop: 'solid' }}>
         <Typography variant="body1" sx={{ fontWeight: 'bold' }}>SHIP TO:</Typography>
-        <MonoTypoNormal >{pkg.toAddress.name}</MonoTypoNormal>
-        <MonoTypoNormal >{cleanAddress(pkg,'to', pkg.toAddress.address1)}</MonoTypoNormal>
-        <MonoTypoNormal >{cleanAddress(pkg, 'to', pkg.toAddress.address2)}</MonoTypoNormal>
-        <MonoTypoNormal >{pkg.toAddress.city}, {getStateId(pkg.toAddress.state)}, {pkg.toAddress.zip}</MonoTypoNormal>
+        <MonoTypoNormal factor={factor} >{pkg.toAddress.name}</MonoTypoNormal>
+        <MonoTypoNormal factor={factor} >{cleanAddress(pkg,'to', pkg.toAddress.address1)}</MonoTypoNormal>
+        <MonoTypoNormal factor={factor} >{cleanAddress(pkg, 'to', pkg.toAddress.address2)}</MonoTypoNormal>
+        <MonoTypoNormal factor={factor} >{pkg.toAddress.city}, {getStateId(pkg.toAddress.state)}, {pkg.toAddress.zip}</MonoTypoNormal>
       </Box>
 
       {/* lbs weight number */}
-      <Box sx={{ height: '0.2in', textAlign: 'right' }}>
-        <Typography sx={{ fontSize: '0.8rem' }}>{pkg.weight} lbs.</Typography>
+      <Box sx={{ height: `${0.2 * factor}in`, textAlign: 'right' }}>
+        <Typography sx={{ fontSize: `${0.8 * factor}rem` }}>{pkg.weight} lbs.</Typography>
       </Box>
 
       {/* barcode tracking */}
-      <Box sx={{ height: '1.5in', width: '100%', textAlign: 'center' }}>
-        <BarcodeComponent value={pkg.trackingNo} />
+      <Box sx={{ height: `${1.5 * factor}in`, width: '100%', textAlign: 'center' }}>
+        <BarcodeComponent value={pkg.trackingNo} factor={factor} />
       </Box>
 
       {/* under barcode spacing */}
-      <Box sx={{ height: '0.7in' }}>
-        <Typography variant="body2" sx={{ textAlign: 'left', fontSize: '0.8rem' }}>
+      <Box sx={{ height: `${0.7 * factor}in` }}>
+        <Typography variant="body2" sx={{ textAlign: 'left', fontSize: `${0.8 * factor}rem` }}>
           Please return all packages instead of leaving them after finishing the Proof of Delivery (POD).
           <br />
           Pod check email : monkeyexp100@gmail.com
       </Typography>
       </Box>
       {/* bottom line */}
-      <Box sx={{ height: '0.2in', display: 'flex', justifyContent: 'space-between', alignItems: "end", }}>
-        <Box> Reference No: {pkg.referenceNo}</Box>
-        <img src={monkeyFont} alt="Monkey Font Logo" style={{ width: '5em' }} />
+      <Box sx={{ height: `${0.2 * factor}in`, display: 'flex', justifyContent: 'space-between', alignItems: "end", }}>
+        <Box sx={{fontSize: `${1 * factor}rem`,}}> Reference No: {pkg.referenceNo}</Box>
+        <img src={monkeyFont} alt="Monkey Font Logo" style={{ width: `${5 * factor}em` }} />
       </Box>
     </Box>
   );

@@ -21,4 +21,10 @@ export const FlexBox = styled(Box) ({
 	padding: 0,
 });
 
+export const scaleStyle = (cssSize: string, scale: number) => {
+	const parts = cssSize.match(/(\d+)(\w+)/);
+	if (!parts) return cssSize;
+	const [, size, unit] = parts;
+	return `${parseFloat(size) * scale}${unit}`;
+};
 export const backDropStyle = { color: '#fff', zIndex: (theme: Theme) => theme.zIndex.drawer + 1 }
