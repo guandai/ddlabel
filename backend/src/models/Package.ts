@@ -2,15 +2,11 @@ import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 import { User } from './User';
 import { Address } from './Address';
-import { PackageAttributes, PackageSource } from '@ddlabel/shared';
+import { PackageAttributes, PackageCreationAttributes, PackageSource } from '@ddlabel/shared';
 import { Transaction } from './Transaction';
-
-interface PackageCreationAttributes extends Optional<PackageAttributes, 'id'> {}
 
 class Package extends Model<PackageAttributes, PackageCreationAttributes> implements PackageAttributes {
   public id!: number;
-  // public fromAddressId!: number;
-  // public toAddressId!: number;
   public length!: number;
   public width!: number;
   public height!: number;
@@ -23,6 +19,7 @@ class Package extends Model<PackageAttributes, PackageCreationAttributes> implem
   public fromAddress!: Address;
   public toAddress!: Address;
   public user!: User;
+  public transaction!: Transaction;
 }
 
 Package.init(
@@ -40,22 +37,6 @@ Package.init(
         key: 'id',
       },
     },
-    // fromAddressId: {
-    //   type: DataTypes.INTEGER.UNSIGNED,
-    //   allowNull: false,
-    //   references: {
-    //     model: Address,
-    //     key: 'id',
-    //   },
-    // },
-    // toAddressId: {
-    //   type: DataTypes.INTEGER.UNSIGNED,
-    //   allowNull: false,
-    //   references: {
-    //     model: Address,
-    //     key: 'id',
-    //   },
-    // },
     length: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,

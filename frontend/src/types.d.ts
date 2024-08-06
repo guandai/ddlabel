@@ -32,16 +32,6 @@ declare module "*.jpg" {
     export default content;
 }
 
-export type ProfileType = {
-    id: number;
-    name: string;
-    email: string;
-    password: string; 
-    confirmPassword: string;
-    role: string;
-    warehouseAddress: AddressAttributes;
-};
-
 export enum MsgLevel {
     error ='error',
     success ='success',

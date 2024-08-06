@@ -4,12 +4,12 @@ import { tryLoad } from '../util/errors';
 import MessageAlert from './MessageAlert';
 import { MessageContent } from '../types';
 import TransactionApi from '../api/TransectionApi';
-import { TransactionType } from '@ddlabel/shared';
+import { TransactionModel } from '@ddlabel/shared';
 import { FlexBox, StyledBox } from '../util/styled';
 import TransactionTableSideBar from './TransactionTableSideBar';
 
 const TransactionTable: React.FC = () => {
-  const [transactions, setTransactions] = useState<TransactionType[]>([]);
+  const [transactions, setTransactions] = useState<TransactionModel[]>([]);
   const [message, setMessage] = useState<MessageContent>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);

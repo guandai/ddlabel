@@ -4,11 +4,11 @@ import { tryLoad } from '../util/errors';
 import { MessageContent } from '../types';
 import RateApi from '../api/RateApi';
 import PostalZoneApi from '../api/PostalZoneApi';
-import { PackageType } from '@ddlabel/shared';
+import { PackageModel } from '@ddlabel/shared';
 import MessageAlert from './MessageAlert';
 
 type PackageDialogProps = {
-    selectedPackage: PackageType | null
+    selectedPackage: PackageModel | null
 }
 
 const PackageGetRate: React.FC<PackageDialogProps> = ({ selectedPackage }) => {
@@ -16,7 +16,7 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ selectedPackage }) => {
     const [sortCode, setSortCode] = useState<string | null>(null);
     const [message, setMessage] = useState<MessageContent>(null);
 
-    const getZone = useCallback(async (selectedPackage: PackageType): Promise<string> => {
+    const getZone = useCallback(async (selectedPackage: PackageModel): Promise<string> => {
         const fromZip = selectedPackage.fromAddress.zip;
         const toZip = selectedPackage.toAddress.zip;
         const zone = (await PostalZoneApi.getZone({fromZip, toZip})).zone?.replace('Zone ', '');
@@ -28,7 +28,7 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ selectedPackage }) => {
         return zone;
     }, [setMessage]);
     
-    const getCost = useCallback(async (selectedPackage: PackageType, zone: string): Promise<number> => { 
+    const getCost = useCallback(async (selectedPackage: PackageModel, zone: string): Promise<number> => { 
         const params = {
             length: selectedPackage.length,
             width: selectedPackage.width,

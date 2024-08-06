@@ -1,13 +1,13 @@
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
-import { PackageType } from '@ddlabel/shared';
+import { PackageModel } from '@ddlabel/shared';
 import PackageGetRate from './PackageGetRate';
 import BeansStatusInfo from './BeansStatusInfo';
 
 type PackageDialogProps = {
     open: boolean;
     handleClose: () => void;
-    selectedPackage: PackageType | null
+    selectedPackage: PackageModel | null
     ;
 }
 

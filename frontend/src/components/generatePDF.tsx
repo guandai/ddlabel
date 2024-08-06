@@ -1,11 +1,11 @@
 // frontend/src/utils/generatePDF.ts
 import jsPDF from 'jspdf';
-import { PackageType } from '@ddlabel/shared';
+import { PackageModel } from '@ddlabel/shared';
 import PackageLabel from '../components/PackageLabel';
 import { createRoot } from 'react-dom/client';
 import html2canvas from 'html2canvas';
 
-export const getLabelContainer = (pkg: PackageType) => {
+export const getLabelContainer = (pkg: PackageModel) => {
   const PPI = 300; // Desired PPI for the PDF
   const mmToInch = 25.4; // Conversion factor from mm to inches
   const widthInInches = 4; // Width of the label in inches
@@ -31,7 +31,7 @@ export const getLabelContainer = (pkg: PackageType) => {
   return { labelRoot, labelContainer, scaleFactor };
 };
 
-export const generatePDF = async (pkg: PackageType) => {
+export const generatePDF = async (pkg: PackageModel) => {
   const { labelContainer, scaleFactor } = getLabelContainer(pkg);
   // Wait for the component to render
   await new Promise(resolve => setTimeout(resolve, 1000));

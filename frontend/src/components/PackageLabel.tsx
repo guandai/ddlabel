@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode.react';
 import BarcodeComponent from './BarcodeComponent';
 import { Box, Typography } from '@mui/material';
-import { cleanAddress, getStateId, PackageType } from '@ddlabel/shared';
+import { cleanAddress, getStateId, PackageModel } from '@ddlabel/shared';
 import monkeyLogo from '../assets/svg/monkey_logo.jpg'; // Import the main logo
 import monkeyFont from '../assets/svg/monkey_font.jpg'; // Import the bottom-right logo
 import styled from 'styled-components';
@@ -19,7 +19,7 @@ const MonoTypoNormal = styled(Typography)(() => ({
 }));
 
 interface PackageLabelProps {
-  pkg: PackageType;
+  pkg: PackageModel;
   reader?: 'web' | 'pdf';
 }
 

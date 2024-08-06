@@ -4,7 +4,7 @@ import {
   Paper, IconButton, Typography, TablePagination
 } from '@mui/material';
 import { Visibility, Edit, Delete, PictureAsPdf, Label } from '@mui/icons-material';
-import { BeansAI, PackageType } from '@ddlabel/shared';
+import { BeansAI, PackageModel } from '@ddlabel/shared';
 import { tryLoad } from '../util/errors';
 
 import { generatePDF } from './generatePDF';
@@ -20,14 +20,14 @@ import PackageTableSideBar from './PackageTableSideBar';
 import { FlexBox, StyledBox } from '../util/styled';
 
 const PackageTable: React.FC = () => {
-  const [packages, setPackages] = useState<PackageType[]>([]);
+  const [packages, setPackages] = useState<PackageModel[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [search, setSearch] = useState('');
   const [totalPackages, setTotalPackages] = useState(0);
   const [message, setMessage] = useState<MessageContent>(null);
   const [statusLogs, setStatusLogs] = useState<BeansAI.ListItemReadableStatusLogs[]>([]);
-  const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(null);
+  const [selectedPackage, setSelectedPackage] = useState<PackageModel | null>(null);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -55,11 +55,11 @@ const PackageTable: React.FC = () => {
     tryLoad(setMessage, deleteLoading);
   };
 
-  const handleEdit = (pkg: PackageType) => {
+  const handleEdit = (pkg: PackageModel) => {
     navigate(`/packages/edit/${pkg.id}`);
   };
 
-  const handleViewDetails = (pkg: PackageType) => {
+  const handleViewDetails = (pkg: PackageModel) => {
     setSelectedPackage(pkg);
     setOpen(true);
   };

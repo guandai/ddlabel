@@ -1,5 +1,5 @@
 import { Optional } from 'sequelize';
-import { AddressAttributes, KeyZones, PackageAttributes, PackageType, PostalZoneAttributes, TransactionType, UserAttributes, ZipCodeAttributes } from "./models";
+import { AddressAttributes, PackageModel, PostalZoneAttributes, TransactionModel, UserAttributes, UserModel } from "./models";
 import { SimpleRes } from './types';
 import { BeansAI } from './beans';
 
@@ -19,13 +19,12 @@ export type UpdateCurrentUserRes = {
 	success: boolean;
 };
 
-type UserClean = Omit<UserAttributes, 'password'> & { warehouseAddress: AddressAttributes };
 export type GetUsersRes = {
-	users: UserClean[]
+	users: UserModel[]
 };
 
 export type GetCurrentUserRes = {
-	user: UserClean;
+	user: UserModel;
 };
 
 export type LoginUserReq = Pick<UserAttributes, 'email' | 'password'>;
@@ -44,13 +43,7 @@ export type UpdateUserRes = {
 export type WeightUnit = 'lbs' | 'oz';
 export type VolumeUnit = 'inch' | 'mm';
 
-export type GetPackageRes = {
-	package: PackageAttributes & {
-		fromAddress: AddressAttributes;
-		toAddress: AddressAttributes;
-		user: UserAttributes;
-	}
-};
+export type GetPackageRes = { package: PackageModel };
 
 export type GetPackagesReq = {
 	limit: number;
@@ -58,12 +51,11 @@ export type GetPackagesReq = {
 	search: string;
 }
 export type GetPackagesRes = {
-	packages: PackageType[],
+	packages: PackageModel[],
 	total: number,
 };
 
-type PackageClean = Omit<PackageAttributes, 'id' | 'userId'> & { fromAddress: AddressAttributes, toAddress: AddressAttributes };
-export type CreatePackageReq = Optional<PackageClean, 'length' | 'width' | 'height' | 'trackingNo'>;
+export type CreatePackageReq = Optional<PackageModel, 'length' | 'width' | 'height' | 'trackingNo'>;
 export type CreatePackageRes = {
 	success: boolean;
 	packageId: number;
@@ -86,11 +78,11 @@ export type GetTransactionsReq = {
 };
 export type GetTransactionsRes = {
 	total: number;
-	transactions: TransactionType[];
+	transactions: TransactionModel[];
 };
 
 export type GetTransactionRes = {
-	transaction: TransactionType;
+	transaction: TransactionModel;
 };
 
 

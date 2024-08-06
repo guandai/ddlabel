@@ -22,6 +22,14 @@ export type KeyCsvRecord = keyof CsvRecord;
 export type HeaderMapping = {
     [k in keyof CsvRecord]: string | undefined;
 };
+export type PortInfo = {
+    zip: string;
+    proposal: string;
+    sortCode: string;
+    startZip: string;
+    state: string;
+    city: string;
+};
 export type ZipInfo = {
     zip: string;
     city: string;

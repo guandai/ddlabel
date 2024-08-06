@@ -2,10 +2,10 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 import { Address } from './Address';
-import { UserAttributes } from '@ddlabel/shared/dist/models';
+import { Transaction } from './Transaction';
+import { UserAttributes, UserCreationAttributes } from '@ddlabel/shared';
 import { defineRelations } from '../config/relations';
-
-interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
+import { Package } from './Package';
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   public id!: number;
@@ -13,8 +13,10 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public email!: string;
   public password!: string;
   public role!: string;
+
   public warehouseAddress!: Address;
-  // public warehouseAddressId!: number;
+  public packages!: Package[];
+  public transactions!: Transaction[];
 }
 
 User.init(
