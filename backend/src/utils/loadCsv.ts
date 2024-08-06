@@ -18,15 +18,12 @@ export const loadCsvData = <T>(filePath: string): Promise<T[]> => {
 		fs.createReadStream(fullPath)
 			.pipe(csv())
 			.on('data', (row: T) => {
-				console.log(`row`, row);
 				data.push(row);
 			})
 			.on('end', () => {
-				console.log(`end`);
 				resolve(data);
 			})
 			.on('error', (err) => {
-				console.log(`eee`, err);
 				reject(err);
 			});
 	});

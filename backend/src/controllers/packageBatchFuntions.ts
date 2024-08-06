@@ -26,7 +26,6 @@ export const getPreparedData = async (packageCsvMap: string, csvData: CsvData) =
 	const headerMapping: HeaderMapping = isValidJSON(packageCsvMap) ? JSON.parse(packageCsvMap) : defaultMapping;
 	const mappedData = getMappingData(csvData, headerMapping);
 	const fromZipInfo = getZipInfo(getFromAddressZip(mappedData));
-	console.log(`fromZipInfo`, fromZipInfo);
 	const toZipInfo = getZipInfo(getToAddressZip(mappedData));
 	if (!fromZipInfo) { 
 		logger.error(`Error in getPreparedData: no fromAddressZip, ${mappedData['fromAddressZip']}`);
