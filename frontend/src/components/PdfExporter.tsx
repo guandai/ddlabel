@@ -55,7 +55,7 @@ const PdfExporter: React.FC = () => {
       <div key={pkg.id}
         style={print
           ? { position: 'absolute', left: -9999 }
-          : { width: '2in', height: '3in', transform: 'scale(0.5)', transformOrigin: 'top left' }}
+          : {    }}
         ref={(el) => print && (pagesRef.current[idx] = el)
         }
       >
