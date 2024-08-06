@@ -20,45 +20,40 @@ const MonoTypoNormal = styled(Typography)(() => ({
 
 interface PackageLabelProps {
   pkg: PackageModel;
-  reader?: 'web' | 'pdf';
+  factor?: number;
+  width?: string;
+  height?: string;
 }
 
-export const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
-  const [sortCode, setSortCode] = useState<string | 'N/A'>('N/A');
-  const [toProposal, setToProposal] = useState<KeyZones | 'N/A'>('N/A');
+export const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, width = '4in', height = '6in', factor=1 }) => {
+  // const [sortCode, setSortCode] = useState<string | 'N/A'>('N/A');
+  // const [toProposal, setToProposal] = useState<KeyZones | 'N/A'>('N/A');
 
-  const { width, height } = reader === 'web' ? {
-    width: '4in', height: 'auto',
-  } : {
-    width: '4in', height: 'auto',
-  };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const postalZone = (await new PostalZoneApi().getPostalZone({zip: pkg.toAddress.zip})).postalZone;
+  //       setToProposal(postalZone.proposal);
+  //       setSortCode(postalZone.new_sort_code);
+  //     } catch (error) {
+  //       setToProposal('N/A');
+  //       setSortCode('N/A');
+  //     }
+  //   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const postalZone = (await new PostalZoneApi().getPostalZone({zip: pkg.toAddress.zip})).postalZone;
-        setToProposal(postalZone.proposal);
-        setSortCode(postalZone.new_sort_code);
-      } catch (error) {
-        setToProposal('N/A');
-        setSortCode('N/A');
-      }
-    };
-
-    fetchData();
-  }, [pkg]);
+  //   fetchData();
+  // }, [pkg]);
 
   return (
     <Box sx={{ width, height, padding: '0.1in', margin: 0, border: '0.02in solid black', boxSizing: 'border-box' }}>
-
       {/* main upper */}
-      <Box sx={{ height: '1.  9in', display: 'flex', justifyContent: 'space-between', alignItems: 'top', }}>
+      <Box sx={{ height: '1.9in', display: 'flex', justifyContent: 'space-between', alignItems: 'top', }}>
         {/* top left part */}
         <Box sx={{ textAlign: 'left', mr: '8px', width: '70%' }}>
           {/* logo part */}
           <Box >
-            <img src={monkeyLogo} alt="Monkey Logo" style={{ display: 'inline', width: '0.7in'}} /> {/* Adjust logo size */}
-            <Typography variant="h4" sx={{ float: 'right', display: 'inline', fontWeight: 'bold' }}>{sortCode}</Typography>
+            <img src={monkeyLogo} alt="Monkey Logo" style={{ display: 'inline', width: '0.7in'}} />
+            <Typography variant="h4" sx={{ float: 'right', display: 'inline', fontWeight: 'bold' }}>{pkg.toAddress.sortCode}</Typography>
           </Box>
 
           {/* Return to part */}
@@ -74,7 +69,7 @@ export const PackageLabel: React.FC<PackageLabelProps> = ({ pkg, reader }) => {
         {/* top right part */}
         <Box sx={{ textAlign: 'right', width: '30%' }}>
           <QRCode value={`${process.env.REACT_APP_FE_URL}/packages/${pkg.id}`} size={100} /> {/* Increase QR code size */}
-          <Typography sx={{ textAlign: 'center', fontSize: '3rem', fontWeight: 'bold', lineHeight: 1 }}>{toProposal as string}</Typography>
+          <Typography sx={{ textAlign: 'center', fontSize: '3rem', fontWeight: 'bold', lineHeight: 1 }}>{pkg.toAddress.proposal}</Typography>
           <Typography sx={{ textAlign: 'center', fontSize: '2rem', color: 'white', backgroundColor: 'black', lineHeight: 1 }}>{pkg.toAddress.zip}</Typography>
         </Box>
       </Box>

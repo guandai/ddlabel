@@ -23,13 +23,13 @@ const PdfExporter: React.FC = () => {
       if (!page) return Promise.resolve();
       return html2canvas(page)
         .then((canvas) => {
-          const imgData = canvas.toDataURL('image/png');
+          const imgData = canvas.toDataURL('image/jpeg', 0.7);
           const imgWidth = 4;
           const imgHeight = (canvas.height * imgWidth) / canvas.width;
           if (idx !== 0) {
             pdf.addPage();
           }
-          pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+          pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
         })
     });
     return renderPromises;
@@ -47,13 +47,19 @@ const PdfExporter: React.FC = () => {
         pdf.save('combined.pdf');
         setLoading(false);
       });
-    } , 100);
+    }, 100);
   };
 
-  const getLabels = () =>
+  const getLabels = (print = true) =>
     packages.map((pkg, idx) =>
-      <div key={pkg.id} style={{ width: '4in' }} ref={(el) => (pagesRef.current[idx] = el)}>
-        <PackageLabel pkg={pkg} />
+      <div key={pkg.id}
+        style={print
+          ? { position: 'absolute', left: -9999 }
+          : { width: '2in', height: '3in', transform: 'scale(0.5)', transformOrigin: 'top left' }}
+        ref={(el) => print && (pagesRef.current[idx] = el)
+        }
+      >
+        <PackageLabel pkg={pkg} factor={print ? 1 : 0.5} />
       </div>
     );
 
@@ -61,12 +67,13 @@ const PdfExporter: React.FC = () => {
     <FlexBox component="main" maxWidth="lg">
       <Backdrop open={loading} sx={backDropStyle} ><CircularProgress /></Backdrop>
       <ExportPdfSideBar capturePages={capturePages} setPackages={setPackages} setMessage={setMessage} />
-      <StyledBox>
+      <StyledBox sx={{ overflowY: 'clip' }}>
         <Typography component="h1" variant="h4" align='center'>Export to PDF</Typography>
         <MessageAlert message={message} />
         <FlexBox component="main" maxWidth="lg" sx={{ mt: 3, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-          {getLabels()}
+          {getLabels(false)}
         </FlexBox>
+        {getLabels()}
       </StyledBox>
     </FlexBox>
   );
