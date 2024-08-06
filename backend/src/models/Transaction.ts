@@ -3,10 +3,7 @@ import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
 import { Package } from './Package';
 import { User } from './User';
-import { TransactionAttributes } from '@ddlabel/shared';
-
-
-interface TransactionCreationAttributes extends Optional<TransactionAttributes, 'id' | 'dateAdded'> {}
+import { TransactionAttributes, TransactionCreationAttributes } from '@ddlabel/shared';
 
 class Transaction extends Model<TransactionAttributes, TransactionCreationAttributes> implements TransactionAttributes {
   public id!: number;

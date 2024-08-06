@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { ZipCode } from '../models/ZipCode';
-import getZipInfo from '../utils/getZipInfo';
+import getZipInfo from '../utils/getInfo';
 import { ResponseAdv, ZipInfo } from '@ddlabel/shared';
 
 export const getZipCode = async (req: Request, res: ResponseAdv<ZipCode>) => {

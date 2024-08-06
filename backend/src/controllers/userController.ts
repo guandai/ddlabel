@@ -73,8 +73,7 @@ export const getCurrentUser = async (req: AuthRequest, res: ResponseAdv<GetCurre
 
   if (!req.user) { return notFound() };
 
-  type UserWithAddress = Optional<UserAttributes, 'password'> & { warehouseAddress: AddressAttributes } | null;
-  const user: UserWithAddress = await User.findOne({
+  const user = await User.findOne({
     where: { id: req.user.id },
     attributes: ['id', 'name', 'email', 'role'],
     include: [

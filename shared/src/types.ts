@@ -22,10 +22,16 @@ type CsvRecordOptional = {
 export type CsvRecord = CsvRecordOptional & CsvRecordRequired;
 export type KeyCsvRecord = keyof CsvRecord;
 
-// type HeaderMappingOptional = { [k in keyof CsvRecordOptional]: string };
-// type HeaderMappingRequired = { [k in keyof CsvRecordRequired]: string };
-// export type HeaderMapping = HeaderMappingOptional & HeaderMappingRequired;
 export type HeaderMapping = { [k in keyof CsvRecord]: string | undefined };
+
+export type PortInfo = {
+	zip: string;
+	proposal: string;
+	sortCode: string;
+	startZip: string;
+	state: string;
+	city: string;
+};
 
 export type ZipInfo = {
 	zip: string;

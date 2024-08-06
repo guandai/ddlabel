@@ -1,7 +1,7 @@
 // backend/src/controllers/packageBatchFuntions.ts
 import { Package, PackageCreationAttributes } from '../models/Package';
 import { Address, AddressCreationAttributes } from '../models/Address';
-import getZipInfo, { getFromZip, getToZip } from '../utils/getZipInfo';
+import getZipInfo, { getFromZip, getToZip } from '../utils/getInfo';
 import { isValidJSON, reducedError } from '../utils/errors';
 import logger from '../config/logger';
 import { CsvRecord, defaultMapping, CSV_KEYS, HeaderMapping, KeyCsvRecord } from '@ddlabel/shared';
@@ -50,8 +50,8 @@ export const processBatch = async (batchData: BatchDataType) => {
 			shipFromBatch[idx].fromPackageId = pkg.id;
 			shipToBatch[idx].toPackageId = pkg.id;
 		});
-		await Address.bulkCreate(shipFromBatch);
-		await Address.bulkCreate(shipToBatch);
+		await Address.bulkCreateWithInfo(shipFromBatch);
+		await Address.bulkCreateWithInfo(shipToBatch);
 	} catch (error: any) {
 		logger.error(`Error in processBatch: ${reducedError(error)}`);
 		throw error;

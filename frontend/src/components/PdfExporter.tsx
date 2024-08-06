@@ -1,16 +1,16 @@
 import React, { useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { PackageType, GetPackagesReq } from '@ddlabel/shared';
+import { PackageModel } from '@ddlabel/shared';
 import { MessageContent } from '../types';
-import { Backdrop, CircularProgress, Dialog, Typography } from '@mui/material';
+import { Backdrop, CircularProgress, Typography } from '@mui/material';
 import MessageAlert from './MessageAlert';
 import PackageLabel from './PackageLabel';
 import { backDropStyle, FlexBox, StyledBox } from '../util/styled';
 import ExportPdfSideBar from './ExportPdfSideBar';
 
 const PdfExporter: React.FC = () => {
-  const [packages, setPackages] = useState<PackageType[]>([]);
+  const [packages, setPackages] = useState<PackageModel[]>([]);
   const [message, setMessage] = useState<MessageContent>(null);
   const [loading, setLoading] = useState(false);
 

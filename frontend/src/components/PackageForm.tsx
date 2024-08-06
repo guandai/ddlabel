@@ -4,7 +4,7 @@ import { TextField, Button, Box, Typography, Container, Grid } from '@mui/materi
 import { useNavigate, useParams } from 'react-router-dom';
 import { tryLoad } from '../util/errors';
 import AddressForm from './AddressForm';
-import { AddressAttributes, CreatePackageReq, PackageType, UpdatePackageReq } from "@ddlabel/shared";
+import { AddressAttributes, CreatePackageReq, PackageModel, UpdatePackageReq } from "@ddlabel/shared";
 import { MessageContent } from '../types.d';
 import MessageAlert from './MessageAlert';
 import { AddressEnum } from '@ddlabel/shared';
@@ -12,7 +12,7 @@ import PackageApi from '../api/PackageApi';
 import { StyledBox } from '../util/styled';
 
 type QuickFieldProp = {
-  name: keyof PackageType;
+  name: keyof PackageModel;
   type?: 'text' | 'number';
   pattern?: string | null;
   required?: boolean;
@@ -21,10 +21,10 @@ type QuickFieldProp = {
 const defautAddress = { addressType: AddressEnum.toPackage } as AddressAttributes;
 const initialPackage = {
   fromAddress: defautAddress, toAddress: defautAddress,
-} as PackageType;
+} as PackageModel;
 
 const PackageForm: React.FC = () => {
-  const [packageData, setPackageData] = useState<PackageType>(initialPackage);
+  const [packageData, setPackageData] = useState<PackageModel>(initialPackage);
   const [message, setMessage] = useState<MessageContent>(null);
   const navigate = useNavigate();
   const { id: packageId } = useParams<{ id: string }>(); // from url params

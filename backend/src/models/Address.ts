@@ -1,12 +1,10 @@
 // backend/src/models/Address.ts
 import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database';
-import { fixCityState } from '../utils/getZipInfo';
-import { AddressAttributes, AddressEnum, PortEnum } from '@ddlabel/shared';
+import { fixCityState, fixPort } from '../utils/getInfo';
+import { AddressAttributes, AddressCreationAttributes, AddressEnum, PortEnum } from '@ddlabel/shared';
 import { User } from './User';
 import { Package } from './Package';
-
-interface AddressCreationAttributes extends Optional<AddressAttributes, 'id'> { }
 
 class Address extends Model<AddressAttributes, AddressCreationAttributes> implements AddressAttributes {
   public id!: number;
@@ -16,7 +14,7 @@ class Address extends Model<AddressAttributes, AddressCreationAttributes> implem
   public city!: string;
   public state!: string;
   public zip!: string;
-  public port?: PortEnum;
+  public proposal?: PortEnum;
   public sortCode?: string;
   public email?: string;
   public phone?: string;
@@ -31,19 +29,22 @@ class Address extends Model<AddressAttributes, AddressCreationAttributes> implem
   public toPackage!: Package;
 
 
-  public static async createWithInfo(attr: AddressCreationAttributes): Promise<Address> {
-    const fixedAttr = await fixCityState(attr);
-    return await Address.create(fixedAttr);
+  public static async createWithInfo(attr: AddressCreationAttributes): Promise<AddressCreationAttributes> {
+    attr = await fixCityState(attr);
+    attr = await fixPort(attr);
+    return await Address.create(attr);
   }
 
-  public static async updateWithInfo(attr: AddressAttributes) {
-    const fixedAttr = await fixCityState(attr);
-    await Address.update(fixedAttr,  { where: { id: attr.id } });
+  public static async updateWithInfo(attr: AddressAttributes): Promise<void> {
+    attr = await fixCityState(attr);
+    attr = await fixPort(attr);
+    await Address.update(attr,  { where: { id: attr.id } });
   }
 
   public static async bulkCreateWithInfo(attrs: AddressCreationAttributes[]) {
-    const fixedAttrs = await Promise.all(attrs.map(async (attr) => await fixCityState(attr))); 
-    await Address.bulkCreate(fixedAttrs);
+    attrs = await Promise.all(attrs.map(async (attr) => await fixCityState(attr))); 
+    attrs = await Promise.all(attrs.map(async (attr) => await fixPort(attr))); 
+    await Address.bulkCreate(attrs);
   }
 }
 
@@ -82,7 +83,7 @@ Address.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    port: { 
+    proposal: { 
       type: DataTypes.ENUM('LAX', 'JFK', 'ORD', 'SFO', 'DFW', 'MIA', 'ATL', 'BOS', 'SEA'),
       allowNull: true,
     },

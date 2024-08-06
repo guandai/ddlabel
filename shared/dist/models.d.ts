@@ -1,8 +1,17 @@
+import { Optional } from 'sequelize';
 export declare enum PackageSource {
     manual = "manual",
     csv = "csv",
     api = "api"
 }
+export type PackageCreationAttributes = Optional<PackageAttributes, 'id'>;
+export type UserCreationAttributes = Optional<UserAttributes, 'id'>;
+export type AddressCreationAttributes = Optional<AddressAttributes, 'id'>;
+export type TransactionCreationAttributes = Optional<TransactionAttributes, 'id'>;
+export type PackageChange = PackageAttributes | PackageCreationAttributes;
+export type AddressChange = AddressAttributes | AddressCreationAttributes;
+export type UserChange = UserAttributes | UserCreationAttributes;
+export type TransactionChange = TransactionAttributes | TransactionCreationAttributes;
 export type PackageAttributes = {
     id: number;
     userId: number;
@@ -14,9 +23,25 @@ export type PackageAttributes = {
     referenceNo: string;
     source: PackageSource;
 };
-export type PackageType = PackageAttributes & {
+export type UserModel = UserAttributes & {
+    warehouseAddress: AddressAttributes;
+    transactions: TransactionAttributes[];
+    packages: PackageAttributes[];
+};
+export type PackageModel = PackageAttributes & {
+    user: UserAttributes;
     fromAddress: AddressAttributes;
     toAddress: AddressAttributes;
+    transaction: TransactionAttributes;
+};
+export type AddressModel = AddressAttributes & {
+    user: UserAttributes;
+    fromPackage: PackageAttributes;
+    toPackage: PackageAttributes;
+};
+export type TransactionModel = TransactionAttributes & {
+    package: PackageAttributes;
+    user: UserAttributes;
 };
 export declare enum PortEnum {
     LAX = "LAX",
@@ -42,7 +67,7 @@ export type AddressAttributes = {
     city: string;
     state: string;
     zip: string;
-    port?: PortEnum;
+    proposal?: PortEnum;
     sortCode?: string;
     email?: string;
     phone?: string;
@@ -94,9 +119,6 @@ export type TransactionAttributes = {
     cost: number;
     tracking: string;
 };
-export type TransactionType = TransactionAttributes & {
-    package: PackageAttributes;
-};
 export type ZipCodeAttributes = {
     zip: string;
     lat: number;
@@ -112,7 +134,7 @@ export type ZipCodeAttributes = {
 };
 export type SortCodeAttributes = {
     id: number;
-    port: string;
+    proposal: string;
     zip: string;
     sortCode: string;
     createdAt: Date;

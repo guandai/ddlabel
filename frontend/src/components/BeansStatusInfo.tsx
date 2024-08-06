@@ -2,12 +2,12 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Box } from '@mui/material';
 import { tryLoad } from '../util/errors';
 import { MessageContent } from '../types';
-import { PackageType } from '@ddlabel/shared';
+import { PackageModel } from '@ddlabel/shared';
 import MessageAlert from './MessageAlert';
 import BeansStatusLogApi from '../external/beansApi';
 
 type PackageDialogProps = {
-    selectedPackage: PackageType | null
+    selectedPackage: PackageModel | null
 }
 
 const BeansStatusInfo: React.FC<PackageDialogProps> = ({ selectedPackage }) => {

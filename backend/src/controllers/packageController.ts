@@ -2,6 +2,7 @@
 import { Request } from 'express';
 import { Package } from '../models/Package';
 import { Address } from '../models/Address';
+import { Transaction } from '../models/Transaction';
 import { User } from '../models/User';
 import { AuthRequest } from '../types';
 import { Op } from 'sequelize';
@@ -60,6 +61,7 @@ export const getPackages = async (req: AuthRequest, res: ResponseAdv<GetPackages
         { model: Address, as: 'fromAddress', where: { addressType: 'fromPackage' } },
         { model: Address, as: 'toAddress', where: { addressType: 'toPackage' } },
         { model: User, as: 'user' },
+        { model: Transaction, as: 'transaction' },
       ],
       where: whereCondition,
       limit,
