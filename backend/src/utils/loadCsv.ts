@@ -1,20 +1,33 @@
 import fs from 'fs';
 import csv from 'csv-parser';
 
-// Load CSV data
-export const loadCsvData = <DataStructure>(filePath: string): Promise<DataStructure[]> => {
-	return new Promise((resolve, reject) => {
-	  const data: DataStructure[] = [];
-	  fs.createReadStream(filePath)
-		.pipe(csv())
-		.on('data', (row: DataStructure) => {
-		  data.push(row);
-		})
-		.on('end', () => {
-		  resolve(data);
-		})
-		.on('error', (err) => {
-		  reject(err);
-		});
+import path from 'path';
+
+export const loadData = async <T>(fileName: string) => loadCsvData<T>(`../data/${fileName}`)
+	.then((data) => data).catch((error) => {
+		console.error(`Error loading ${fileName} data:`, error);
+		return null;
 	});
-  };
+
+// Load CSV data
+export const loadCsvData = <T>(filePath: string): Promise<T[]> => {
+	const fullPath = path.resolve(__dirname, filePath);
+	console.log(`Load data from ${fullPath}`);
+	return new Promise((resolve, reject) => {
+		const data: T[] = [];
+		fs.createReadStream(fullPath)
+			.pipe(csv())
+			.on('data', (row: T) => {
+				console.log(`row`, row);
+				data.push(row);
+			})
+			.on('end', () => {
+				console.log(`end`);
+				resolve(data);
+			})
+			.on('error', (err) => {
+				console.log(`eee`, err);
+				reject(err);
+			});
+	});
+};

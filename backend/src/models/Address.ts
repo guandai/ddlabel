@@ -42,7 +42,8 @@ class Address extends Model<AddressAttributes, AddressCreationAttributes> implem
   }
 
   public static async bulkCreateWithInfo(attrs: AddressCreationAttributes[]) {
-    attrs = await Promise.all(attrs.map(async (attr) => await fixCityState(attr))); 
+    // attrs = await Promise.all(attrs.map(async (attr) => await fixCityState(attr))); 
+    // fixCityState by getZipInfo already done is getPreparedData()
     attrs = await Promise.all(attrs.map(async (attr) => await fixPort(attr))); 
     await Address.bulkCreate(attrs);
   }
@@ -85,6 +86,10 @@ Address.init(
     },
     proposal: { 
       type: DataTypes.ENUM('LAX', 'JFK', 'ORD', 'SFO', 'DFW', 'MIA', 'ATL', 'BOS', 'SEA'),
+      allowNull: true,
+    },
+    sortCode: {
+      type: DataTypes.STRING,
       allowNull: true,
     },
     email: {

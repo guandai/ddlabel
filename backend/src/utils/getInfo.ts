@@ -1,6 +1,8 @@
 import { AddressChange, CsvRecord, extractAddressZip, PortInfo, ZipInfo } from '@ddlabel/shared';
-import { loadCsvData } from './loadCsv';
-
+import stateDataJson from '../data/stateSmall.json';
+import portDataJson from '../data/portSmall.json';
+const stateData = stateDataJson as ZipInfo[];
+const portData = portDataJson as PortInfo[];
 type PortData = {
   zip: string;
   sortCode: string;
@@ -18,54 +20,40 @@ type StateData = {
   tz?: string;
 }
 
-export const fixCityState = async <T extends AddressChange>(attr: T): Promise<T> => {
+export const fixCityState = <T extends AddressChange>(attr: T): T => {
   if (attr.city && attr.state) { return attr }
-  const info = await getZipInfo(attr.zip)
-    || await getZipInfo(extractAddressZip(attr.address2))
-    || await getZipInfo(extractAddressZip(attr.address1));
+  const info = getZipInfo(attr.zip)
+    || getZipInfo(extractAddressZip(attr.address2))
+    || getZipInfo(extractAddressZip(attr.address1));
   if (!info) {
     throw new Error(`ZipInfo not found for ${attr.zip}`);
   }
   return { ...attr, city: info.city, state: info.state };
 }
 
-export const fixPort = async <T extends AddressChange>(attr: T): Promise<T> => {
+export const fixPort = <T extends AddressChange>(attr: T): T => {
   if (attr.proposal) { return attr }
-  const info = await getPortInfo(attr.zip)
+  const info = getPortInfo(attr.zip);
   if (!info) {
     throw new Error(`Port not found for ${attr.zip}`);
   }
   return { ...attr, proposal: info.proposal, sortCode: info.sortCode };
 }
 
-const loadData = async <T>(fileName: string) => loadCsvData<T>(`../data/${fileName}`)
-  .then((data) => data).catch((error) => {
-    console.error(`Error loading ${fileName} data:`, error);
-  });
-
-let stateSmall: StateData[];
-let portSmall: PortData[];
-
-const getZipInfo = async (zip: string): Promise<ZipInfo | undefined> => {
-  stateSmall = stateSmall || await loadData<StateData>('stateSmall.csv');
-  if (!zip || !stateSmall) { return }
-  return stateSmall.find(x => x.zip === zip);
+const getInfo = <T extends StateData | PortData>(zip: string, data: T[]) => {
+  if (!zip || !data || !data.length) { return }
+  return data.find(x => x.zip === zip);
 };
+export const getZipInfo = (zip: string): ZipInfo | undefined => getInfo<ZipInfo>(zip, stateData);
+export const getPortInfo = (zip: string): PortInfo | undefined => getInfo<PortInfo>(zip, portData);
 
-const getPortInfo = async (zip: string): Promise<PortInfo | undefined> => {
-  portSmall = portSmall || await loadData<PortData>('portSmall.csv');
-  if (!zip || !portSmall) { return }
-  return portSmall.find(x => x.zip === zip);
-};
-
-
-export const getFromZip = (mappedData: CsvRecord): string =>
+export const getFromAddressZip = (mappedData: CsvRecord): string =>
   mappedData['fromAddressZip'] && mappedData['fromAddressZip']
   || mappedData['fromAddress2'] && extractAddressZip(mappedData['fromAddress2'])
   || extractAddressZip(mappedData['fromAddress1'])
   || '';
 
-export const getToZip = (mappedData: CsvRecord): string =>
+export const getToAddressZip = (mappedData: CsvRecord): string =>
   mappedData['toAddressZip'] && mappedData['toAddressZip']
   || mappedData['toAddress2'] && extractAddressZip(mappedData['toAddress2'])
   || extractAddressZip(mappedData['toAddress1'])

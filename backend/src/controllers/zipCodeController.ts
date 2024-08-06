@@ -17,7 +17,7 @@ export const getZipCode = async (req: Request, res: ResponseAdv<ZipCode>) => {
 };
 
 export const getZipCodeFromFile = async (req: Request, res: ResponseAdv<ZipInfo>) => {
-  const info = await getZipInfo(req.params.zip);
+  const info = getZipInfo(req.params.zip);
   if (!info) {
     return res.status(404).json({ message: 'Zip code not found' });
   }
