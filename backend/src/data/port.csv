@@ -1,4 +1,4 @@
-zip_code,sort_code,proposal,open_date,LAX,SFO,ORD,JFK,ATL,DFW,MIA,SEA,BOS,PDX
+zipCode,sortCode,proposal,openDate,LAX,SFO,ORD,JFK,ATL,DFW,MIA,SEA,BOS,PDX
 01801,MA-EJ05,BOS,Open,-,-,-,Zone 3,-,-,-,-,Zone 1,-
 01803,MA-EJ04,BOS,Open,-,-,-,Zone 3,-,-,-,-,Zone 1,-
 01867,MA-EJ06,BOS,Open,-,-,-,Zone 3,-,-,-,-,Zone 1,-
