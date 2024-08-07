@@ -17,7 +17,7 @@ import BeansStatusLogApi from '../external/beansApi';
 import { toUpdateTime } from '../util/time';
 import PackageTableSideBar from './PackageTableSideBar';
 import { FlexBox, StyledBox } from '../util/styled';
-import TablePaginationCommon from './TablePaginationCommon';
+import TablePaginationQuery from './TablePaginationQuery';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageModel[]>([]);
@@ -75,7 +75,6 @@ const PackageTable: React.FC = () => {
         <StyledBox>
             <Typography component="h1" variant="h4" align='center'>Packages</Typography>
             <MessageAlert message={message} />
-            <TablePaginationCommon getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} />
             <TableContainer component={Paper} sx={{ mt: 3 }}>
               <Table>
                 <TableHead>

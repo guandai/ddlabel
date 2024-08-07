@@ -30,7 +30,7 @@ const TableSideBar: React.FC<Props> = (prop) => {
 	}, [search, setRecords, setMessage]);
 
 	return (
-		<Box sx={{ backgroundColor: '#DDDDDD', flex: 1.5, height: '100hv', overflowY: "auto", padding: 2 }}>
+		<Box sx={{ backgroundColor: '#DDDDDD', width: "200px", height: '100hv', overflowY: "auto", padding: 2 }}>
 			<List>
 				{children}
 				<ListItem>
