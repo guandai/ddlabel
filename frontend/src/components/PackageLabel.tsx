@@ -35,7 +35,14 @@ export const PackageLabel: React.FC<PackageLabelProps> = (prop) => {
   const scaledWidth = scaleStyle(width || '4in', factor);
   const scaledHeight = scaleStyle(height || '6in', factor);
   return (
-    <Box sx={{ width: scaledWidth, height: scaledHeight, padding: `${0.1 * factor}in`, margin: 0, border: `${0.02 * factor}in solid black`, boxSizing: 'border-box' }}>
+    <Box sx={{
+      width: `calc(${scaledWidth} - ${0.02 * factor}in * 2)`,  // Adjusted width to account for border on both sides
+      height: `calc(${scaledHeight} - ${0.02 * factor}in * 2)`, // Adjusted height to account for border on top and bottom
+      padding: `${0.1 * factor}in`,
+      margin: 0,
+      border: `${0.02 * factor}in solid black`,
+      boxSizing: 'content-box', // Ensure padding and border are included within the specified width and height
+    }}>
       {/* main upper */}
       <Box sx={{ height: `${1.9 * factor}in`, display: 'flex', justifyContent: 'space-between', alignItems: 'top', }}>
         {/* top left part */}
