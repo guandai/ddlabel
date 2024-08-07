@@ -31,7 +31,7 @@ const TableSideBar: React.FC<Props> = (prop) => {
 
 	return (
 		<Box sx={{ backgroundColor: '#DDDDDD', width: "200px", height: '100hv', overflowY: "auto", padding: 2 }}>
-			<List>
+			<List sx={{minHeight: '100vh'}}>
 				{children}
 				<ListItem>
 					<TextField
