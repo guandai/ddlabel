@@ -25,7 +25,6 @@ const ExportPdfSideBar: React.FC<Props> = (prop) => {
 		>
 			<ListItem>
 				<Button
-					sx={{ my: 2 }}
 					fullWidth
 					variant="contained"
 					onClick={capturePages}><DownloadForOfflineRounded

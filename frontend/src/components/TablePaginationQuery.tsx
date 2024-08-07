@@ -4,39 +4,41 @@ import { tryLoad } from '../util/errors';
 
 import { GetRecordsReq, GetRecordsRes } from '@ddlabel/shared';
 import { MessageContent } from '../types';
-import { Padding } from '@mui/icons-material';
-import { display } from 'html2canvas/dist/types/css/property-descriptors/display';
 
 const StyledTablePagination = styled((props: TablePaginationProps) => (
 	<TablePagination {...props} />
 ))(({ theme }) => ({
-	'& .MuiToolbar-root p': {
-		marginTop: '0px',
-	},
+	
 	'& .MuiToolbar-root': {
 		padding: '0px',
 		display: 'block',
+
+		// '& p': {
+		// 	marginTop: '0px',
+		// },
+		// Per page label
+		'& .MuiTablePagination-selectLabel': {
+			marginTop: '0px',
+			display: 'inline-flex',
+			
+		},
+		// Per page dropdown
+		'& .MuiInputBase-root ': {
+			display: 'inline-flex',
+			marginLeft: '4px',
+			marginRight: '0px',
+		},
+		// Records label, total records
+		'& .MuiTablePagination-displayedRows': {
+			display: 'block',
+			margin: '0',
+		},
+		// Buttons
+		'& .MuiTablePagination-actions': {
+			margin: '0',
+		},
 	},
-	'& .MuiTablePagination-selectLabel': {
-		display: 'inline-flex',
-		
-	},
-	'& .MuiInputBase-root ': {
-		display: 'inline-flex',
-		marginLeft: '4px',
-		marginRight: '0px',
-	},
-	'& .MuiTablePagination-displayedRows': {
-		display: 'block',
-		width: 'fit-content',
-		margin: 'auto',
-		marginLeft: '0px',
-	},
-	'.MuiTablePagination-actions': {
-		margin: 'auto',
-		width: 'fit-content',
-		padding: '0px',
-	},
+	
 }));
 
 
@@ -69,6 +71,8 @@ const TablePaginationQuery: React.FC<Props> = (prop) => {
 
 	const muiChangePage = (_event: unknown, newPage: number) => {
 		setPage(newPage + 1);
+		setStartPage(newPage + 1);
+		setEndPage(newPage + 1);
 	};
 
 	const muiChangePerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,7 +105,7 @@ const TablePaginationQuery: React.FC<Props> = (prop) => {
 
 	const getValidPage = (newPage: number) => Math.max(1, Math.min(maxPage, Math.max(1, newPage)));
 
-	const onDisplayRows = ({ from, to, count }: { from: number; to: number; count: number }) => `Page: ${from}-${to} of ${count}`;
+	const onDisplayRows = ({ from, to, count }: { from: number; to: number; count: number }) => `Records: ${from}-${to} of ${count}`;
 
 	const numberBox = (label: string, value: number | undefined, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void) =>
 		<Box sx={{ mt: 2 }}>
@@ -120,7 +124,7 @@ const TablePaginationQuery: React.FC<Props> = (prop) => {
 		<Box sx={{margin: 0, padding: 0}}>
 			<StyledTablePagination
 				component="div"
-				rowsPerPageOptions={[20, 40, 80]}
+				rowsPerPageOptions={[2, 20, 40, 80]}
 				count={total} // Total number of packages
 				rowsPerPage={perPage}
 				labelRowsPerPage="Per page:"
