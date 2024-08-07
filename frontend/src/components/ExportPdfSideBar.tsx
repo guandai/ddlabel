@@ -6,6 +6,7 @@ import { DownloadForOfflineRounded } from '@mui/icons-material';
 import { PackageModel } from '@ddlabel/shared';
 import PackageApi from '../api/PackageApi';
 import { MessageContent } from '../types';
+import TablePaginationQuery from './TablePaginationQuery';
 
 type Props = {
 	capturePages: () => void;
@@ -31,6 +32,9 @@ const ExportPdfSideBar: React.FC<Props> = (prop) => {
 					/>
 					Export to PDF
 				</Button>
+			</ListItem>
+			<ListItem>
+				<TablePaginationQuery getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} />
 			</ListItem>
 		</TableSideBar>
 	);

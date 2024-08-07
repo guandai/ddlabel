@@ -7,6 +7,7 @@ import { AddCircle } from '@mui/icons-material';
 import TableSideBar from './TableSideBar';
 import PackageApi from '../api/PackageApi';
 import { MessageContent } from '../types';
+import TablePaginationQuery from './TablePaginationQuery';
 
 type Props = {
 	setPackages: (transactions: any) => void;
@@ -35,6 +36,9 @@ const PackageTableSideBar: React.FC<Props> = (prop) => {
 			</ListItem >
 			<ListItem>
 				<PackageUploadMapping />
+			</ListItem>
+			<ListItem>
+				<TablePaginationQuery getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} />
 			</ListItem>
 		</TableSideBar>
 	);

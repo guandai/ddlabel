@@ -2,28 +2,43 @@ import React, { useState, useEffect } from 'react';
 import { Box, styled, TablePagination, TablePaginationProps, TextField } from '@mui/material';
 import { tryLoad } from '../util/errors';
 
-import { GetRecordsReq, GetRecordsRes, Model } from '@ddlabel/shared';
+import { GetRecordsReq, GetRecordsRes } from '@ddlabel/shared';
 import { MessageContent } from '../types';
-import { FlexBox } from '../util/styled';
+import { Padding } from '@mui/icons-material';
+import { display } from 'html2canvas/dist/types/css/property-descriptors/display';
 
 const StyledTablePagination = styled((props: TablePaginationProps) => (
 	<TablePagination {...props} />
-  ))(({ theme }) => ({
+))(({ theme }) => ({
 	'& .MuiToolbar-root p': {
-	  margin: '4px',
+		marginTop: '0px',
 	},
 	'& .MuiToolbar-root': {
-	  minHeight: 'auto',
+		padding: '0px',
+		display: 'block',
 	},
-	'& .MuiTablePagination-actions': {
-	  margin: '0px',
+	'& .MuiTablePagination-selectLabel': {
+		display: 'inline-flex',
+		
 	},
-	'& .MuiInputBase-root': {
-	  margin: '0px',
+	'& .MuiInputBase-root ': {
+		display: 'inline-flex',
+		marginLeft: '4px',
+		marginRight: '0px',
 	},
-  }));
-  
-  
+	'& .MuiTablePagination-displayedRows': {
+		display: 'block',
+		width: 'fit-content',
+		margin: 'auto',
+		marginLeft: '0px',
+	},
+	'.MuiTablePagination-actions': {
+		margin: 'auto',
+		width: 'fit-content',
+	},
+}));
+
+
 
 type Props = {
 	getRecords: (params?: GetRecordsReq) => Promise<GetRecordsRes>;
@@ -31,7 +46,7 @@ type Props = {
 	setMessage: React.Dispatch<React.SetStateAction<MessageContent>>;
 };
 
-const TablePaginationCommon: React.FC<Props> = (prop) => {
+const TablePaginationQuery: React.FC<Props> = (prop) => {
 	const { getRecords, setRecords, setMessage } = prop;
 	const [page, setPage] = useState(1);
 	const [startPage, setStartPage] = useState(1);
@@ -83,42 +98,43 @@ const TablePaginationCommon: React.FC<Props> = (prop) => {
 		setPage(value);
 	}
 
-	const getValidPage = (newPage: number) => Math.max(1, Math.min( maxPage, Math.max(1, newPage)));
+	const getValidPage = (newPage: number) => Math.max(1, Math.min(maxPage, Math.max(1, newPage)));
+
+	const onDisplayRows = ({ from, to, count }: { from: number; to: number; count: number }) => `Page: ${from}-${to} of ${count}`;
 
 	const numberBox = (label: string, value: number | undefined, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void) =>
-		<Box>
+		<Box sx={{ mt: 2 }}>
 			<TextField
+				fullWidth
 				label={label}
 				type="number"
 				value={value} // Displaying 1-indexed page number
 				onChange={onChange}
 				variant="outlined"
-				sx={{ mr: 2, lineHeight: '10px', height: '10px' }}
-				inputProps={{ style: { height: 8 }, min: 1, max: Math.ceil(total / perPage) * 10 }}
+				sx={{ mb: 2 }}
+				inputProps={{ style: { height: 8 }, min: 1, max: maxPage }}
 			/>
 		</Box>
 	return (
-		<FlexBox sx={{ mt: 2 }}>
-			<Box sx={{ mr: 2 }}>
+		<Box sx={{margin: 0, padding: 0}}>
 			<StyledTablePagination
 				component="div"
 				rowsPerPageOptions={[20, 40, 80]}
 				count={total} // Total number of packages
 				rowsPerPage={perPage}
-				labelRowsPerPage="Per page"
+				labelRowsPerPage="Per page:"
+				labelDisplayedRows={onDisplayRows}
 				page={page - 1}
 				onPageChange={muiChangePage}
 				onRowsPerPageChange={muiChangePerPage}
-			// showFirstButton // Show the first page button
-			// showLastButton // Show the last page button
+				showFirstButton
+				showLastButton
 			/>
-			</Box>
-			
-			{numberBox('Page', page, onChangePage)}
-			{numberBox('Start', startPage, onChangeStartPage)}
-			{numberBox('End', endPage, onChangeEndPage)}
-		</FlexBox>
+			{numberBox('Current Page', page, onChangePage)}
+			{numberBox('Start Page', startPage, onChangeStartPage)}
+			{numberBox('End Page', endPage, onChangeEndPage)}
+		</Box>
 	);
 };
 
-export default TablePaginationCommon;
+export default TablePaginationQuery;
