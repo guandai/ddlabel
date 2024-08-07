@@ -35,6 +35,7 @@ const StyledTablePagination = styled((props: TablePaginationProps) => (
 	'.MuiTablePagination-actions': {
 		margin: 'auto',
 		width: 'fit-content',
+		padding: '0px',
 	},
 }));
 

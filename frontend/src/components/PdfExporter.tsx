@@ -70,7 +70,7 @@ const PdfExporter: React.FC = () => {
         <Typography component="h1" variant="h4" align='center'>Export to PDF</Typography>
         <MessageAlert message={message} />
         <FlexBox component="main" maxWidth="lg" sx={{ mt: 3, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-          {getLabels(0.75)}
+          {getLabels(0.7)}
         </FlexBox>
       </StyledBox>
     </FlexBox>
