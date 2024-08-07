@@ -8,6 +8,8 @@ import MessageAlert from './MessageAlert';
 import PackageLabel from './PackageLabel';
 import { backDropStyle, FlexBox, StyledBox } from '../util/styled';
 import ExportPdfSideBar from './ExportPdfSideBar';
+import TablePaginationCommon from './TablePaginationCommon';
+import PackageApi from '../api/PackageApi';
 
 const PdfExporter: React.FC = () => {
   const [packages, setPackages] = useState<PackageModel[]>([]);
@@ -50,16 +52,13 @@ const PdfExporter: React.FC = () => {
     }, 100);
   };
 
-  const getLabels = (print = true) =>
+  const getLabels = (factor = 1) =>
     packages.map((pkg, idx) =>
       <div key={pkg.id}
-        style={print
-          ? { position: 'absolute', left: -9999 }
-          : {    }}
-        ref={(el) => print && (pagesRef.current[idx] = el)
+        ref={(el) => true && (pagesRef.current[idx] = el)
         }
       >
-        <PackageLabel pkg={pkg} factor={print ? 1 : 0.5} />
+        <PackageLabel pkg={pkg} factor={factor} />
       </div>
     );
 
@@ -70,10 +69,10 @@ const PdfExporter: React.FC = () => {
       <StyledBox sx={{ overflowY: 'clip' }}>
         <Typography component="h1" variant="h4" align='center'>Export to PDF</Typography>
         <MessageAlert message={message} />
+        <TablePaginationCommon getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} />
         <FlexBox component="main" maxWidth="lg" sx={{ mt: 3, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-          {getLabels(false)}
+          {getLabels(0.75)}
         </FlexBox>
-        {getLabels()}
       </StyledBox>
     </FlexBox>
   );
