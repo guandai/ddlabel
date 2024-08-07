@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, IconButton, Typography, TablePagination
+  Paper, IconButton, Typography
 } from '@mui/material';
 import { Visibility, Edit, Delete, PictureAsPdf, Label } from '@mui/icons-material';
 import { BeansAI, PackageModel } from '@ddlabel/shared';
@@ -13,38 +13,30 @@ import { useNavigate } from 'react-router-dom';
 import { MessageContent } from '../types';
 import MessageAlert from './MessageAlert';
 import PackageApi from '../api/PackageApi';
-import { GetPackagesReq } from '@ddlabel/shared';
 import BeansStatusLogApi from '../external/beansApi';
 import { toUpdateTime } from '../util/time';
 import PackageTableSideBar from './PackageTableSideBar';
 import { FlexBox, StyledBox } from '../util/styled';
+import TablePaginationCommon from './TablePaginationCommon';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageModel[]>([]);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [search, setSearch] = useState('');
-  const [totalPackages, setTotalPackages] = useState(0);
   const [message, setMessage] = useState<MessageContent>(null);
   const [statusLogs, setStatusLogs] = useState<BeansAI.ListItemReadableStatusLogs[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<PackageModel | null>(null);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-
   
   useEffect(() => {
     const loadPackageAndBeanLog = async () => {
-      const params: GetPackagesReq = { limit: rowsPerPage, offset: page * rowsPerPage, search };
-      const packagesRes = await PackageApi.getPackages(params);
-      setPackages(packagesRes.packages);
-      setTotalPackages(packagesRes.total);
-      const packagesLogs = await Promise.all(packagesRes.packages.map(
+      const packagesLogs = await Promise.all(packages.map(
         async pkg => (await BeansStatusLogApi.getStatusLog({ trackingNo: pkg.trackingNo })).listItemReadableStatusLogs
       ));
       setStatusLogs(packagesLogs);
     };
+    
     tryLoad(setMessage, loadPackageAndBeanLog);
-  }, [page, rowsPerPage, search]);
+  }, [packages]);
 
   const handleDelete = async (id: number) => {
     const deleteLoading = async () => {
@@ -69,15 +61,6 @@ const PackageTable: React.FC = () => {
     setSelectedPackage(null);
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
   const toStatus = (idx: number) => {
     return statusLogs?.[idx]?.[0]?.item.status || 'N/A';
   };
@@ -85,13 +68,14 @@ const PackageTable: React.FC = () => {
   const tsMillis = (idx: number) => {
     return statusLogs?.[idx]?.[0]?.tsMillis || 0;
   };
-
+  
   return (
     <FlexBox component="main" maxWidth="lg" >
-        <PackageTableSideBar search={search} setSearch={setSearch} setPage={setPage} />
+        <PackageTableSideBar setPackages={setPackages}  setMessage={setMessage} />
         <StyledBox>
             <Typography component="h1" variant="h4" align='center'>Packages</Typography>
             <MessageAlert message={message} />
+            <TablePaginationCommon getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} />
             <TableContainer component={Paper} sx={{ mt: 3 }}>
               <Table>
                 <TableHead>
@@ -121,17 +105,6 @@ const PackageTable: React.FC = () => {
                   ))}
                 </TableBody>
               </Table>
-              <TablePagination
-                rowsPerPageOptions={[5, 25, 50, 100]}
-                component="div"
-                count={totalPackages}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                showFirstButton
-                showLastButton
-              />
             </TableContainer>
           <PackageDialog open={open} handleClose={handleClose} selectedPackage={selectedPackage} />
         </StyledBox>

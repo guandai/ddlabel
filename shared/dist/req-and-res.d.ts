@@ -1,5 +1,5 @@
 import { Optional } from 'sequelize';
-import { AddressAttributes, PackageModel, PostalZoneAttributes, TransactionModel, UserAttributes, UserModel } from "./models";
+import { AddressAttributes, AddressModel, PackageModel, PostalZoneAttributes, TransactionModel, UserAttributes, UserModel } from "./models";
 import { SimpleRes } from './types';
 import { BeansAI } from './beans';
 export type RegisterUserReq = Pick<UserAttributes, 'name' | 'email' | 'password' | 'role'> & {
@@ -36,19 +36,36 @@ export type UpdateUserReq = Pick<UserAttributes, 'name' | 'email' | 'role'> & {
 export type UpdateUserRes = {
     success: boolean;
 };
+export type Model = UserModel | PackageModel | TransactionModel | AddressModel;
+export type Models = 'user' | 'package' | 'transaction' | 'address';
+export declare enum ModelEnum {
+    user = "user",
+    package = "package",
+    transaction = "transaction",
+    address = "address"
+}
 export type WeightUnit = 'lbs' | 'oz';
 export type VolumeUnit = 'inch' | 'mm';
-export type GetPackageRes = {
-    package: PackageModel;
-};
-export type GetPackagesReq = {
+export type GetRecordsRes = GetPackagesRes | GetTransactionsRes;
+export type PaginationRecordReq = {
     limit: number;
     offset: number;
-    search: string;
 };
+export type SearchRecordReq = {
+    search?: string;
+};
+export type StartToRecordReq = {
+    startPage?: number;
+    endPage?: number;
+};
+export type GetRecordsReq = PaginationRecordReq | SearchRecordReq | StartToRecordReq;
+export type GetPackagesReq = GetRecordsReq;
 export type GetPackagesRes = {
     packages: PackageModel[];
     total: number;
+};
+export type GetPackageRes = {
+    package: PackageModel;
 };
 export type CreatePackageReq = Optional<PackageModel, 'length' | 'width' | 'height' | 'trackingNo'>;
 export type CreatePackageRes = {
@@ -61,14 +78,10 @@ export type UpdatePackageRes = {
 };
 export type ImportPackageReq = FormData;
 export type ImportPackageRes = SimpleRes;
-export type GetTransactionsReq = {
-    limit: number;
-    offset: number;
-    search: string;
-};
+export type GetTransactionsReq = GetRecordsReq;
 export type GetTransactionsRes = {
-    total: number;
     transactions: TransactionModel[];
+    total: number;
 };
 export type GetTransactionRes = {
     transaction: TransactionModel;
@@ -85,15 +98,7 @@ export type GetRatesReq = {
 export type GetRatesRes = {
     rates: number[];
 };
-export type FullRateReq = {
-    weight: number;
-    weightUnit: WeightUnit;
-    length: number;
-    width: number;
-    height: number;
-    volumeUnit: VolumeUnit;
-    zone: number;
-};
+export type FullRateReq = GetRatesReq;
 export type FullRateRes = {
     totalCost: number;
 };

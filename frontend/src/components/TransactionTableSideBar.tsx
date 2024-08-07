@@ -1,19 +1,20 @@
 import React from 'react';
 
 import TableSideBar from './TableSideBar';
+import TransactionApi from '../api/TransectionApi';
 
 type Props = {
-	search: string;
-	setSearch: (search: string) => void;
-  	setPage: (page: number) => void;
+	setTransactions: (transactions: any) => void;
+	setMessage: React.Dispatch<React.SetStateAction<any>>;
 };
 
-const TransactionTableSideBar: React.FC<Props> = ({search, setSearch, setPage}) => {
-  return (
-	<TableSideBar search={search} setSearch={setSearch} setPage={setPage} >
-		<></>
-	</TableSideBar>
-  );
+const TransactionTableSideBar: React.FC<Props> = (prop) => {
+	const { setTransactions, setMessage } = prop;
+	return (
+		<TableSideBar getRecords={TransactionApi.getTransactions} setRecords={setTransactions} setMessage={setMessage} >
+			<></>
+		</TableSideBar>
+	);
 };
 
 export default TransactionTableSideBar;
