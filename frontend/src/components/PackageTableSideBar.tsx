@@ -1,13 +1,11 @@
 import React from 'react';
-import { Button, ListItem } from '@mui/material';
+import { Button, List, ListItem } from '@mui/material';
 
 import { useNavigate } from 'react-router-dom';
 import PackageUploadMapping from './PackageUploadMapping';
 import { AddCircle } from '@mui/icons-material';
-import TableSideBar from './TableSideBar';
-import PackageApi from '../api/PackageApi';
 import { MessageContent } from '../types';
-import TablePaginationQuery from './TablePaginationQuery';
+import { StyledSideBarBox } from '../util/styled';
 
 type Props = {
 	setPackages: (transactions: any) => void;
@@ -15,32 +13,26 @@ type Props = {
 };
 
 const PackageTableSideBar: React.FC<Props> = (prop) => {
-	const { setPackages, setMessage } = prop;
 	const navigate = useNavigate();
 
 	return (
-		<TableSideBar
-			getRecords={PackageApi.getPackages}
-			setRecords={setPackages}
-			setMessage={setMessage}
-		>
-			<ListItem>
-				<Button
-					variant="contained"
-					onClick={() => navigate('/packages/create')}
-					startIcon={<AddCircle />}
-					fullWidth
-				>
-					Add
-				</Button >
-			</ListItem >
-			<ListItem>
-				<PackageUploadMapping />
-			</ListItem>
-			<ListItem>
-				<TablePaginationQuery getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} />
-			</ListItem>
-		</TableSideBar>
+		<StyledSideBarBox >
+			<List sx={{ minHeight: '100vh' }}>
+				<ListItem>
+					<Button
+						variant="contained"
+						onClick={() => navigate('/packages/create')}
+						startIcon={<AddCircle />}
+						fullWidth
+					>
+						Add
+					</Button >
+				</ListItem >
+				<ListItem>
+					<PackageUploadMapping />
+				</ListItem>
+			</List>
+		</StyledSideBarBox>
 	);
 };
 

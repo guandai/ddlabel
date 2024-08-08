@@ -65,10 +65,11 @@ const PdfExporter: React.FC = () => {
   return (
     <FlexBox component="main" maxWidth="lg">
       <Backdrop open={loading} sx={backDropStyle} ><CircularProgress /></Backdrop>
-      <ExportPdfSideBar capturePages={capturePages} setPackages={setPackages} setMessage={setMessage} />
+      <ExportPdfSideBar capturePages={capturePages} />
       <StyledBox sx={{ overflowY: 'clip' }}>
         <Typography component="h1" variant="h4" align='center'>Export to PDF</Typography>
         <MessageAlert message={message} />
+        <TablePaginationQuery getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} />
         <FlexBox component="main" maxWidth="lg" sx={{ mt: 3, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
           {getLabels(0.7)}
         </FlexBox>

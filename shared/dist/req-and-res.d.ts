@@ -47,18 +47,19 @@ export declare enum ModelEnum {
 export type WeightUnit = 'lbs' | 'oz';
 export type VolumeUnit = 'inch' | 'mm';
 export type GetRecordsRes = GetPackagesRes | GetTransactionsRes;
+export type GetRecordRes = GetPackageRes | GetTransactionRes;
 export type PaginationRecordReq = {
     limit: number;
     offset: number;
 };
 export type SearchRecordReq = {
-    search?: string;
+    search: string;
 };
-export type StartToRecordReq = {
-    startPage?: number;
-    endPage?: number;
+export type DateRecordReq = {
+    startDate: string;
+    endDate: string;
 };
-export type GetRecordsReq = PaginationRecordReq | SearchRecordReq | StartToRecordReq;
+export type GetRecordsReq = PaginationRecordReq & (SearchRecordReq | DateRecordReq | {});
 export type GetPackagesReq = GetRecordsReq;
 export type GetPackagesRes = {
     packages: PackageModel[];
@@ -127,3 +128,7 @@ export type GetStatusLogReq = {
 export type GetStatusLogRes = {
     listItemReadableStatusLogs: BeansAI.ListItemReadableStatusLogs;
 };
+export declare const isGetPackageRes: (res: GetRecordRes) => res is GetPackageRes;
+export declare const isGetPackagesRes: (res: GetRecordsRes) => res is GetPackagesRes;
+export declare const isGetTransactionsRes: (res: GetRecordsRes) => res is GetTransactionsRes;
+export declare const isGetTransactionRes: (res: GetRecordRes) => res is GetTransactionRes;
