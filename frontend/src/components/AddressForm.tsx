@@ -80,11 +80,11 @@ const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onCh
       <Typography variant="h6" mb='1em'>{title}</Typography>
       <Grid container spacing={2}>
         {quickField({ name: 'name', autoComplete: 'name' })}
+        {quickField({ name: 'zip', autoComplete: 'postal-code', pattern: '[0-9]{5}', value: addressData.zip })}
         {quickField({ name: 'address1', autoComplete: 'address-line1', value: addressData.address1 })}
         {quickField({ name: 'address2', autoComplete: 'address-line2', value: addressData.address2, required: false })}
-        {quickField({ name: 'zip', autoComplete: 'postal-code', pattern: '[0-9]{5}', value: addressData.zip })}
-        {quickField({ name: 'state', autoComplete: 'address-level1', readOnly: true, value: state })}
         {quickField({ name: 'city', autoComplete: 'address-level2', readOnly: true, value: city })}
+        {quickField({ name: 'state', autoComplete: 'address-level1', readOnly: true, value: state })}
         {quickField({ name: 'phone', autoComplete: 'tel', required: false, pattern: '[+]?[0-9]{5,}' })}
         {quickField({ name: 'email', autoComplete: 'email', required: false, pattern: '^[\\w\\-\\.]+@([\\w\\-]+\\.)+[\\w\\-]{2,4}$' })}
       </Grid>

@@ -53,6 +53,7 @@ export type WeightUnit = 'lbs' | 'oz';
 export type VolumeUnit = 'inch' | 'mm';
 
 export type GetRecordsRes = GetPackagesRes | GetTransactionsRes;
+export type GetRecordRes = GetPackageRes | GetTransactionRes;
 
 export type PaginationRecordReq = {
 	limit: number;
@@ -63,12 +64,12 @@ export type SearchRecordReq = {
 	search?: string;
 };
 
-export type StartToRecordReq = {
-	startPage?: number;
-    endPage?: number;
+export type DateRecordReq = {
+	startDate?: string;
+    endDate?: string;
 };
 
-export type GetRecordsReq = PaginationRecordReq | SearchRecordReq | StartToRecordReq;
+export type GetRecordsReq = PaginationRecordReq | SearchRecordReq | DateRecordReq;
 
 export type GetPackagesReq = GetRecordsReq;
 export type GetPackagesRes = {
@@ -145,3 +146,18 @@ export type GetZoneRes = { zone: string }
 // Beans
 export type GetStatusLogReq = { trackingNo: string };
 export type GetStatusLogRes = { listItemReadableStatusLogs: BeansAI.ListItemReadableStatusLogs };
+
+
+export const isGetPackageRes = (res: GetRecordRes): res is GetPackageRes => {
+	return (res as GetPackageRes).package !== undefined;
+};
+export const isGetPackagesRes = (res: GetRecordsRes): res is GetPackagesRes => {
+	return (res as GetPackagesRes).packages !== undefined;
+};
+
+export const isGetTransactionsRes = (res: GetRecordsRes): res is GetTransactionsRes => {
+	return (res as GetTransactionsRes).transactions !== undefined;
+};
+export const isGetTransactionRes = (res: GetRecordRes): res is GetTransactionRes => {
+	return (res as GetTransactionRes).transaction !== undefined;
+};

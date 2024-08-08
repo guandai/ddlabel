@@ -18,6 +18,7 @@ const TransactionTable: React.FC = () => {
       <StyledBox>
         <Typography component="h1" variant="h4">Transactions</Typography>
         <MessageAlert message={message} />
+        <TablePaginationQuery getRecords={TransactionApi.getTransactions} setRecords={setTransactions} setMessage={setMessage} />
         <TableContainer component={Paper} sx={{ mt: 3 }}>
           <Table>
             <TableHead>
