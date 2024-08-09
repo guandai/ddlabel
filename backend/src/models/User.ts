@@ -1,5 +1,5 @@
 // backend/src/models/User.ts
-import { Model, DataTypes, Optional } from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../config/database';
 import { Address } from './Address';
 import { Transaction } from './Transaction';

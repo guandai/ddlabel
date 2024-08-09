@@ -28,7 +28,6 @@ class Address extends Model<AddressAttributes, AddressCreationAttributes> implem
   public fromPackage!: Package;
   public toPackage!: Package;
 
-
   public static async createWithInfo(attr: AddressCreationAttributes): Promise<AddressCreationAttributes> {
     attr = await fixCityState(attr);
     attr = await fixPort(attr);
@@ -128,7 +127,7 @@ Address.init(
   {
     sequelize,
     tableName: 'addresses',
-    timestamps: false, // Disable timestamps if not needed
+    timestamps: true,
   }
 );
 

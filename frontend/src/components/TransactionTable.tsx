@@ -6,7 +6,7 @@ import TransactionApi from '../api/TransectionApi';
 import { TransactionModel } from '@ddlabel/shared';
 import { FlexBox, StyledBox } from '../util/styled';
 import TransactionTableSideBar from './TransactionTableSideBar';
-import TablePaginationQuery from './TablePaginationQuery';
+import RecordsQuery from './RecordsQuery';
 
 const TransactionTable: React.FC = () => {
   const [transactions, setTransactions] = useState<TransactionModel[]>([]);
@@ -18,7 +18,7 @@ const TransactionTable: React.FC = () => {
       <StyledBox>
         <Typography component="h1" variant="h4">Transactions</Typography>
         <MessageAlert message={message} />
-        <TablePaginationQuery getRecords={TransactionApi.getTransactions} setRecords={setTransactions} setMessage={setMessage} />
+        <RecordsQuery getRecords={TransactionApi.getTransactions} setRecords={setTransactions} setMessage={setMessage} />
         <TableContainer component={Paper} sx={{ mt: 3 }}>
           <Table>
             <TableHead>

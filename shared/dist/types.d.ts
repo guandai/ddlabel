@@ -6,6 +6,7 @@ type CsvRecordRequired = {
     toName: string;
     toAddress1: string;
 };
+export type BeansStatus = 'FINISHED' | 'FAILED' | 'MISLOAD' | 'DELETED' | 'NEW' | 'IN_PROCESS' | 'NOLOCATION' | 'N/A';
 type CsvRecordOptional = {
     referenceNo?: string;
     fromAddressZip?: string;

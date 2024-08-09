@@ -8,7 +8,7 @@ import MessageAlert from './MessageAlert';
 import PackageLabel from './PackageLabel';
 import { backDropStyle, FlexBox, StyledBox } from '../util/styled';
 import ExportPdfSideBar from './ExportPdfSideBar';
-import TablePaginationQuery from './TablePaginationQuery';
+import RecordsQuery from './RecordsQuery';
 import PackageApi from '../api/PackageApi';
 
 const PdfExporter: React.FC = () => {
@@ -69,7 +69,7 @@ const PdfExporter: React.FC = () => {
       <StyledBox sx={{ overflowY: 'clip' }}>
         <Typography component="h1" variant="h4" align='center'>Export to PDF</Typography>
         <MessageAlert message={message} />
-        <TablePaginationQuery getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} />
+        <RecordsQuery getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} />
         <FlexBox component="main" maxWidth="lg" sx={{ mt: 3, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
           {getLabels(0.7)}
         </FlexBox>
