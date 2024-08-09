@@ -5,10 +5,13 @@ import { Address } from '../models/Address';
 import { Transaction } from '../models/Transaction';
 import { User } from '../models/User';
 import { AuthRequest } from '../types';
-import { Op } from 'sequelize';
+import { Op, WhereOptions } from 'sequelize';
 import logger from '../config/logger';
 import { AddressEnum, CreatePackageReq, CreatePackageRes, GetPackageRes, GetPackagesRes, PackageSource, ResponseAdv, SimpleRes, UpdatePackageReq } from '@ddlabel/shared';
 import { generateTrackingNo } from '../utils/generateTrackingNo';
+import { UpdatedAt } from 'sequelize-typescript';
+import { start } from 'repl';
+import { isDateValid } from '../utils/errors';
 
 export const createPackage = async (req: AuthRequest, res: ResponseAdv<CreatePackageRes>) => {
   if (!req.user) {
@@ -29,7 +32,6 @@ export const createPackage = async (req: AuthRequest, res: ResponseAdv<CreatePac
       source: PackageSource.manual,
     });
 
-
     toAddress.toPackageId = fromAddress.fromPackageId = pkg.id;
     toAddress.fromPackageId = fromAddress.toPackageId = undefined;
     toAddress.userId = fromAddress.userId = userId;
@@ -37,7 +39,7 @@ export const createPackage = async (req: AuthRequest, res: ResponseAdv<CreatePac
     toAddress.addressType = AddressEnum.toPackage;
     fromAddress.addressType = AddressEnum.fromPackage;
 
-    const a = await Address.createWithInfo(fromAddress);
+    await Address.createWithInfo(fromAddress);
     await Address.createWithInfo(toAddress);
 
     return res.status(201).json({ success: true, packageId: pkg.id });
@@ -47,14 +49,22 @@ export const createPackage = async (req: AuthRequest, res: ResponseAdv<CreatePac
   }
 };
 
+
 export const getPackages = async (req: AuthRequest, res: ResponseAdv<GetPackagesRes>) => {
   const limit = parseInt(req.query.limit as string) || 100; // Default limit to 20 if not provided
   const offset = parseInt(req.query.offset as string) || 0; // 
-  const userId = req.user.id;
-  const search = req.query.search;
+  const startDate = req.query.startDate as string;
+  const endDate = req.query.endDate as string;
+  const userId = req.user.id as string;
+  const search = req.query.search as string;
+
   try {
+    const hasSearch = search && search.length >= 3;
+    const hasDate = isDateValid(startDate) && isDateValid(endDate);
     const total = (await Package.count({ where: { userId } })) || 0;
-    const whereCondition = search ? { userId, trackingNo: { [Op.like]: `%${search}%` } } : { userId };
+    let where = { userId } as WhereOptions;
+    where = hasSearch ? { ...where, trackingNo: {[Op.like]: `%${search}%`} } : where;
+    where = hasDate ? { ...where, createdAt: { [Op.between]: [startDate, endDate] } } : where;
 
     const packages = await Package.findAll({
       include: [
@@ -63,10 +73,11 @@ export const getPackages = async (req: AuthRequest, res: ResponseAdv<GetPackages
         { model: User, as: 'user' },
         { model: Transaction, as: 'transaction' },
       ],
-      where: whereCondition,
+      where,
       limit,
       offset,
     });
+
     return res.json({ total, packages });
   } catch (error: any) {
     logger.error(`Error in getPackages: ${error}`);

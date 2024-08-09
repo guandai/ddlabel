@@ -6,8 +6,7 @@ import jwt from 'jsonwebtoken';
 import { Address } from '../models/Address';
 import { AuthRequest } from '../types';
 import logger from '../config/logger';
-import { AddressAttributes, GetCurrentUserRes, GetUsersRes, LoginUserRes, RegisterUserReq, RegisterUserRes, ResponseAdv, UpdateCurrentUserRes, UpdateUserReq, UpdateUserRes, UserAttributes } from '@ddlabel/shared';
-import { Optional } from 'sequelize';
+import { GetCurrentUserRes, GetUsersRes, LoginUserRes, RegisterUserReq, RegisterUserRes, ResponseAdv, UpdateCurrentUserRes, UpdateUserReq, UpdateUserRes } from '@ddlabel/shared';
 import { aggregateError } from '../utils/errors';
 
 export const registerUser = async (req: Request, res: ResponseAdv<RegisterUserRes>) => {

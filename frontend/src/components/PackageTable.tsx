@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Table, TableBody, TableContainer, TableHead, TableRow,
   Paper, IconButton, Typography
 } from '@mui/material';
 import { Visibility, Edit, Delete, PictureAsPdf, Label } from '@mui/icons-material';
-import { BeansAI, PackageModel } from '@ddlabel/shared';
+import { BeansAI, BeansStatus, PackageModel } from '@ddlabel/shared';
 import { tryLoad } from '../util/errors';
 
 import { generatePDF } from './generatePDF';
@@ -14,10 +14,10 @@ import { MessageContent } from '../types';
 import MessageAlert from './MessageAlert';
 import PackageApi from '../api/PackageApi';
 import BeansStatusLogApi from '../external/beansApi';
-import { toUpdateTime } from '../util/time';
+import { convertToTimeString, toUpdateTime } from '../util/time';
 import PackageTableSideBar from './PackageTableSideBar';
-import { FlexBox, StyledBox, StyledTabelCell } from '../util/styled';
-import TablePaginationQuery from './TablePaginationQuery';
+import { FlexBox, StatusLabel, StyledBox, StyledTabelCell } from '../util/styled';
+import RecordsQuery from './RecordsQuery';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageModel[]>([]);
@@ -26,7 +26,7 @@ const PackageTable: React.FC = () => {
   const [selectedPackage, setSelectedPackage] = useState<PackageModel | null>(null);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     const loadPackageAndBeanLog = async () => {
       const packagesLogs = await Promise.all(packages.map(
@@ -62,7 +62,7 @@ const PackageTable: React.FC = () => {
   };
 
   const toStatus = (idx: number) => {
-    return statusLogs?.[idx]?.[0]?.item.status || 'N/A';
+    return (statusLogs?.[idx]?.[0]?.item.status || 'N/A' ) as BeansStatus;
   };
 
   const tsMillis = (idx: number) => {
@@ -75,7 +75,7 @@ const PackageTable: React.FC = () => {
         <StyledBox>
             <Typography component="h1" variant="h4" align='center'>Packages</Typography>
             <MessageAlert message={message} />
-            <TablePaginationQuery getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} />
+            <RecordsQuery getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} />
             <TableContainer component={Paper} sx={{ mt: 3 }}>
               <Table>
                 <TableHead>
@@ -91,8 +91,10 @@ const PackageTable: React.FC = () => {
                   {packages.map((pkg, idx) => (
                     <TableRow key={pkg.id}>
                       <StyledTabelCell sx={{margin: '0px'}} >{pkg.toAddress.address1}</StyledTabelCell>
-                      <StyledTabelCell>{toUpdateTime(tsMillis(idx))}</StyledTabelCell>
-                      <StyledTabelCell>{toStatus(idx)}</StyledTabelCell>
+                      <StyledTabelCell>{toUpdateTime(tsMillis(idx)) || convertToTimeString((pkg.toAddress as any).createdAt) }</StyledTabelCell>
+                      <StyledTabelCell>
+                          <StatusLabel status={toStatus(idx)}>{toStatus(idx)}</StatusLabel>
+                      </StyledTabelCell>
                       <StyledTabelCell>{pkg.trackingNo}</StyledTabelCell>
                       <StyledTabelCell style={{ width: '200px', whiteSpace: 'nowrap' }}>
                         <IconButton onClick={() => handleViewDetails(pkg)}><Visibility /></IconButton>

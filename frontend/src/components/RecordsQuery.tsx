@@ -6,7 +6,6 @@ import { makeStyles } from '@mui/styles';
 import { GetRecordsReq, GetRecordsRes, isGetPackagesRes, isGetTransactionsRes } from '@ddlabel/shared';
 import { MessageContent } from '../types';
 
-
 const useStyles = makeStyles({
     root: {
         borderRadius: '4px',
@@ -21,7 +20,7 @@ const useStyles = makeStyles({
 		},
     },
 	displayedRows: {
-		display: 'none',
+		display: 'inline',
 	},
 	input: {
 		borderRadius: '4px',
@@ -41,7 +40,7 @@ type Props = {
 	setMessage: React.Dispatch<React.SetStateAction<MessageContent>>;
 };
 
-const TablePaginationQuery: React.FC<Props> = (prop) => {
+const RecordsQuery: React.FC<Props> = (prop) => {
 	const { getRecords, setRecords, setMessage } = prop;
 	const [page, setPage] = useState(1);
 	const [startDate, setStartDate] = useState<string>('0000-00-00');
@@ -50,7 +49,6 @@ const TablePaginationQuery: React.FC<Props> = (prop) => {
 	const [total, setTotal] = useState(0);
 	const [maxPage, setMaxPage] = useState(1);
 	const [search, setSearch] = useState('');
-
 	const classes = useStyles();
 
 	useEffect(() => {
@@ -73,7 +71,7 @@ const TablePaginationQuery: React.FC<Props> = (prop) => {
 			setTotal(recordsRes.total);
 		}
 		tryLoad(setMessage, getFn);
-	}, [search, startDate, endDate, page, perPage, getRecords, setRecords, setMessage]);
+	}, [search, startDate, total, endDate, page, perPage, getRecords, setRecords, setMessage]);
 
 	const muiChangePage = (_event: unknown, newPage: number) => {
 		setPage(newPage + 1);
@@ -95,16 +93,19 @@ const TablePaginationQuery: React.FC<Props> = (prop) => {
 		const newDate = event.target.value;
 		setStartDate(newDate);
 		if (!endDate || new Date(endDate) < new Date(newDate)) setEndDate(newDate);
+		setPage(1);
 	}
 
 	const onChangeEndDate = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const newDate = (event.target.value);
 		setEndDate(newDate);
 		if (!startDate || new Date(startDate) > new Date(newDate)) setStartDate(newDate);
+		setPage(1);
 	}
 
 	const onChangeSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setSearch(event.target.value);
+		setPage(1);
 	};
 
 	const getValidPage = (newPage: number) => Math.max(1, Math.min(maxPage, Math.max(1, newPage)));
@@ -149,6 +150,7 @@ const TablePaginationQuery: React.FC<Props> = (prop) => {
 				value={search}
 				onChange={onChangeSearch}
 			/>
+			{total}
 			<TablePagination
 				component={'span'}
 				rowsPerPageOptions={[2, 20, 40, 80]}
@@ -174,4 +176,4 @@ const TablePaginationQuery: React.FC<Props> = (prop) => {
 	);
 };
 
-export default TablePaginationQuery;
+export default RecordsQuery;

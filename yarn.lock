@@ -1869,6 +1869,7 @@ __metadata:
     dotenv: ^16.4.5
     express: ^4.19.2
     jsonwebtoken: ^9.0.2
+    moment: ^2.30.1
     multer: ^1.4.5-lts.1
     mysql: ^2.18.1
     mysql2: ^3.10.1
@@ -11247,7 +11248,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment@npm:^2.29.4":
+"moment@npm:^2.29.4, moment@npm:^2.30.1":
   version: 2.30.1
   resolution: "moment@npm:2.30.1"
   checksum: 859236bab1e88c3e5802afcf797fc801acdbd0ee509d34ea3df6eea21eb6bcc2abd4ae4e4e64aa7c986aa6cba563c6e62806218e6412a765010712e5fa121ba6
