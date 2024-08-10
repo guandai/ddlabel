@@ -66,7 +66,7 @@ export const getPackages = async (req: AuthRequest, res: ResponseAdv<GetPackages
       offset,
     });
 
-    const total = (await Package.count(relationQuery)) || 0;
+    const total = (await Package.count(relationQuery)) ;
     return res.json({ total, packages });
   } catch (error: any) {
     logger.error(`Error in getPackages: ${error}`);
@@ -109,7 +109,6 @@ export const deletePackage = async (req: AuthRequest, res: ResponseAdv<SimpleRes
 
 export const getPackage = async (req: AuthRequest, res: ResponseAdv<GetPackageRes>) => {
   const { id } = req.params;
-
   try {
     const pkg: Package | null = await Package.findOne({
       where: { id },

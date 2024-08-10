@@ -12,7 +12,6 @@ import { parse } from 'json2csv'; // Import parse from json2csv
 
 export const getCsvPackages = async (req: AuthRequest, res: ResponseAdv<GetPackagesCsvRes>) => {
   const relationQuery = getRelationQuery(req);
-
   try {
     const packages = await Package.findAll({
       ...relationQuery,
@@ -31,11 +30,11 @@ export const getCsvPackages = async (req: AuthRequest, res: ResponseAdv<GetPacka
         {
           model: Transaction,
           as: 'transaction',
-          attributes: ['transactionId', 'amount', 'currency', 'status'],
+          attributes: ['id', 'event', 'cost'],
         },
       ],
     });
-
+    
     // Convert the data to JSON
     const packagesData = packages.map(pkg => pkg.toJSON());
 
@@ -50,16 +49,12 @@ export const getCsvPackages = async (req: AuthRequest, res: ResponseAdv<GetPacka
     // Convert JSON to CSV
     const csv = parse(packagesData, { fields });
 
-    // Define a file path for storing the CSV
-    const filePath = path.join(__dirname, '../tmp', `packages_${uuidv4()}.csv`);
+    // Set the headers to indicate a file download
+    res.header('Content-Type', 'text/csv');
+    res.header('Content-Disposition', `attachment; filename="packages_${uuidv4()}.csv"`);
 
-    // Write the CSV to a file
-    fs.writeFileSync(filePath, csv);
-
-    // Return the download URL
-    const downloadUrl = `${req.protocol}://${req.get('host')}/download/${path.basename(filePath)}`;
-    return res.json({ url: downloadUrl, total: packages.length });
-
+    // Send the CSV content as the response
+    return res.send(csv);
   } catch (error: any) {
     logger.error(`Error in getPackages: ${error}`);
     return res.status(400).json({ message: error.message });

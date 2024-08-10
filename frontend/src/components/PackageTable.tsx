@@ -18,7 +18,7 @@ import { convertToTimeString } from '../util/time';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import PackageTableSideBar from './PackageTableSideBar';
 import { FlexBox, StatusLabel, StyledBox, StyledTabelCell } from '../util/styled';
-import RecordsQuery from './RecordsQuery';
+import RecordsQuery, { FilterConfig } from './RecordsQuery';
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageModel[]>([]);
@@ -26,6 +26,7 @@ const PackageTable: React.FC = () => {
   const [statusLogs, setStatusLogs] = useState<BeansAI.ListItemReadableStatusLogs[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<PackageModel | null>(null);
   const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState<FilterConfig>({ startDate: null, endDate: null, tracking: '', address: '' });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -72,11 +73,11 @@ const PackageTable: React.FC = () => {
   
   return (
     <FlexBox component="main" maxWidth="lg" >
-        <PackageTableSideBar setPackages={setPackages}  setMessage={setMessage} />
+        <PackageTableSideBar setMessage={setMessage} filter={filter} />
         <StyledBox>
             <Typography component="h1" variant="h4" align='center'>Packages</Typography>
             <MessageAlert message={message} />
-            <RecordsQuery getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} perPageList={[5,10,20]}/>
+            <RecordsQuery getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} perPageList={[5,10,20]} setFilter={setFilter} />
             <TableContainer component={Paper} sx={{ mt: 3 }}>
               <Table>
                 <TableHead>
