@@ -62,6 +62,10 @@ export type DateRecordReq = {
 };
 export type GetRecordsReq = PaginationRecordReq & SearchRecordReq & DateRecordReq;
 export type GetPackagesReq = GetRecordsReq;
+export type GetPackagesCsvRes = {
+    url: string;
+    total: number;
+};
 export type GetPackagesRes = {
     packages: PackageModel[];
     total: number;
@@ -103,9 +107,6 @@ export type GetRatesRes = {
 export type FullRateReq = GetRatesReq;
 export type FullRateRes = {
     totalCost: number;
-};
-export type AuthRequest = import("express-serve-static-core").Request & {
-    user: UserAttributes;
 };
 export type GetPostalZoneReq = {
     zip: string;

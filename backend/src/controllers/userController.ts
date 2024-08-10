@@ -4,9 +4,19 @@ import { User } from '../models/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Address } from '../models/Address';
-import { AuthRequest } from '../types';
 import logger from '../config/logger';
-import { GetCurrentUserRes, GetUsersRes, LoginUserRes, RegisterUserReq, RegisterUserRes, ResponseAdv, UpdateCurrentUserRes, UpdateUserReq, UpdateUserRes } from '@ddlabel/shared';
+import { AuthRequest } from '../types';
+import {
+  GetCurrentUserRes,
+  GetUsersRes,
+  LoginUserRes,
+  RegisterUserReq,
+  RegisterUserRes,
+  ResponseAdv,
+  UpdateCurrentUserRes,
+  UpdateUserReq,
+  UpdateUserRes
+} from '@ddlabel/shared';
 import { aggregateError } from '../utils/errors';
 
 export const registerUser = async (req: Request, res: ResponseAdv<RegisterUserRes>) => {
@@ -48,10 +58,9 @@ export const updateCurrentUser = async (req: AuthRequest, res: ResponseAdv<Updat
     return res.status(404).json({ message: 'User not found' });
   }
 
+  const user = req.body as UpdateUserReq & { id: number };
+  user.id = req.user.id;
   try {
-    const user = req.body as UpdateUserReq & { id: number };
-    user.id = req.user.id;
-
     if (user.password) {
       user.password = await bcrypt.hash(user.password, 10);
     } else {

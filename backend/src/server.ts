@@ -1,5 +1,5 @@
 // backend/src/server.ts
-import express from 'express';
+import express, { NextFunction, RequestHandler, Request, Response } from 'express';
 import cors from 'cors';
 import http from 'http';
 import { Server } from 'socket.io';
@@ -12,14 +12,16 @@ import postalZoneRoutes from './routes/postalZoneRoutes';
 import compression from 'compression';
 
 import dotenv from 'dotenv';
-import { Request } from 'express';
 import logger from './config/logger';
 import zipCodeRoutes from './routes/zipCodeRoutes';
+import { UserAttributes } from '@ddlabel/shared';
+import { authenticate } from './middleware/auth';
 
 declare global {
   namespace Express {
     interface Request {
       io: import('socket.io').Server;
+      user?: UserAttributes;
     }
   }
 }
@@ -41,6 +43,10 @@ const io = new Server(server, {
   },
 });
 
+const socketIoMiddleware = (req: Request, _res: Response, next: NextFunction ) => {
+  req.io = io;
+  next();
+}
 
 // Middleware
 app.use(express.json());
@@ -53,10 +59,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/shipping_rates', shippingRateRoutes);
 app.use('/api/postal_zones', postalZoneRoutes);
-app.use('/api/packages', (req: Request, _res, next) => {
-  req.io = io;
-  next();
-}, packageRoutes);
+app.use('/api/packages', authenticate, socketIoMiddleware, packageRoutes);
 
 // Connect to the database and start the server
 connectDB().then(() => {
