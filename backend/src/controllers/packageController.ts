@@ -49,50 +49,77 @@ export const createPackage = async (req: AuthRequest, res: ResponseAdv<CreatePac
   }
 };
 
+const getPackagesWhere = (req: AuthRequest): WhereOptions => {
+  const userId = req.user.id;
+
+  const startDate = req.query.startDate as string;
+  const endDate = req.query.endDate as string;
+  const tracking = req.query.tracking as string;
+
+  const hasTracking = tracking && tracking.length >= 2;
+  const hasDate = isDateValid(startDate) && isDateValid(endDate);
+
+  const whereTracking = hasTracking ? { trackingNo: { [Op.like]: `%${tracking}%` } } : {};
+  const whereDate = hasDate ? { createdAt: { [Op.between]: [startDate, endDate] } } : {};
+  return { ...whereTracking, ...whereDate, userId };
+};
+
+const getAddressesWhere = (req: AuthRequest, addressType: AddressEnum): WhereOptions => {
+  const address = req.query.address as string;
+  const hasAddress = address && address.length >= 2;
+
+  const whereAddress = hasAddress ? {[Op.or]: [
+    { address1: { [Op.like]: `%${address}%` } },
+    { address2: { [Op.like]: `%${address}%` } },
+  ]} : {};
+
+  return { ...whereAddress, addressType };
+};
+
+const getInclude = (whereFrom: WhereOptions, whereTo: WhereOptions ) => [
+    { model: Address, as: 'fromAddress', where: whereFrom },
+    { model: Address, as: 'toAddress', where: whereTo },
+    { model: User, as: 'user' },
+    { model: Transaction, as: 'transaction' },
+]; 
+
+const getRelationQuery = (req: AuthRequest) => {
+  const wherePackage = getPackagesWhere(req);
+  const whereFrom = getAddressesWhere(req, AddressEnum.fromPackage);
+  const whereTo = getAddressesWhere(req, AddressEnum.toPackage);
+  const include = getInclude(whereFrom, whereTo);
+  return { wherePackage, include };
+};
+
+export const getCsvPackages = async (req: AuthRequest, res: ResponseAdv<GetPackagesRes>) => {
+  const relationQuery = getRelationQuery(req);
+
+  try {
+    const packages = await Package.findAll({
+      ...relationQuery,
+    });
+
+
+    return ...
+  } catch (error: any) {
+    logger.error(`Error in getPackages: ${error}`);
+    return res.status(400).json({ message: error.message });
+  }
+};
 
 export const getPackages = async (req: AuthRequest, res: ResponseAdv<GetPackagesRes>) => {
   const limit = parseInt(req.query.limit as string) || 100; // Default limit to 20 if not provided
   const offset = parseInt(req.query.offset as string) || 0; // 
-  const startDate = req.query.startDate as string;
-  const endDate = req.query.endDate as string;
-  const userId = req.user.id as string;
-  const tracking = req.query.tracking as string;
-  const address = req.query.address as string;
+  const relationQuery = getRelationQuery(req);
 
   try {
-    const hasTracking = tracking && tracking.length >= 2;
-    const hasAddress = address && address.length >= 2;
-    const hasDate = isDateValid(startDate) && isDateValid(endDate);
-
-    const whereTracking = hasTracking ? { trackingNo: { [Op.like]: `%${tracking}%` } } : {};
-    const whereDate = hasDate ? { createdAt: { [Op.between]: [startDate, endDate] } } : {};
-    const wherePackage = { ...whereTracking, ...whereDate, userId };
-
-    const whereAddress = hasAddress ? {[Op.or]: [
-      { address1: { [Op.like]: `%${address}%` } },
-      { address2: { [Op.like]: `%${address}%` } },
-    ]} : {};
-    const whereFrom = { ...whereAddress, addressType: 'fromPackage' };
-    const whereTo = { ...whereAddress, addressType: 'toPackage'  };
-
-    const include = [
-      { model: Address, as: 'fromAddress', where: whereFrom },
-      { model: Address, as: 'toAddress', where: whereTo },
-      { model: User, as: 'user' },
-      { model: Transaction, as: 'transaction' },
-    ];
-
     const packages = await Package.findAll({
-      include,
-      where: wherePackage,
+      ...relationQuery,
       limit,
       offset,
     });
-    console.log(`packages`, packages);
-    const total = (await Package.count({
-      include,
-      where: wherePackage,
-    })) || 0;
+
+    const total = (await Package.count(relationQuery)) || 0;
 
     return res.json({ total, packages });
   } catch (error: any) {

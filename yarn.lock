@@ -1907,7 +1907,6 @@ __metadata:
     axios: ^1.7.2
     babel-preset-react-app: ^10.0.1
     date-fns: ^2.x.x
-    dayjs: ^1.11.12
     html2canvas: ^1.4.1
     html5-qrcode: ^2.3.8
     jsbarcode: ^3.11.6
@@ -6535,7 +6534,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dayjs@npm:^1.11.12, dayjs@npm:~1.11.5":
+"dayjs@npm:~1.11.5":
   version: 1.11.12
   resolution: "dayjs@npm:1.11.12"
   checksum: 40a4f67c2df3af125ae0ddec68d3a6d806d3009a7414bf45479aaf82f1dd82f3e139e6642e72391abccc37488897830c56afcabb4c819014130d283644df8128

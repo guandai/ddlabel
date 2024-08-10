@@ -22,6 +22,27 @@ export const FlexBox = styled(Box)({
 	padding: 0,
 });
 
+export const PrintOnlyFlexBox = styled(FlexBox)`
+	@media print {
+		body * {
+			display: none;
+		}
+	
+		.print-only {
+			display: block;
+			visibility: visible;
+			position: relative;
+			left: 0;
+			top: 0;
+			width: 100%;
+		}
+		
+		.print-only .printable-label {
+			page-break-inside: avoid;
+		}
+	}
+`;
+
 export const scaleStyle = (cssSize: string, scale: number) => {
 	const parts = cssSize.match(/(\d+)(\w+)/);
 	if (!parts) return cssSize;
