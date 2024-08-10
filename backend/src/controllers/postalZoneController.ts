@@ -1,10 +1,10 @@
 // backend/src/controllers/postalZoneController.ts
-import { Request } from 'express';
 import { PostalZone } from '../models/PostalZone';
-import { GetPostalZoneReq, GetPostalZoneRes, GetZoneRes, GetZoneReq, ResponseAdv } from '@ddlabel/shared';
+import { GetPostalZoneRes, GetZoneRes, ResponseAdv } from '@ddlabel/shared';
+import { AuthRequest } from '../types';
 import { ReturnMsg } from '../utils/errors';
 
-export const getPostalZone = async (req: Request<GetPostalZoneReq>, res: ResponseAdv<GetPostalZoneRes>) => {
+export const getPostalZone = async (req: AuthRequest, res: ResponseAdv<GetPostalZoneRes>) => {
   try {
     const { zip } = req.query;
     if (!zip || typeof zip !== 'string') {
@@ -23,7 +23,7 @@ export const getPostalZone = async (req: Request<GetPostalZoneReq>, res: Respons
   }
 };
 
-export const getZone = async (req: Request<GetZoneReq>, res: ResponseAdv<GetZoneRes>) => {
+export const getZone = async (req: AuthRequest, res: ResponseAdv<GetZoneRes>) => {
   const { fromZip, toZip } = req.query;
   if (typeof fromZip !== 'string' || typeof toZip !=='string') {
     return ReturnMsg(res, 'fromZip and toZip code should be string' );

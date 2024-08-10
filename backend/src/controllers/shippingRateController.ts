@@ -1,8 +1,9 @@
 // backend/src/controllers/shippingRateController.ts
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { ShippingRate } from '../models/ShippingRate';
 import { Op } from 'sequelize';
 import { FullRateReq, VolumeUnit, WeightUnit } from '@ddlabel/shared';
+import { AuthRequest } from '../types';
 
 // Function to calculate shipping rate
 export const fullShippingRate = async (prop: FullRateReq): Promise<number | 'NO_RATE'> => {
@@ -65,7 +66,7 @@ export const getShippingRatesForWeight = async (weight: number, unit: string): P
   return data;
 }
 
-export const getShippingRates = async (req: Request, res: Response) => {
+export const getShippingRates = async (req: AuthRequest, res: Response) => {
   try {
     const rates = await ShippingRate.findAll();
     return res.json(rates);
@@ -74,7 +75,7 @@ export const getShippingRates = async (req: Request, res: Response) => {
   }
 };
 
-export const getFullRate = async (req: Request, res: Response) => {
+export const getFullRate = async (req: AuthRequest, res: Response) => {
   let { length, width, height, weight, zone, weightUnit, volumeUnit } = req.query;
 
   if (!length || !width || !height || !weight || !zone || !weightUnit || !volumeUnit) {

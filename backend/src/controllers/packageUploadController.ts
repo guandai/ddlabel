@@ -6,9 +6,9 @@ import csv from 'csv-parser';
 import fs from 'fs';
 import path from 'path';
 import { reportIoSocket } from '../utils/reportIo';
-import { AuthRequest } from '../types';
 import logger from '../config/logger';
 import { AddressEnum, ImportPackageRes, PackageSource, ResponseAdv } from '@ddlabel/shared';
+import { AuthRequest } from '../types';
 import { BatchDataType, CsvData, getPreparedData, processBatch } from './packageBatchFuntions';
 import { aggregateError } from '../utils/errors';
 
@@ -99,7 +99,7 @@ const onEnd = async ({ stream, req, pkgAll }: OnEndParams) => {
 	}
 };
 
-export const importPackages = async (req: Request, res: ResponseAdv<ImportPackageRes>) => {
+export const importPackages = async (req: AuthRequest, res: ResponseAdv<ImportPackageRes>) => {
 	const { file } = req;
 	if (!file) {
 		return res.status(400).send({ message: 'No file uploaded' });

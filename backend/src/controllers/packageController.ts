@@ -1,10 +1,20 @@
 // backend/src/controllers/packageController.ts
-import { Request } from 'express';
 import { Package } from '../models/Package';
 import { Address } from '../models/Address';
 import { User } from '../models/User';
 import logger from '../config/logger';
-import { AddressEnum, AuthRequest, CreatePackageReq, CreatePackageRes, GetPackageRes, GetPackagesRes, PackageSource, ResponseAdv, SimpleRes, UpdatePackageReq } from '@ddlabel/shared';
+import {
+  AddressEnum,
+  CreatePackageReq,
+  CreatePackageRes,
+  GetPackageRes,
+  GetPackagesRes,
+  PackageSource,
+  ResponseAdv,
+  SimpleRes,
+  UpdatePackageReq 
+} from '@ddlabel/shared';
+import { AuthRequest } from '../types';
 import { generateTrackingNo } from '../utils/generateTrackingNo';
 import { getRelationQuery } from './packageControllerUtil';
 
@@ -64,7 +74,7 @@ export const getPackages = async (req: AuthRequest, res: ResponseAdv<GetPackages
   }
 };
 
-export const updatePackage = async (req: Request, res: ResponseAdv<Package>) => {
+export const updatePackage = async (req: AuthRequest, res: ResponseAdv<Package>) => {
   const { fromAddress, toAddress, ...rest }: UpdatePackageReq = req.body;
   try {
     const pkg = await Package.findByPk(req.params.id);
@@ -81,7 +91,7 @@ export const updatePackage = async (req: Request, res: ResponseAdv<Package>) => 
   }
 };
 
-export const deletePackage = async (req: Request, res: ResponseAdv<SimpleRes>) => {
+export const deletePackage = async (req: AuthRequest, res: ResponseAdv<SimpleRes>) => {
   try {
     const pkg = await Package.findByPk(req.params.id);
     if (!pkg) {
@@ -97,7 +107,7 @@ export const deletePackage = async (req: Request, res: ResponseAdv<SimpleRes>) =
   }
 };
 
-export const getPackage = async (req: Request, res: ResponseAdv<GetPackageRes>) => {
+export const getPackage = async (req: AuthRequest, res: ResponseAdv<GetPackageRes>) => {
   const { id } = req.params;
 
   try {

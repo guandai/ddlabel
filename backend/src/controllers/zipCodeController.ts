@@ -1,9 +1,9 @@
-import { Request } from 'express';
 import { ZipCode } from '../models/ZipCode';
 import getZipInfo from '../utils/getInfo';
 import { ResponseAdv, ZipInfo } from '@ddlabel/shared';
+import { AuthRequest } from '../types';
 
-export const getZipCode = async (req: Request, res: ResponseAdv<ZipCode>) => {
+export const getZipCode = async (req: AuthRequest, res: ResponseAdv<ZipCode>) => {
   try {
     const { zip } = req.params;
     const zipCode = await ZipCode.findOne({ where: { zip } });
@@ -16,7 +16,7 @@ export const getZipCode = async (req: Request, res: ResponseAdv<ZipCode>) => {
   }
 };
 
-export const getZipCodeFromFile = async (req: Request, res: ResponseAdv<ZipInfo>) => {
+export const getZipCodeFromFile = async (req: AuthRequest, res: ResponseAdv<ZipInfo>) => {
   const info = getZipInfo(req.params.zip);
   if (!info) {
     return res.status(404).json({ message: 'Zip code not found' });

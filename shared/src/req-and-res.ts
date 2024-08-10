@@ -131,13 +131,6 @@ export type FullRateRes = {
 	totalCost: number;
 }
 
-
-// AuthRequest
-export type AuthRequest = import("express-serve-static-core").Request & {
-	user: UserAttributes;
-};
-
-
 // Postal zip
 export type GetPostalZoneReq = { zip: string };
 export type GetPostalZoneRes = { postalZone: PostalZoneAttributes };;

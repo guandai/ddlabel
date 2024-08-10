@@ -1,7 +1,8 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { SortCode } from '../models/SortCode';
+import { AuthRequest } from '../types';
 
-exports.getAllSortCodes = async (req: Request, res: Response) => {
+exports.getAllSortCodes = async (req: AuthRequest, res: Response) => {
   try {
     const sortCodes = await SortCode.findAll();
     return res.json(sortCodes);
@@ -10,7 +11,7 @@ exports.getAllSortCodes = async (req: Request, res: Response) => {
   }
 };
 
-exports.createSortCode = async (req: Request, res: Response) => {
+exports.createSortCode = async (req: AuthRequest, res: Response) => {
   try {
     const newSortCode = await SortCode.create(req.body);
     return res.status(201).json(newSortCode);
@@ -19,7 +20,7 @@ exports.createSortCode = async (req: Request, res: Response) => {
   }
 };
 
-exports.updateSortCode = async (req: Request, res: Response) => {
+exports.updateSortCode = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const updated = await SortCode.update(req.body, { where: { id: id } });
@@ -35,7 +36,7 @@ exports.updateSortCode = async (req: Request, res: Response) => {
   }
 };
 
-exports.deleteSortCode = async (req: Request, res: Response) => {
+exports.deleteSortCode = async (req: AuthRequest, res: Response) => {
   try {
     if (await SortCode.destroy({ where: { id: req.params } })) {
       return res.status(200).send({success: true});
