@@ -73,6 +73,10 @@ export type DateRecordReq = {
 export type GetRecordsReq = PaginationRecordReq & SearchRecordReq & DateRecordReq;
 
 export type GetPackagesReq = GetRecordsReq;
+export type GetPackagesCsvRes = {
+	url: string;
+	total: number;	
+};
 export type GetPackagesRes = {
 	packages: PackageModel[];
 	total: number;	
