@@ -17,7 +17,9 @@ const getPackagesWhere = (req: AuthRequest): WhereOptions => {
 	const hasDate = isDateValid(startDate) && isDateValid(endDate);
   
 	const whereTracking = hasTracking ? { trackingNo: { [Op.like]: `%${tracking}%` } } : {};
-	const whereDate = hasDate ? { createdAt: { [Op.between]: [startDate, endDate] } } : {};
+	const startDateTime = `${startDate} 00:00:00`;
+	const endDateTime = `${endDate} 23:59:59`;
+	const whereDate = hasDate ? { createdAt: { [Op.between]: [startDateTime, endDateTime] } } : {};
 	return { ...whereTracking, ...whereDate, userId };
   };
   
@@ -41,9 +43,9 @@ const getPackagesWhere = (req: AuthRequest): WhereOptions => {
   ]; 
   
   export const getRelationQuery = (req: AuthRequest) => {
-	const wherePackage = getPackagesWhere(req);
+	const where = getPackagesWhere(req);
 	const whereFrom = getAddressesWhere(req, AddressEnum.fromPackage);
 	const whereTo = getAddressesWhere(req, AddressEnum.toPackage);
 	const include = getInclude(whereFrom, whereTo);
-	return { wherePackage, include };
+	return { where, include };
   };

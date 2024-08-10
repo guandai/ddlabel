@@ -10,15 +10,23 @@ import RecordsPageQuery from './RecordsPageQuery';
 
 const PerPageList = [2, 20, 40, 80];
 
+export type FilterConfig = {
+	startDate: Date | null;
+	endDate: Date | null;
+	tracking: string;
+	address: string;
+};
+	
 type Props = {
 	perPageList?: number[];
+	setFilter?: (filter: FilterConfig) => void;
 	getRecords: (params: GetRecordsReq) => Promise<GetRecordsRes>;
 	setRecords: (records: any) => void;
 	setMessage: React.Dispatch<React.SetStateAction<MessageContent>>;
 };
 
 const RecordsQuery: React.FC<Props> = (prop) => {
-	const { getRecords, setRecords, setMessage, perPageList = PerPageList } = prop;
+	const { getRecords, setRecords, setMessage, setFilter, perPageList = PerPageList } = prop;
 	const [page, setPage] = useState(1);
 	const [startDate, setStartDate] = useState<Date | null>(null);
 	const [endDate, setEndDate] = useState<Date | null>(null);
@@ -29,6 +37,7 @@ const RecordsQuery: React.FC<Props> = (prop) => {
 	const [address, setAddress] = useState('');
 
 	useEffect(() => {
+		setFilter && setFilter({ startDate, endDate, tracking, address });
 		const getFn = async () => {
 			const params: GetRecordsReq = {
 				startDate: startDate ? formatDateToString(startDate) : '',
