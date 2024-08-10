@@ -53,13 +53,14 @@ export type PaginationRecordReq = {
     offset: number;
 };
 export type SearchRecordReq = {
-    search?: string;
+    tracking: string;
+    address: string;
 };
 export type DateRecordReq = {
-    startDate?: string;
-    endDate?: string;
+    startDate: string;
+    endDate: string;
 };
-export type GetRecordsReq = PaginationRecordReq | SearchRecordReq | DateRecordReq;
+export type GetRecordsReq = PaginationRecordReq & SearchRecordReq & DateRecordReq;
 export type GetPackagesReq = GetRecordsReq;
 export type GetPackagesRes = {
     packages: PackageModel[];

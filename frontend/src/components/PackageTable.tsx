@@ -14,7 +14,8 @@ import { MessageContent } from '../types';
 import MessageAlert from './MessageAlert';
 import PackageApi from '../api/PackageApi';
 import BeansStatusLogApi from '../external/beansApi';
-import { convertToTimeString, toUpdateTime } from '../util/time';
+import { convertToTimeString } from '../util/time';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import PackageTableSideBar from './PackageTableSideBar';
 import { FlexBox, StatusLabel, StyledBox, StyledTabelCell } from '../util/styled';
 import RecordsQuery from './RecordsQuery';
@@ -65,9 +66,9 @@ const PackageTable: React.FC = () => {
     return (statusLogs?.[idx]?.[0]?.item.status || 'N/A' ) as BeansStatus;
   };
 
-  const tsMillis = (idx: number) => {
-    return statusLogs?.[idx]?.[0]?.tsMillis || 0;
-  };
+  // const tsMillis = (idx: number) => {
+  //   return statusLogs?.[idx]?.[0]?.tsMillis || 0;
+  // };
   
   return (
     <FlexBox component="main" maxWidth="lg" >
@@ -75,13 +76,13 @@ const PackageTable: React.FC = () => {
         <StyledBox>
             <Typography component="h1" variant="h4" align='center'>Packages</Typography>
             <MessageAlert message={message} />
-            <RecordsQuery getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} />
+            <RecordsQuery getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} perPageList={[5,10,20]}/>
             <TableContainer component={Paper} sx={{ mt: 3 }}>
               <Table>
                 <TableHead>
                   <TableRow>
                     <StyledTabelCell>Ship To Address</StyledTabelCell>
-                    <StyledTabelCell>Update Time</StyledTabelCell>
+                    <StyledTabelCell>Created Time</StyledTabelCell>
                     <StyledTabelCell>Status</StyledTabelCell>
                     <StyledTabelCell>Tracking</StyledTabelCell>
                     <StyledTabelCell>Actions</StyledTabelCell>
@@ -91,7 +92,7 @@ const PackageTable: React.FC = () => {
                   {packages.map((pkg, idx) => (
                     <TableRow key={pkg.id}>
                       <StyledTabelCell sx={{margin: '0px'}} >{pkg.toAddress.address1}</StyledTabelCell>
-                      <StyledTabelCell>{toUpdateTime(tsMillis(idx)) || convertToTimeString((pkg.toAddress as any).createdAt) }</StyledTabelCell>
+                      <StyledTabelCell>{convertToTimeString((pkg as any).createdAt) }</StyledTabelCell>
                       <StyledTabelCell>
                           <StatusLabel status={toStatus(idx)}>{toStatus(idx)}</StatusLabel>
                       </StyledTabelCell>
@@ -101,6 +102,7 @@ const PackageTable: React.FC = () => {
                         <IconButton onClick={() => handleEdit(pkg)}><Edit /></IconButton>
                         <IconButton onClick={() => handleDelete(pkg.id || 0)}><Delete /></IconButton>
                         <IconButton onClick={() => generatePDF(pkg)}><PictureAsPdf /></IconButton>
+                        <IconButton onClick={() => generatePDF(pkg)}><AssignmentTurnedInIcon /></IconButton>
                         <IconButton component="a" href={`/packages/${pkg.id}/label`} target="_blank"><Label /></IconButton>
                       </StyledTabelCell>
                     </TableRow>
