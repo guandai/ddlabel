@@ -1,176 +1,219 @@
 import React, { useState, useEffect } from 'react';
-import { Box, TablePagination, TextField } from '@mui/material';
+import { Box, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TablePagination, TextField } from '@mui/material';
 import { tryLoad } from '../util/errors';
 import { makeStyles } from '@mui/styles';
 
 import { GetRecordsReq, GetRecordsRes, isGetPackagesRes, isGetTransactionsRes } from '@ddlabel/shared';
 import { MessageContent } from '../types';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'; // Import date adapter
+import { formatDateToString } from '../util/time';
+import { position } from 'html2canvas/dist/types/css/property-descriptors/position';
+import { tr } from 'date-fns/locale';
 
+const PerPageList = [2, 20, 40, 80];
 const useStyles = makeStyles({
-    root: {
-        borderRadius: '4px',
+	root: {
+		borderRadius: '4px',
 		border: '1px solid #ccc',
 		margin: '8px',
 		'& .MuiToolbar-root': {
-			padding: 0,
-			minHeight: '40px', // Set your desired min-height here
-			'& div, & p': {
-				margin: '0 8px', // Set your desired min-height here
-			},
-		},
-    },
-	displayedRows: {
-		display: 'inline',
-	},
-	input: {
-		borderRadius: '4px',
-		border: '1px solid #ccc',
-	},
-	actions: {
-		"& button": {
 			padding: '0px',
+			minHeight: '40px',
 		},
-		margin: '0px',
+		'& .MuiTablePagination-spacer': {
+			margin: '0px',
+		},
+		'& .MuiTablePagination-displayedRows': {
+			margin: '0px',
+			padding: '0px 8px',
+		},
+		'& .MuiTablePagination-selectLabel': {
+			display: 'none',
+		},
+		'& .MuiTablePagination-input': {
+			margin: '0 4px',
+			display: 'none',
+		},
+		'& div.MuiTablePagination-actions': {
+			marginLeft: '0',
+			"& button": {
+				padding: '2px',
+			},
+		}
 	},
 });
 
 type Props = {
+	perPageList?: number[];
 	getRecords: (params: GetRecordsReq) => Promise<GetRecordsRes>;
 	setRecords: (records: any) => void;
 	setMessage: React.Dispatch<React.SetStateAction<MessageContent>>;
 };
 
 const RecordsQuery: React.FC<Props> = (prop) => {
-	const { getRecords, setRecords, setMessage } = prop;
+	const { getRecords, setRecords, setMessage, perPageList = PerPageList } = prop;
 	const [page, setPage] = useState(1);
-	const [startDate, setStartDate] = useState<string>('0000-00-00');
-	const [endDate, setEndDate] = useState<string>('0000-00-00');
+	const [startDate, setStartDate] = useState<Date | null>(null);
+	const [endDate, setEndDate] = useState<Date | null>(null);
 	const [perPage, setPerPage] = useState(20);
 	const [total, setTotal] = useState(0);
 	const [maxPage, setMaxPage] = useState(1);
-	const [search, setSearch] = useState('');
+	const [tracking, setTracking] = useState('');
+	const [address, setAddress] = useState('');
 	const classes = useStyles();
 
 	useEffect(() => {
 		const getFn = async () => {
-			const params: GetRecordsReq = { 
-				startDate: startDate, 
-				endDate: endDate, 
-				search,
-				limit: perPage, 
+			const params: GetRecordsReq = {
+				startDate: startDate ? formatDateToString(startDate) : '',
+				endDate: endDate ? formatDateToString(endDate) : '',
+				tracking,
+				address,
+				limit: perPage,
 				offset: (page - 1) * perPage
 			};
 			const recordsRes: GetRecordsRes = await getRecords(params);
-			
+
 			if (isGetPackagesRes(recordsRes)) {
 				setRecords(recordsRes.packages);
 			} else if (isGetTransactionsRes(recordsRes)) {
 				setRecords(recordsRes.transactions);
 			}
-
+			setMaxPage(Math.ceil(recordsRes.total / perPage));
 			setTotal(recordsRes.total);
 		}
 		tryLoad(setMessage, getFn);
-	}, [search, startDate, total, endDate, page, perPage, getRecords, setRecords, setMessage]);
+	}, [tracking, address, startDate, endDate, page, perPage, total, getRecords, setRecords, setMessage]);
 
 	const muiChangePage = (_event: unknown, newPage: number) => {
 		setPage(newPage + 1);
 	};
 
-	const muiChangePerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const newPerPage = parseInt(event.target.value, 10);
+	const muiChangePerPage = (event: SelectChangeEvent<number>) => {
+		const newPerPage = parseInt(String(event.target.value), 10);
 		setMaxPage(Math.ceil(total / newPerPage));
 		setPerPage(newPerPage);
 		setPage(1);
 	};
 
 	const onChangePage = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const value = getValidPage(parseInt(event.target.value, 10));
+		const value = getValidPage(parseInt(event.target.value, 10)) || 1;
 		setPage(value);
 	};
 
-	const onChangeStartDate = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const newDate = event.target.value;
+	const onChangeStartDate = (newDate: Date | null) => {
+		if (!newDate) return;
 		setStartDate(newDate);
-		if (!endDate || new Date(endDate) < new Date(newDate)) setEndDate(newDate);
+		if (!endDate || endDate < newDate) setEndDate(newDate);
 		setPage(1);
 	}
 
-	const onChangeEndDate = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const newDate = (event.target.value);
+	const onChangeEndDate = (newDate: Date | null) => {
+		if (!newDate) return;
 		setEndDate(newDate);
-		if (!startDate || new Date(startDate) > new Date(newDate)) setStartDate(newDate);
+		if (!startDate || (startDate) > (newDate)) setStartDate(newDate);
 		setPage(1);
 	}
 
-	const onChangeSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setSearch(event.target.value);
+	const onChangeSearchTracking = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setTracking(event.target.value);
+		setPage(1);
+	};
+	
+	const onChangeSearchAddress = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setAddress(event.target.value);
 		setPage(1);
 	};
 
-	const getValidPage = (newPage: number) => Math.max(1, Math.min(maxPage, Math.max(1, newPage)));
+	const getValidPage = (newPage: number) => Math.max(1, Math.min(maxPage, newPage));
 	const onDisplayRows = ({ from, to, count }: { from: number; to: number; count: number }) => `${from}-${to} of ${count}`;
-		
+
+	const dataPickerStyle = {
+		width: '160px',
+		margin: '8px',
+		'& label': { fontSize: '14px', top: '-5px' },
+		'& input': { width:'100px', padding: '8px 0px 8px 8px' },
+	};
+	
 	return (
-		<Box width='100%' sx={{mt: 2}}>
+		<Box width='100%' sx={{ mt: 2 }}>
+			<LocalizationProvider dateAdapter={AdapterDateFns}>
+				<DatePicker
+					label="Start Date"
+					value={startDate}
+					onChange={onChangeStartDate}
+					format='yyyy-MM-dd'
+					sx={dataPickerStyle}
+				/>
+			</LocalizationProvider>
+			<LocalizationProvider dateAdapter={AdapterDateFns}>
+				<DatePicker
+					sx={dataPickerStyle}
+					label="To Date"
+					value={endDate}
+					onChange={onChangeEndDate}
+					format='yyyy-MM-dd'
+				/>
+			</LocalizationProvider>
 			<TextField
 				size="small"
 				variant="outlined"
-				sx={{ m: 1, width: '150px' }}
-				label='Page'
-				type='number'
-				value={page}
-				onChange={onChangePage}
-				inputProps={{ min: 1, max: maxPage }}
-			/>
-			<TextField
-				size="small"
-				variant="outlined"
-				sx={{ m: 1, width: '150px' }}
-				label='Start Date'
-				type='date'
-				value={startDate}
-				onChange={onChangeStartDate}
-			/>
-			<TextField
-				size="small"
-				variant="outlined"
-				sx={{ m: 1, width: '150px' }}
-				label='End Date'
-				type='date'
-				value={endDate}
-				onChange={onChangeEndDate}
-			/>
-			<TextField
-				size="small"
-				variant="outlined"
-				sx={{ m: 1, width: '150px' }}
-				label='Search'
+				sx={{ m: 1, width: '150px', '& label': { fontSize: '14px' } }}
+				label='Search Tracking'
 				type='text'
-				value={search}
-				onChange={onChangeSearch}
+				value={tracking}
+				onChange={onChangeSearchTracking}
 			/>
-			{total}
+			<TextField
+				size="small"
+				variant="outlined"
+				sx={{ m: 1, width: '150px' }}
+				label='Search Address'
+				type='text'
+				value={address}
+				onChange={onChangeSearchAddress}
+			/>
+			<Box sx={{ display: 'inline-flex', float: "inline-end" }}>
+				<TextField
+					variant="outlined"
+					size="small"
+					sx={{ m: 1, width: '80px' }}
+					label='Page'
+					type='number'
+					value={page}
+					onChange={onChangePage}
+				/>
+				<FormControl variant="outlined" size="small" sx={{ m: 1, width: '80px' }}>
+					<InputLabel id="per-page-label">Per Page</InputLabel>
+					<Select
+						size="small"
+						variant="outlined"
+						labelId='per-page-label'
+						label='Per Page'
+						type='number'
+						value={perPage}
+						onChange={muiChangePerPage}
+					>
+						{perPageList.map((per) => (
+							<MenuItem key={per} value={per}>
+								{per}
+							</MenuItem>
+						))}
+					</Select>
+				</FormControl>
+			</Box>
 			<TablePagination
 				component={'span'}
-				rowsPerPageOptions={[2, 20, 40, 80]}
 				count={total} // Total number of packages
 				rowsPerPage={perPage}
-				labelRowsPerPage="Per page:"
 				labelDisplayedRows={onDisplayRows}
 				page={page - 1}
 				onPageChange={muiChangePage}
-				onRowsPerPageChange={muiChangePerPage}
 				showFirstButton
 				showLastButton
-				variant='head'
-				sx={{display: 'inline-flex', float: "inline-end"}}
-				classes={{					
-					root: classes.root,
-					input:	classes.input,
-					actions: classes.actions,
-					displayedRows: classes.displayedRows
-				}}
+				sx={{ display: 'inline-flex', float: "inline-end" }}
+				classes={{ root: classes.root }}
 			/>
 		</Box>
 	);

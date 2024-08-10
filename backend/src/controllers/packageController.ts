@@ -56,27 +56,43 @@ export const getPackages = async (req: AuthRequest, res: ResponseAdv<GetPackages
   const startDate = req.query.startDate as string;
   const endDate = req.query.endDate as string;
   const userId = req.user.id as string;
-  const search = req.query.search as string;
+  const tracking = req.query.tracking as string;
+  const address = req.query.address as string;
 
   try {
-    const hasSearch = search && search.length >= 3;
+    const hasTracking = tracking && tracking.length >= 2;
+    const hasAddress = address && address.length >= 2;
     const hasDate = isDateValid(startDate) && isDateValid(endDate);
-    const total = (await Package.count({ where: { userId } })) || 0;
-    let where = { userId } as WhereOptions;
-    where = hasSearch ? { ...where, trackingNo: {[Op.like]: `%${search}%`} } : where;
-    where = hasDate ? { ...where, createdAt: { [Op.between]: [startDate, endDate] } } : where;
+
+    const whereTracking = hasTracking ? { trackingNo: { [Op.like]: `%${tracking}%` } } : {};
+    const whereDate = hasDate ? { createdAt: { [Op.between]: [startDate, endDate] } } : {};
+    const wherePackage = { ...whereTracking, ...whereDate, userId };
+
+    const whereAddress = hasAddress ? {[Op.or]: [
+      { address1: { [Op.like]: `%${address}%` } },
+      { address2: { [Op.like]: `%${address}%` } },
+    ]} : {};
+    const whereFrom = { ...whereAddress, addressType: 'fromPackage' };
+    const whereTo = { ...whereAddress, addressType: 'toPackage'  };
+
+    const include = [
+      { model: Address, as: 'fromAddress', where: whereFrom },
+      { model: Address, as: 'toAddress', where: whereTo },
+      { model: User, as: 'user' },
+      { model: Transaction, as: 'transaction' },
+    ];
 
     const packages = await Package.findAll({
-      include: [
-        { model: Address, as: 'fromAddress', where: { addressType: 'fromPackage' } },
-        { model: Address, as: 'toAddress', where: { addressType: 'toPackage' } },
-        { model: User, as: 'user' },
-        { model: Transaction, as: 'transaction' },
-      ],
-      where,
+      include,
+      where: wherePackage,
       limit,
       offset,
     });
+    console.log(`packages`, packages);
+    const total = (await Package.count({
+      include,
+      where: wherePackage,
+    })) || 0;
 
     return res.json({ total, packages });
   } catch (error: any) {

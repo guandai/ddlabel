@@ -78,5 +78,8 @@ export const StatusLabel = styled('span')(({ status }: StatusLabelProps) => ({
 	...(status === 'NOLOCATION' && {
 	  backgroundColor: '#9c27b0',  // Purple
 	}),
+	...(status === 'N/A' && {
+	  backgroundColor: '#8e8e8e',  // Grey
+	}),
   }));
   
