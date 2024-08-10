@@ -116,16 +116,24 @@ export const importPackages = async (req: Request, res: ResponseAdv<ImportPackag
 		.on('data', (csvData: CsvData) => onData({ req, csvData, pkgAll }))
 		.on('end', async () => onEnd({ stream, req, pkgAll }));
 
-	//  if .on('error')  follow the chain, the error can not be catched by stream
 	stream.on('error', error => {
 		logger.error(`Error in importPackages: ${error}`);
+		deleteUploadedFile(file);
 		return res.status(400).send({ message: `Importing Error: ${error}` })
 	});
 	stream.on('success', () => {
+		deleteUploadedFile(file);
 		return res.json({ message: `Importing Done!` });
 	});
 };
 
+const deleteUploadedFile = (file: Express.Multer.File ) => {
+	fs.unlink(file.path, (unlinkError) => {
+		if (unlinkError) {
+			logger.error(`Failed to delete file after process: ${unlinkError}`);
+		}
+	});
+}
 const storage = multer.diskStorage({
 	destination: function (req, file, cb) {
 		cb(null, './uploads/');
