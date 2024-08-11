@@ -20,7 +20,7 @@ const DialogCard: React.FC<Prop> = ({ cards, title }) => {
 
 	return (
 		<Box>
-			<Typography variant="h6" sx={{ color: "#474747" }} gutterBottom>{title}</Typography>
+			<Typography variant="h6" sx={{ fontSize: '1em' , textTransform: 'uppercase', color: 'primary.main' }} gutterBottom>{title}</Typography>
 			<Divider />
 			<Grid container spacing={2} sx={{ marginBottom: 4 }}>
 				{cards.map((card: PackageCardType, index: number) => (
