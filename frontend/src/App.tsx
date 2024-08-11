@@ -1,7 +1,7 @@
 // frontend/src/App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import Home from './components/user/Home';
+import Users from './components/user/Users';
 import LoginForm from './components/user/LoginForm';
 import UserForm from './components/user/UserForm';
 import PackageForm from './components/package/PackageForm';
@@ -21,9 +21,9 @@ const AppContent: React.FC = () => {
     <>
       {showHeader && <Header />}
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<LoginForm />} />
         <Route path="/pdfs" element={<PdfExporter />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/users" element={<Users />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<UserForm isRegister={true} />} />
         <Route path="/profile" element={<PrivateRoute component={UserForm} />} />

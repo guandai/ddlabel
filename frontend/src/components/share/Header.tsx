@@ -28,25 +28,20 @@ const Header: React.FC = () => {
         <Typography variant="h6" sx={{ marginLeft: '0.5em', flexGrow: 1 }}>
           TMS Labeling System
         </Typography>
-        <Button color="inherit" component={Link} to="/">
-          HOME
-        </Button>
-        {/* <Button color="inherit" component={Link} to="/register">
-          REGISTER
-        </Button> */}
         {isAuthenticated && (
           <>
+            {<Button color="inherit" component={Link} to="/users">
+              USERS
+            </Button>}
             <Button color="inherit" component={Link} to="/profile">
               PROFILE
             </Button>
             <Button color="inherit" component={Link} to="/packages">
               PACKAGES
             </Button>
-
             <Button color="inherit" component={Link} to="/pdfs">
               LABELS
             </Button>
-
             <Button color="inherit" component={Link} to="/transactions">
               TRANSACTIONS
             </Button>
