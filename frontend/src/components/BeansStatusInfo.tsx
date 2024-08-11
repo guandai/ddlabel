@@ -4,22 +4,22 @@ import { tryLoad } from '../util/errors';
 import { MessageContent } from '../types';
 import { PackageModel } from '@ddlabel/shared';
 import MessageAlert from './MessageAlert';
-import BeansStatusLogApi from '../external/beansApi';
+import BeansAiApi from '../external/beansApi';
 
 type PackageDialogProps = {
-    selectedPackage: PackageModel | null
+    pkg: PackageModel | null
 }
 
-const BeansStatusInfo: React.FC<PackageDialogProps> = ({ selectedPackage }) => {
+const BeansStatusInfo: React.FC<PackageDialogProps> = ({ pkg }) => {
 	const [message, setMessage] = useState<MessageContent>(null);
     const [status, setStatus] = useState<string>();
     
     const handleGetData = useCallback(async () => {
-        if (!selectedPackage) {
+        if (!pkg) {
             return;
         }
         const  getStatusLog = async () => {
-			const statusLog = (await BeansStatusLogApi.getStatusLog({trackingNo: selectedPackage.trackingNo}));
+			const statusLog = (await BeansAiApi.getStatusLog({trackingNo: pkg.trackingNo}));
 			if (!('listItemReadableStatusLogs' in statusLog)) {
 				setStatus('N/A');
 				return;
@@ -28,13 +28,13 @@ const BeansStatusInfo: React.FC<PackageDialogProps> = ({ selectedPackage }) => {
 			setStatus(status);
         };
         tryLoad(setMessage, getStatusLog);
-    }, [selectedPackage, setMessage]);
+    }, [pkg, setMessage]);
 
     useEffect(() => {
 		setMessage(null);
         handleGetData();
     }
-    , [selectedPackage, handleGetData, setMessage]);
+    , [pkg, handleGetData, setMessage]);
 
     return (
 		<Box>

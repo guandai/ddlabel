@@ -104,3 +104,14 @@ export const StatusLabel = styled('span')(({ status }: StatusLabelProps) => ({
 	}),
   }));
   
+export const Line = styled('span')({
+	display: 'block',
+	margin: '0.5em 0',
+	height: '1px',
+	backgroundColor: '#ccc',
+	
+	fontSize: '12px',
+	lineHeight: '12px',
+	width: '100%',
+	borderBottom: '1px solid #ccc',
+});

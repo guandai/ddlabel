@@ -8,7 +8,7 @@ import { formatDateToString } from '../util/time';
 import RecordsQuerySearch from './RecordsQuerySearch';
 import RecordsPageQuery from './RecordsPageQuery';
 
-const PerPageList = [2, 20, 40, 80];
+const PerPageList = [5, 10, 20, 40, 80];
 
 export type FilterConfig = {
 	startDate: Date | null;
@@ -30,7 +30,7 @@ const RecordsQuery: React.FC<Props> = (prop) => {
 	const [page, setPage] = useState(1);
 	const [startDate, setStartDate] = useState<Date | null>(null);
 	const [endDate, setEndDate] = useState<Date | null>(null);
-	const [perPage, setPerPage] = useState(20);
+	const [perPage, setPerPage] = useState(perPageList[0]);
 	const [total, setTotal] = useState(0);
 	const [maxPage, setMaxPage] = useState(1);
 	const [tracking, setTracking] = useState('');

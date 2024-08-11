@@ -1,4 +1,4 @@
-export const toUpdateTime = (time: number) => {
+export const unixTimeToString = (time: number) => {
 	if (!time) {
 		return '';
 	}

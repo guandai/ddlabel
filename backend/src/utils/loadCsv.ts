@@ -12,7 +12,6 @@ export const loadData = async <T>(fileName: string) => loadCsvData<T>(`../data/$
 // Load CSV data
 export const loadCsvData = <T>(filePath: string): Promise<T[]> => {
 	const fullPath = path.resolve(__dirname, filePath);
-	console.log(`Load data from ${fullPath}`);
 	return new Promise((resolve, reject) => {
 		const data: T[] = [];
 		fs.createReadStream(fullPath)

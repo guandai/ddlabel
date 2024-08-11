@@ -13,30 +13,36 @@ import { useNavigate } from 'react-router-dom';
 import { MessageContent } from '../types';
 import MessageAlert from './MessageAlert';
 import PackageApi from '../api/PackageApi';
-import BeansStatusLogApi from '../external/beansApi';
+import BeansAiApi from '../external/beansApi';
 import { convertToTimeString } from '../util/time';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import PackageTableSideBar from './PackageTableSideBar';
 import { FlexBox, StatusLabel, StyledBox, StyledTabelCell } from '../util/styled';
 import RecordsQuery, { FilterConfig } from './RecordsQuery';
+import StatusLogsDialog from './StatusLogsDialog';
 
+type StatusLogsMaps = { [x: number]: BeansAI.ListItemReadableStatusLogs }
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageModel[]>([]);
   const [message, setMessage] = useState<MessageContent>(null);
-  const [statusLogs, setStatusLogs] = useState<BeansAI.ListItemReadableStatusLogs[]>([]);
-  const [selectedPackage, setSelectedPackage] = useState<PackageModel | null>(null);
-  const [open, setOpen] = useState(false);
+  const [statusLogs, setStatusLogs] = useState<StatusLogsMaps>([]);
+  const [pkg, setPkg] = useState<PackageModel | null>(null);
+  const [logs, setLogs] = useState<BeansAI.StatusLog[] | null>(null);
+  const [pkgOpen, setPkgOpen] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
   const [filter, setFilter] = useState<FilterConfig>({ startDate: null, endDate: null, tracking: '', address: '' });
   const navigate = useNavigate();
 
   useEffect(() => {
     const loadPackageAndBeanLog = async () => {
-      const packagesLogs = await Promise.all(packages.map(
-        async pkg => (await BeansStatusLogApi.getStatusLog({ trackingNo: pkg.trackingNo })).listItemReadableStatusLogs
-      ));
-      setStatusLogs(packagesLogs);
+      const statusLogsMap: StatusLogsMaps = {};
+      for (const pkg of packages) {
+        const log = (await BeansAiApi.getStatusLog({ trackingNo: pkg.trackingNo })).listItemReadableStatusLogs;
+        statusLogsMap[pkg.id] = log;
+      }
+      setStatusLogs(statusLogsMap);
     };
-    
+
     tryLoad(setMessage, loadPackageAndBeanLog);
   }, [packages]);
 
@@ -54,65 +60,76 @@ const PackageTable: React.FC = () => {
   };
 
   const handleViewDetails = (pkg: PackageModel) => {
-    setSelectedPackage(pkg);
-    setOpen(true);
+    setPkg(pkg);
+    setPkgOpen(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedPackage(null);
+  const handlePkgClose = () => {
+    setPkgOpen(false);
+    setPkg(null);
   };
 
-  const toStatus = (idx: number) => {
-    return (statusLogs?.[idx]?.[0]?.item.status || 'N/A' ) as BeansStatus;
+  const handleViewlog = (pkgId: number) => {
+    setLogs(statusLogs[pkgId]);
+    setLogOpen(true);
   };
 
-  // const tsMillis = (idx: number) => {
-  //   return statusLogs?.[idx]?.[0]?.tsMillis || 0;
+  const handleLogClose = () => {
+    setLogOpen(false);
+    setLogs(null);
+  };
+
+  const toStatus = (pkgId: number) => {
+    return (statusLogs?.[pkgId]?.[0]?.item.status || 'N/A') as BeansStatus;
+  };
+
+  // const tsMillis = (pkgId: number) => {
+  //   return statusLogs?.[pkgId]?.[0]?.tsMillis || 0;
   // };
-  
+
   return (
     <FlexBox component="main" maxWidth="lg" >
-        <PackageTableSideBar setMessage={setMessage} filter={filter} />
-        <StyledBox>
-            <Typography component="h1" variant="h4" align='center'>Packages</Typography>
-            <MessageAlert message={message} />
-            <RecordsQuery getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} perPageList={[5,10,20]} setFilter={setFilter} />
-            <TableContainer component={Paper} sx={{ mt: 3 }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <StyledTabelCell>Ship To Address</StyledTabelCell>
-                    <StyledTabelCell>Created Time</StyledTabelCell>
-                    <StyledTabelCell>Status</StyledTabelCell>
-                    <StyledTabelCell>Tracking</StyledTabelCell>
-                    <StyledTabelCell>Actions</StyledTabelCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {packages.map((pkg, idx) => (
-                    <TableRow key={pkg.id}>
-                      <StyledTabelCell sx={{margin: '0px'}} >{pkg.toAddress.address1}</StyledTabelCell>
-                      <StyledTabelCell>{convertToTimeString((pkg as any).createdAt) }</StyledTabelCell>
-                      <StyledTabelCell>
-                          <StatusLabel status={toStatus(idx)}>{toStatus(idx)}</StatusLabel>
-                      </StyledTabelCell>
-                      <StyledTabelCell>{pkg.trackingNo}</StyledTabelCell>
-                      <StyledTabelCell style={{ width: '200px', whiteSpace: 'nowrap' }}>
-                        <IconButton onClick={() => handleViewDetails(pkg)}><Visibility /></IconButton>
-                        <IconButton onClick={() => handleEdit(pkg)}><Edit /></IconButton>
-                        <IconButton onClick={() => handleDelete(pkg.id || 0)}><Delete /></IconButton>
-                        <IconButton onClick={() => generatePDF(pkg)}><PictureAsPdf /></IconButton>
-                        <IconButton onClick={() => generatePDF(pkg)}><AssignmentTurnedInIcon /></IconButton>
-                        <IconButton component="a" href={`/packages/${pkg.id}/label`} target="_blank"><Label /></IconButton>
-                      </StyledTabelCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          <PackageDialog open={open} handleClose={handleClose} selectedPackage={selectedPackage} />
-        </StyledBox>
+      <PackageTableSideBar setMessage={setMessage} filter={filter} />
+      <StyledBox>
+        <Typography component="h1" variant="h4" align='center'>Packages</Typography>
+        <MessageAlert message={message} />
+        <RecordsQuery getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} perPageList={[5, 10, 20]} setFilter={setFilter} />
+        <TableContainer component={Paper} sx={{ mt: 3 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <StyledTabelCell>Ship To Address</StyledTabelCell>
+                <StyledTabelCell>Created Time</StyledTabelCell>
+                <StyledTabelCell>Status</StyledTabelCell>
+                <StyledTabelCell>Tracking</StyledTabelCell>
+                <StyledTabelCell>Actions</StyledTabelCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {packages.map((pkg) => (
+                <TableRow key={pkg.id}>
+                  <StyledTabelCell sx={{ margin: '0px' }} >{pkg.toAddress.address1}</StyledTabelCell>
+                  <StyledTabelCell>{convertToTimeString((pkg as any).createdAt)}</StyledTabelCell>
+                  <StyledTabelCell>
+                    <StatusLabel status={toStatus(pkg.id)}>{toStatus(pkg.id)}</StatusLabel>
+                  </StyledTabelCell>
+                  <StyledTabelCell>{pkg.trackingNo}</StyledTabelCell>
+                  <StyledTabelCell style={{ width: '200px', whiteSpace: 'nowrap' }}>
+                    <IconButton onClick={() => handleViewDetails(pkg)}><Visibility /></IconButton>
+                    <IconButton onClick={() => handleEdit(pkg)}><Edit /></IconButton>
+                    <IconButton onClick={() => handleDelete(pkg.id || 0)}><Delete /></IconButton>
+                    <IconButton onClick={() => generatePDF(pkg)}><PictureAsPdf /></IconButton>
+                    <IconButton onClick={() => handleViewlog(pkg.id)}><AssignmentTurnedInIcon /></IconButton>
+                    <IconButton component="a" href={`/packages/${pkg.id}/label`} target="_blank"><Label /></IconButton>
+                  </StyledTabelCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <PackageDialog open={pkgOpen} handleClose={handlePkgClose} pkg={pkg} />
+        <StatusLogsDialog open={logOpen} handleClose={handleLogClose} logs={logs} />
+      </StyledBox>
     </FlexBox>
   );
 };

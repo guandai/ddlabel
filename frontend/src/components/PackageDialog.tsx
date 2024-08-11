@@ -3,58 +3,55 @@ import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, B
 import { PackageModel } from '@ddlabel/shared';
 import PackageGetRate from './PackageGetRate';
 import BeansStatusInfo from './BeansStatusInfo';
+import { Line } from '../util/styled';
 
 type PackageDialogProps = {
     open: boolean;
     handleClose: () => void;
-    selectedPackage: PackageModel | null
+    pkg: PackageModel | null
     ;
 }
 
-const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, selectedPackage }) => {
-    const Line = () => <>
-        <i style={{ display: 'block', fontSize: '0px', height: '12px', borderBottom: '1px solid black' }}>{' '}</i>
-    </>
-
+const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, pkg }) => {
     return (
         <Dialog open={open} onClose={handleClose} aria-labelledby="package-details-title">
             <DialogTitle id="package-details-title">Package Details</DialogTitle>
-            {selectedPackage && (
+            {pkg && (
                 <DialogContent  sx={{width: '400px'}}>
-                    <PackageGetRate selectedPackage={selectedPackage} />
-                    <BeansStatusInfo selectedPackage={selectedPackage} />
+                    <PackageGetRate pkg={pkg} />
+                    <BeansStatusInfo pkg={pkg} />
                     <DialogContentText>
-                        <strong>Package Id:</strong> {selectedPackage.id}<br />
+                        <strong>Package Id:</strong> {pkg.id}<br />
                         <Line />
-                        <strong>Tracking Number:</strong> {selectedPackage.trackingNo}<br />
-                        <strong>Reference Number:</strong> {selectedPackage.referenceNo}<br />
+                        <strong>Tracking Number:</strong> {pkg.trackingNo}<br />
+                        <strong>Reference Number:</strong> {pkg.referenceNo}<br />
                         <Line />
                         From: <br />
-                        <strong>Name:</strong> {selectedPackage.fromAddress.name}<br />
-                        <strong>Address1:</strong> {selectedPackage.fromAddress.address1}<br />
-                        <strong>Address2:</strong> {selectedPackage.fromAddress.address2}<br />
-                        <strong>City:</strong> {selectedPackage.fromAddress.city}<br />
-                        <strong>Zip:</strong> {selectedPackage.fromAddress.zip}<br />
-                        <strong>State:</strong> {selectedPackage.fromAddress.state}<br />
-                        <strong>Phone:</strong> {selectedPackage.fromAddress.phone}<br />
-                        <strong>Email:</strong> {selectedPackage.fromAddress.email}<br />
+                        <strong>Name:</strong> {pkg.fromAddress.name}<br />
+                        <strong>Address1:</strong> {pkg.fromAddress.address1}<br />
+                        <strong>Address2:</strong> {pkg.fromAddress.address2}<br />
+                        <strong>City:</strong> {pkg.fromAddress.city}<br />
+                        <strong>Zip:</strong> {pkg.fromAddress.zip}<br />
+                        <strong>State:</strong> {pkg.fromAddress.state}<br />
+                        <strong>Phone:</strong> {pkg.fromAddress.phone}<br />
+                        <strong>Email:</strong> {pkg.fromAddress.email}<br />
 
                         <Line />
                         To: <br />
-                        <strong>Name:</strong> {selectedPackage.toAddress.name}<br />
-                        <strong>Address1:</strong> {selectedPackage.toAddress.address1}<br />
-                        <strong>Address2:</strong> {selectedPackage.toAddress.address2}<br />
-                        <strong>City:</strong> {selectedPackage.toAddress.city}<br />
-                        <strong>Zip:</strong> {selectedPackage.toAddress.zip}<br />
-                        <strong>State:</strong> {selectedPackage.toAddress.state}<br />
-                        <strong>Phone:</strong> {selectedPackage.toAddress.phone}<br />
-                        <strong>Email:</strong> {selectedPackage.toAddress.email}<br />
+                        <strong>Name:</strong> {pkg.toAddress.name}<br />
+                        <strong>Address1:</strong> {pkg.toAddress.address1}<br />
+                        <strong>Address2:</strong> {pkg.toAddress.address2}<br />
+                        <strong>City:</strong> {pkg.toAddress.city}<br />
+                        <strong>Zip:</strong> {pkg.toAddress.zip}<br />
+                        <strong>State:</strong> {pkg.toAddress.state}<br />
+                        <strong>Phone:</strong> {pkg.toAddress.phone}<br />
+                        <strong>Email:</strong> {pkg.toAddress.email}<br />
 
                         <Line />
-                        <strong>Weight:</strong> {selectedPackage.weight}<br />
-                        <strong>Length:</strong> {selectedPackage.length}<br />
-                        <strong>Width:</strong> {selectedPackage.width}<br />
-                        <strong>Height:</strong> {selectedPackage.height}<br />
+                        <strong>Weight:</strong> {pkg.weight}<br />
+                        <strong>Length:</strong> {pkg.length}<br />
+                        <strong>Width:</strong> {pkg.width}<br />
+                        <strong>Height:</strong> {pkg.height}<br />
                     </DialogContentText>
 
                     <DialogActions>
