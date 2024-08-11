@@ -1,10 +1,10 @@
-// frontend/src/components/Home.tsx
+// frontend/src/components/Users.tsx
 import React from 'react';
 import { Container, Typography, Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { StyledBox } from '../../util/styled';
 
-const Home: React.FC = () => {
+const Users: React.FC = () => {
   return (
     <Container component="main" maxWidth="md">
       <StyledBox>
@@ -15,13 +15,11 @@ const Home: React.FC = () => {
           <Button variant="contained" color="primary" component={Link} to="/register" sx={{ mr: 2 }}>
             Register
           </Button>
-          {/* <Button variant="contained" color="secondary" component={Link} to="/login">
-            Login
-          </Button> */}
+          
         </Box>
       </StyledBox>
     </Container>
   );
 };
 
-export default Home;
+export default Users;
