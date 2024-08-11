@@ -27,7 +27,6 @@ exports.loadData = loadData;
 // Load CSV data
 const loadCsvData = (filePath) => {
     const fullPath = path_1.default.resolve(__dirname, filePath);
-    console.log(`Load data from ${fullPath}`);
     return new Promise((resolve, reject) => {
         const data = [];
         fs_1.default.createReadStream(fullPath)

@@ -1,6 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReturnMsg = exports.aggregateError = exports.reducedError = exports.isValidJSON = void 0;
+exports.isDateValid = exports.ReturnMsg = exports.aggregateError = exports.reducedError = exports.isValidJSON = void 0;
+const moment_1 = __importDefault(require("moment"));
 const isValidJSON = (str) => {
     try {
         JSON.parse(str);
@@ -29,3 +33,5 @@ const aggregateError = (error) => (error === null || error === void 0 ? void 0 :
 exports.aggregateError = aggregateError;
 const ReturnMsg = (res, message, code = 400) => res.status(code).json({ message });
 exports.ReturnMsg = ReturnMsg;
+const isDateValid = (date) => (0, moment_1.default)(date, moment_1.default.ISO_8601, true).isValid();
+exports.isDateValid = isDateValid;

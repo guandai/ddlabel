@@ -58,9 +58,9 @@ const updateCurrentUser = (req, res) => __awaiter(void 0, void 0, void 0, functi
     if (!req.user) {
         return res.status(404).json({ message: 'User not found' });
     }
+    const user = req.body;
+    user.id = req.user.id;
     try {
-        const user = req.body;
-        user.id = req.user.id;
         if (user.password) {
             user.password = yield bcryptjs_1.default.hash(user.password, 10);
         }

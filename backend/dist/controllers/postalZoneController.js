@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getZone = exports.getPostalZone = void 0;
+// backend/src/controllers/postalZoneController.ts
 const PostalZone_1 = require("../models/PostalZone");
 const errors_1 = require("../utils/errors");
 const getPostalZone = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

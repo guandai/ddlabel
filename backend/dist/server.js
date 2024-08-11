@@ -18,6 +18,7 @@ const compression_1 = __importDefault(require("compression"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const logger_1 = __importDefault(require("./config/logger"));
 const zipCodeRoutes_1 = __importDefault(require("./routes/zipCodeRoutes"));
+const auth_1 = require("./middleware/auth");
 // Load environment variables from .env file
 const env = process.env.NODE_ENV || 'development';
 if (env === 'production') {
@@ -34,6 +35,10 @@ const io = new socket_io_1.Server(server, {
         origin: '*', methods: ['GET', 'POST'], allowedHeaders: ['Content-Type', 'Authorization', 'socket-id'],
     },
 });
+const socketIoMiddleware = (req, _res, next) => {
+    req.io = io;
+    next();
+};
 // Middleware
 app.use(express_1.default.json());
 app.use((0, cors_1.default)()); // Allow all requests
@@ -44,10 +49,7 @@ app.use('/api/users', userRoutes_1.default);
 app.use('/api/transactions', transactionRoutes_1.default);
 app.use('/api/shipping_rates', shippingRateRoutes_1.default);
 app.use('/api/postal_zones', postalZoneRoutes_1.default);
-app.use('/api/packages', (req, _res, next) => {
-    req.io = io;
-    next();
-}, packageRoutes_1.default);
+app.use('/api/packages', auth_1.authenticate, socketIoMiddleware, packageRoutes_1.default);
 // Connect to the database and start the server
 (0, database_1.connectDB)().then(() => {
     const PORT = process.env.PORT || 5100;

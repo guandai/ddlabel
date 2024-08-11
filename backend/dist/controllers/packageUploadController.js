@@ -92,16 +92,24 @@ const importPackages = (req, res) => __awaiter(void 0, void 0, void 0, function*
     stream.pipe((0, csv_parser_1.default)())
         .on('data', (csvData) => onData({ req, csvData, pkgAll }))
         .on('end', () => __awaiter(void 0, void 0, void 0, function* () { return onEnd({ stream, req, pkgAll }); }));
-    //  if .on('error')  follow the chain, the error can not be catched by stream
     stream.on('error', error => {
         logger_1.default.error(`Error in importPackages: ${error}`);
+        deleteUploadedFile(file);
         return res.status(400).send({ message: `Importing Error: ${error}` });
     });
     stream.on('success', () => {
+        deleteUploadedFile(file);
         return res.json({ message: `Importing Done!` });
     });
 });
 exports.importPackages = importPackages;
+const deleteUploadedFile = (file) => {
+    fs_1.default.unlink(file.path, (unlinkError) => {
+        if (unlinkError) {
+            logger_1.default.error(`Failed to delete file after process: ${unlinkError}`);
+        }
+    });
+};
 const storage = multer_1.default.diskStorage({
     destination: function (req, file, cb) {
         cb(null, './uploads/');

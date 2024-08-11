@@ -118,5 +118,5 @@ Address.init({
 }, {
     sequelize: database_1.sequelize,
     tableName: 'addresses',
-    timestamps: false, // Disable timestamps if not needed
+    timestamps: true,
 });

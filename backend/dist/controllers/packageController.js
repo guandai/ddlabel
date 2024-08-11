@@ -24,14 +24,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPackage = exports.deletePackage = exports.updatePackage = exports.getPackages = exports.createPackage = void 0;
+// backend/src/controllers/packageController.ts
 const Package_1 = require("../models/Package");
 const Address_1 = require("../models/Address");
-const Transaction_1 = require("../models/Transaction");
 const User_1 = require("../models/User");
-const sequelize_1 = require("sequelize");
 const logger_1 = __importDefault(require("../config/logger"));
 const shared_1 = require("@ddlabel/shared");
 const generateTrackingNo_1 = require("../utils/generateTrackingNo");
+const packageControllerUtil_1 = require("./packageControllerUtil");
 const createPackage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.user) {
         return res.status(404).json({ message: 'User not found' });
@@ -54,7 +54,7 @@ const createPackage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         toAddress.userId = fromAddress.userId = userId;
         toAddress.addressType = shared_1.AddressEnum.toPackage;
         fromAddress.addressType = shared_1.AddressEnum.fromPackage;
-        const a = yield Address_1.Address.createWithInfo(fromAddress);
+        yield Address_1.Address.createWithInfo(fromAddress);
         yield Address_1.Address.createWithInfo(toAddress);
         return res.status(201).json({ success: true, packageId: pkg.id });
     }
@@ -67,22 +67,11 @@ exports.createPackage = createPackage;
 const getPackages = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const limit = parseInt(req.query.limit) || 100; // Default limit to 20 if not provided
     const offset = parseInt(req.query.offset) || 0; // 
-    const userId = req.user.id;
-    const search = req.query.search;
+    const relationQuery = (0, packageControllerUtil_1.getRelationQuery)(req);
     try {
-        const total = (yield Package_1.Package.count({ where: { userId } })) || 0;
-        const whereCondition = search ? { userId, trackingNo: { [sequelize_1.Op.like]: `%${search}%` } } : { userId };
-        const packages = yield Package_1.Package.findAll({
-            include: [
-                { model: Address_1.Address, as: 'fromAddress', where: { addressType: 'fromPackage' } },
-                { model: Address_1.Address, as: 'toAddress', where: { addressType: 'toPackage' } },
-                { model: User_1.User, as: 'user' },
-                { model: Transaction_1.Transaction, as: 'transaction' },
-            ],
-            where: whereCondition,
-            limit,
-            offset,
-        });
+        const packages = yield Package_1.Package.findAll(Object.assign(Object.assign({}, relationQuery), { limit,
+            offset }));
+        const total = (yield Package_1.Package.count(relationQuery));
         return res.json({ total, packages });
     }
     catch (error) {
