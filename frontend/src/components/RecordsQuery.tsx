@@ -58,7 +58,7 @@ const RecordsQuery: React.FC<Props> = (prop) => {
 			setTotal(recordsRes.total);
 		}
 		tryLoad(setMessage, getFn);
-	}, [tracking, address, startDate, endDate, page, perPage, total, getRecords, setRecords, setMessage]);
+	}, [tracking, address, startDate, endDate, page, perPage, total, getRecords, setRecords, setMessage, setFilter]);
 
 	return (
 		<Box width='100%' sx={{ mt: 2 }}>
@@ -79,7 +79,6 @@ const RecordsQuery: React.FC<Props> = (prop) => {
 				perPage={perPage}
 				setPerPage={setPerPage}
 				total={total}
-				setTotal={setTotal}
 				maxPage={maxPage}
 				setMaxPage={setMaxPage}
 				perPageList={perPageList} 

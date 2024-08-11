@@ -6,16 +6,14 @@ import PackageUploadMapping from './PackageUploadMapping';
 import { AddCircle, Download } from '@mui/icons-material';
 import { StyledSideBarBox } from '../util/styled';
 import { FilterConfig } from './RecordsQuery';
-import { MessageContent } from '../types';
 import PackageApi from '../api/PackageApi';
 
 type Props = {
 	filter: FilterConfig;
-	setMessage: React.Dispatch<React.SetStateAction<MessageContent>>;
 };
 
 const PackageTableSideBar: React.FC<Props> = (prop) => {
-	const { filter, setMessage } = prop;
+	const { filter } = prop;
 	const navigate = useNavigate();
 
 	const onExportCsv = async () => {

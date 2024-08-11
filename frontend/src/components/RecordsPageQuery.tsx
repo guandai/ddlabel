@@ -43,13 +43,12 @@ type Props = {
 	page: number;
 	setPage: React.Dispatch<React.SetStateAction<number>>;
 	total: number;
-	setTotal: React.Dispatch<React.SetStateAction<number>>;
 	maxPage: number;
 	setMaxPage: React.Dispatch<React.SetStateAction<number>>;
 };
 
 const RecordsPageQuery: React.FC<Props> = (prop) => {
-	const { perPageList, perPage, setPerPage, page, setPage, total, setTotal, maxPage, setMaxPage } = prop;
+	const { perPageList, perPage, setPerPage, page, setPage, total, maxPage, setMaxPage } = prop;
 	const classes = useStyles();
 
 	const muiChangePage = (_event: unknown, newPage: number) => {
