@@ -8,17 +8,17 @@ import { PackageModel } from '@ddlabel/shared';
 import MessageAlert from './MessageAlert';
 
 type PackageDialogProps = {
-    selectedPackage: PackageModel | null
+    pkg: PackageModel | null
 }
 
-const PackageGetRate: React.FC<PackageDialogProps> = ({ selectedPackage }) => {
+const PackageGetRate: React.FC<PackageDialogProps> = ({ pkg }) => {
     const [rate, setRate] = useState<number | string | null>(null);
     const [sortCode, setSortCode] = useState<string | null>(null);
     const [message, setMessage] = useState<MessageContent>(null);
 
-    const getZone = useCallback(async (selectedPackage: PackageModel): Promise<string> => {
-        const fromZip = selectedPackage.fromAddress.zip;
-        const toZip = selectedPackage.toAddress.zip;
+    const getZone = useCallback(async (pkg: PackageModel): Promise<string> => {
+        const fromZip = pkg.fromAddress.zip;
+        const toZip = pkg.toAddress.zip;
         const zone = (await PostalZoneApi.getZone({fromZip, toZip})).zone?.replace('Zone ', '');
         if (!zone || zone === '-') {
             setRate('N/A');
@@ -28,12 +28,12 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ selectedPackage }) => {
         return zone;
     }, [setMessage]);
     
-    const getCost = useCallback(async (selectedPackage: PackageModel, zone: string): Promise<number> => { 
+    const getCost = useCallback(async (pkg: PackageModel, zone: string): Promise<number> => { 
         const params = {
-            length: selectedPackage.length,
-            width: selectedPackage.width,
-            height: selectedPackage.height,
-            weight: selectedPackage.weight,
+            length: pkg.length,
+            width: pkg.width,
+            height: pkg.height,
+            weight: pkg.weight,
             zone, // Replace with actual zone if available
             weightUnit: 'lbs',
             volumeUnit: 'inch',
@@ -48,29 +48,29 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ selectedPackage }) => {
     }, [setMessage]);
     
     const handleGetData = useCallback(async () => {
-        if (!selectedPackage) {
+        if (!pkg) {
             return;
         }
         const getZoneAndCost = async () => {
-            const zip = selectedPackage?.toAddress.zip;
+            const zip = pkg?.toAddress.zip;
             setSortCode((await PostalZoneApi.getPostalZone({zip})).postalZone.sort_code);
 
-            const zone = await getZone(selectedPackage);
+            const zone = await getZone(pkg);
             if (zone === 'N/A' ) { return }
 
-            const cost = await getCost(selectedPackage, zone);
+            const cost = await getCost(pkg, zone);
             if (cost === -1) { return; }
 
             setRate(`$${cost.toFixed(2)}`);
         };
         tryLoad(setMessage, getZoneAndCost);
-    }, [selectedPackage, setMessage, getCost, getZone]);
+    }, [pkg, setMessage, getCost, getZone]);
 
     useEffect(() => {
 		setMessage(null);
         handleGetData();
     }
-    , [selectedPackage, handleGetData, setMessage]);
+    , [pkg, handleGetData, setMessage]);
 
     return (
 		<Box>

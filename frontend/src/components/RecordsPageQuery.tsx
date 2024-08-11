@@ -2,15 +2,16 @@ import React from 'react';
 import { Box, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TablePagination, TextField } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 
-const PerPageList = [2, 20, 40, 80];
 const useStyles = makeStyles({
 	root: {
 		borderRadius: '4px',
 		border: '1px solid #ccc',
+		boxSizing: "border-box",
 		margin: '8px',
+		
 		'& .MuiToolbar-root': {
 			padding: '0px',
-			minHeight: '40px',
+			minHeight: '38px',
 		},
 		'& .MuiTablePagination-spacer': {
 			margin: '0px',
@@ -36,7 +37,7 @@ const useStyles = makeStyles({
 });
 
 type Props = {
-	perPageList?: number[];
+	perPageList: number[];
 	perPage: number;
 	setPerPage: React.Dispatch<React.SetStateAction<number>>;
 	page: number;
@@ -48,7 +49,7 @@ type Props = {
 };
 
 const RecordsPageQuery: React.FC<Props> = (prop) => {
-	const { perPageList = PerPageList, perPage, setPerPage, page, setPage, total, setTotal, maxPage, setMaxPage } = prop;
+	const { perPageList, perPage, setPerPage, page, setPage, total, setTotal, maxPage, setMaxPage } = prop;
 	const classes = useStyles();
 
 	const muiChangePage = (_event: unknown, newPage: number) => {
@@ -107,6 +108,7 @@ const RecordsPageQuery: React.FC<Props> = (prop) => {
 				rowsPerPage={perPage}
 				labelDisplayedRows={onDisplayRows}
 				page={page - 1}
+				rowsPerPageOptions={perPageList}
 				onPageChange={muiChangePage}
 				showFirstButton
 				showLastButton

@@ -45,11 +45,13 @@ const RecordsQuerySearch: React.FC<Props> = (prop) => {
 	};
 
 	const dataPickerStyle = {
-		width: '160px',
+		width: '140px',
 		margin: '8px',
 		'& label': { fontSize: '14px', top: '-5px' },
-		'& input': { width:'100px', padding: '8px 0px 8px 8px' },
+		'& input': { width:'90px', padding: '8px 0px 8px 8px' },
+		'& .MuiInputAdornment-root': { margin: '0px' }
 	};
+	const textSearchStyle = { m: 1, width: '130px', '& label': { fontSize: '14px' } };
 	
 	return (
 		<>
@@ -74,7 +76,7 @@ const RecordsQuerySearch: React.FC<Props> = (prop) => {
 			<TextField
 				size="small"
 				variant="outlined"
-				sx={{ m: 1, width: '150px', '& label': { fontSize: '14px' } }}
+				sx={textSearchStyle}
 				label='Search Tracking'
 				type='text'
 				value={tracking}
@@ -83,7 +85,7 @@ const RecordsQuerySearch: React.FC<Props> = (prop) => {
 			<TextField
 				size="small"
 				variant="outlined"
-				sx={{ m: 1, width: '150px' }}
+				sx={textSearchStyle}
 				label='Search Address'
 				type='text'
 				value={address}
