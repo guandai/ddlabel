@@ -3,13 +3,13 @@ import { IconButton } from '@mui/material';
 import { Visibility, Edit, Delete, PictureAsPdf, Label } from '@mui/icons-material';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import { BeansAI, PackageModel } from '@ddlabel/shared';
-import { generatePDF } from './generatePDF';
-import PackageDialog from './PackageDialog';
-import StatusLogsDialog from './StatusLogsDialog';
-import PackageApi from '../api/PackageApi';
+import { generatePDF } from '../label/generatePDF';
+import PackageDialog from '../dialog/PackageDialog';
+import StatusLogsDialog from '../dialog/StatusLogsDialog';
+import PackageApi from '../../api/PackageApi';
 import { useNavigate } from 'react-router-dom';
-import BeansAiApi from '../external/beansApi';
-import { SetMessage, tryLoad } from '../util/errors';
+import BeansAiApi from '../../external/beansApi';
+import { SetMessage, tryLoad } from '../../util/errors';
 
 type PackageActionsProps = {
   pkg: PackageModel;

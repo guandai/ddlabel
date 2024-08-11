@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box } from '@mui/material';
-import { tryLoad } from '../util/errors';
-import { MessageContent } from '../types';
-import { PackageModel } from '@ddlabel/shared';
+import { tryLoad } from '../../util/errors';
+import { MessageContent } from '../../types';
+import { BeansStatus, PackageModel } from '@ddlabel/shared';
 import MessageAlert from './MessageAlert';
-import BeansAiApi from '../external/beansApi';
+import BeansAiApi from '../../external/beansApi';
+import DialogCard from '../dialog/DialogCard';
+import { StatusLabel } from '../../util/styled';
 
 type PackageDialogProps = {
     pkg: PackageModel | null
@@ -36,10 +38,11 @@ const BeansStatusInfo: React.FC<PackageDialogProps> = ({ pkg }) => {
     }
     , [pkg, handleGetData, setMessage]);
 
+    const value = <StatusLabel status={(status || 'N/A' )as BeansStatus}>{status}</StatusLabel>;
     return (
 		<Box>
 			<MessageAlert message={message} />
-			<strong>Tracking Status: </strong>{ status }<br />
+            <DialogCard title="Beans Status Info" cards={[{ label: 'Tracking Status',  value}]} />
 		</Box>
     );
 };

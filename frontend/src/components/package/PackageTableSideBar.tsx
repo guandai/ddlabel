@@ -2,11 +2,11 @@ import React from 'react';
 import { Button, List, ListItem } from '@mui/material';
 
 import { useNavigate } from 'react-router-dom';
-import PackageUploadMapping from './PackageUploadMapping';
+import PackageUploadMapping from '../upload/PackageUploadMapping';
 import { AddCircle, Download } from '@mui/icons-material';
-import { StyledSideBarBox } from '../util/styled';
-import { FilterConfig } from './RecordsQuery';
-import PackageApi from '../api/PackageApi';
+import { StyledSideBarBox } from '../../util/styled';
+import { FilterConfig } from '../query/RecordsQuery';
+import PackageApi from '../../api/PackageApi';
 
 type Props = {
 	filter: FilterConfig;

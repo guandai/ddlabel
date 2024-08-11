@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import Papa, { ParseResult } from 'papaparse';
 import { Box, Typography, Button, Modal, Alert } from '@mui/material';
 import PackageUploadButton, { RunStatus } from './PackageUploadButton';
-import { MessageContent, MsgLevel } from '../types.d';
 import { Upload } from '@mui/icons-material';
-import CloseButton from './CloseButton';
-import CsvHeaderList from './CsvHeaderList';
+import CloseButton from '../dialog/CloseButton';
 import { KeyCsvRecord, HeaderMapping, CSV_KEYS, defaultMapping, CSV_KEYS_REQUIRED } from '@ddlabel/shared';
+import CsvHeaderList from './CsvHeaderList';
+import { MessageContent, MsgLevel } from '../../types';
 
 const PackageUploadMapping: React.FC = () => {
   const [message, setMessage] = useState<MessageContent>(null);

@@ -4,10 +4,10 @@ import { useParams } from 'react-router-dom';
 import { PackageModel } from '@ddlabel/shared';
 import PackageLabel from './PackageLabel';
 import { CircularProgress } from '@mui/material';
-import { tryLoad } from '../util/errors';
-import { MessageContent } from '../types';
-import MessageAlert from './MessageAlert';
-import { PackageApi } from '../api/PackageApi';
+import { tryLoad } from '../../util/errors';
+import { MessageContent } from '../../types';
+import MessageAlert from '../share/MessageAlert';
+import { PackageApi } from '../../api/PackageApi';
 
 const PackageLabelPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

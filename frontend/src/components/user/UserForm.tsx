@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { TextField, Button, Box, Typography, Container, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material';
-import { tryLoad } from '../util/errors';
-import AddressForm from './AddressForm';
-import { MessageContent } from '../types.d';
-import MessageAlert from './MessageAlert';
+import { tryLoad } from '../../util/errors';
+import AddressForm from '../share/AddressForm';
+import { MessageContent } from '../../types';
+import MessageAlert from '../share/MessageAlert';
 import { AddressEnum, UserModel } from '@ddlabel/shared';
 import { AddressAttributes } from "@ddlabel/shared";
-import UserApi from '../api/UserApi';
-import { StyledBox } from '../util/styled';
+import UserApi from '../../api/UserApi';
+import { StyledBox } from '../../util/styled';
 
 export type ProfileType = UserModel & { confirmPassword: string };
 

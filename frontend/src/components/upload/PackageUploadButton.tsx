@@ -6,9 +6,9 @@ import {
 } from '@mui/material';
 import { Upload } from '@mui/icons-material';
 import { io } from 'socket.io-client';
-import { SetMessage } from '../util/errors';
+import { SetMessage } from '../../util/errors';
 import { HeaderMapping } from '@ddlabel/shared';
-import { PackageApi } from '../api/PackageApi';
+import { PackageApi } from '../../api/PackageApi';
 
 const socket = io(`${process.env.REACT_APP_SOCKET_IO_HOST}`, { path: '/api/socket.io' });
 

@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { AppBar, Toolbar, Button, Typography } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
-import MonkeyLogo from '../assets/svg/monkey_logo.svg';
+import MonkeyLogo from '../../assets/svg/monkey_logo.svg';
 
 const Header: React.FC = () => {
   const isAuthenticated = !!localStorage.getItem('token'); // Check if user is authenticated

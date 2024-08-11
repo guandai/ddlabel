@@ -1,11 +1,11 @@
 // frontend/src/components/LoginForm.tsx
 import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, Container } from '@mui/material';
-import { tryLoad } from '../util/errors';
+import { tryLoad } from '../../util/errors';
 import { LoginUserReq } from "@ddlabel/shared";
-import { MessageContent } from '../types';
-import MessageAlert from './MessageAlert';
-import UserApi from '../api/UserApi';
+import { MessageContent } from '../../types';
+import MessageAlert from '../share/MessageAlert';
+import UserApi from '../../api/UserApi';
 
 const LoginForm: React.FC = () => {
   const [formData, setFormData] = useState<LoginUserReq>({ email: '', password: '' });

@@ -1,16 +1,16 @@
 // frontend/src/App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import Home from './components/Home';
-import LoginForm from './components/LoginForm';
-import UserForm from './components/UserForm';
-import PackageForm from './components/PackageForm';
-import PackageTable from './components/PackageTable';
-import TransactionTable from './components/TransactionTable';
-import PackageLabelPage from './components/PackageLabelPage';
+import Home from './components/user/Home';
+import LoginForm from './components/user/LoginForm';
+import UserForm from './components/user/UserForm';
+import PackageForm from './components/package/PackageForm';
+import PackageTable from './components/package/PackageTable';
+import TransactionTable from './components/transaction/TransactionTable';
+import PackageLabelPage from './components/label/PackageLabelPage';
 import PrivateRoute from './components/PrivateRoute';
-import Header from './components/Header';
-import PdfExporter from './components/PdfExporter';
+import Header from './components/share/Header';
+import PdfExporter from './components/label/PdfExporter';
 
 const AppContent: React.FC = () => {
   const location = useLocation();

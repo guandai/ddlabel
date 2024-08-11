@@ -2,7 +2,7 @@
 import React from 'react';
 import { Container, Typography, Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { StyledBox } from '../util/styled';
+import { StyledBox } from '../../util/styled';
 
 const Home: React.FC = () => {
   return (

@@ -3,10 +3,10 @@ import QRCode from 'qrcode.react';
 import BarcodeComponent from './BarcodeComponent';
 import { Box, Typography } from '@mui/material';
 import { cleanAddress, getStateId, PackageModel } from '@ddlabel/shared';
-import monkeyLogo from '../assets/svg/monkey_logo.jpg'; // Import the main logo
-import monkeyFont from '../assets/svg/monkey_font.jpg'; // Import the bottom-right logo
+import monkeyLogo from '../../assets/svg/monkey_logo.jpg'; // Import the main logo
+import monkeyFont from '../../assets/svg/monkey_font.jpg'; // Import the bottom-right logo
 import styled from 'styled-components';
-import { scaleStyle } from '../util/styled';
+import { scaleStyle } from '../../util/styled';
 
 type MonoSmallProp = {
   factor: number;

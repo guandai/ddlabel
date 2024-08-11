@@ -1,5 +1,5 @@
 import { AxiosError } from "axios";
-import { MessageContent, PkgCsvError } from "../types.d";
+import { MessageContent, PkgCsvError } from "../types";
 import React from "react";
 
 export type SetMessage = (value: React.SetStateAction<MessageContent>) => void;

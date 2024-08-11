@@ -1,9 +1,9 @@
 // frontend/src/components/AddressForm.tsx
 import React, { useEffect, useState } from 'react';
 import { TextField, Grid, Typography } from '@mui/material';
-import { SetMessage, tryLoad } from '../util/errors';
+import { SetMessage, tryLoad } from '../../util/errors';
 import { AddressAttributes, extractAddressZip } from '@ddlabel/shared';
-import { ZipCodeApi } from '../api/ZipCodeApi';
+import { ZipCodeApi } from '../../api/ZipCodeApi';
 
 type QuickFieldProps = {
   name: keyof AddressAttributes;

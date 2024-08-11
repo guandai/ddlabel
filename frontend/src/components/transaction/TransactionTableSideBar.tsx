@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyledSideBarBox } from '../util/styled';
+import { StyledSideBarBox } from '../../util/styled';
 import { List, ListItem } from '@mui/material';
 
 type Props = {

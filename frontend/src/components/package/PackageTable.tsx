@@ -4,17 +4,17 @@ import {
   Paper, Typography
 } from '@mui/material';
 import { BeansAI, BeansStatus, PackageModel } from '@ddlabel/shared';
-import { tryLoad } from '../util/errors';
+import { tryLoad } from '../../util/errors';
 
-import MessageAlert from './MessageAlert';
-import PackageApi from '../api/PackageApi';
-import { convertToTimeString } from '../util/time';
+import MessageAlert from '../share/MessageAlert';
+import PackageApi from '../../api/PackageApi';
+import { convertToTimeString } from '../../util/time';
 import PackageTableSideBar from './PackageTableSideBar';
-import { FlexBox, StatusLabel, StyledBox, StyledTabelCell } from '../util/styled';
-import RecordsQuery, { FilterConfig } from './RecordsQuery';
+import { FlexBox, StatusLabel, StyledBox, StyledTabelCell } from '../../util/styled';
+import RecordsQuery, { FilterConfig } from '../query/RecordsQuery';
 import PackageActions from './PackageActions';
-import BeansAiApi from '../external/beansApi';
-import { MessageContent } from '../types';
+import BeansAiApi from '../../external/beansApi';
+import { MessageContent } from '../../types';
 
 type StatusLogsMaps = { [x: number]: BeansAI.ListItemReadableStatusLogs }
 

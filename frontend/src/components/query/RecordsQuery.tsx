@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
-import { tryLoad } from '../util/errors';
+import { tryLoad } from '../../util/errors';
 
 import { GetRecordsReq, GetRecordsRes, isGetPackagesRes, isGetTransactionsRes } from '@ddlabel/shared';
-import { MessageContent } from '../types';
-import { formatDateToString } from '../util/time';
+import { MessageContent } from '../../types';
+import { formatDateToString } from '../../util/time';
 import RecordsQuerySearch from './RecordsQuerySearch';
 import RecordsPageQuery from './RecordsPageQuery';
 

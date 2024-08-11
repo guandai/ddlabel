@@ -2,14 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, Box, Typography, Container, Grid } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { tryLoad } from '../util/errors';
-import AddressForm from './AddressForm';
+import { tryLoad } from '../../util/errors';
+import AddressForm from '../share/AddressForm';
 import { AddressAttributes, CreatePackageReq, PackageModel, UpdatePackageReq } from "@ddlabel/shared";
-import { MessageContent } from '../types.d';
-import MessageAlert from './MessageAlert';
+import { MessageContent } from '../../types';
+import MessageAlert from '../share/MessageAlert';
 import { AddressEnum } from '@ddlabel/shared';
-import PackageApi from '../api/PackageApi';
-import { StyledBox } from '../util/styled';
+import PackageApi from '../../api/PackageApi';
+import { StyledBox } from '../../util/styled';
 
 type QuickFieldProp = {
   name: keyof PackageModel;

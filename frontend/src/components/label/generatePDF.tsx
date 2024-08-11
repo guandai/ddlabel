@@ -1,7 +1,7 @@
 // frontend/src/utils/generatePDF.ts
 import jsPDF from 'jspdf';
 import { PackageModel } from '@ddlabel/shared';
-import PackageLabel from '../components/PackageLabel';
+import PackageLabel from './PackageLabel';
 import { createRoot } from 'react-dom/client';
 import html2canvas from 'html2canvas';
 

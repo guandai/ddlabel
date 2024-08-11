@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box } from '@mui/material';
-import { tryLoad } from '../util/errors';
-import { MessageContent } from '../types';
-import RateApi from '../api/RateApi';
-import PostalZoneApi from '../api/PostalZoneApi';
+import { tryLoad } from '../../util/errors';
+import { MessageContent } from '../../types';
+import RateApi from '../../api/RateApi';
+import PostalZoneApi from '../../api/PostalZoneApi';
 import { PackageModel } from '@ddlabel/shared';
-import MessageAlert from './MessageAlert';
+import MessageAlert from '../share/MessageAlert';
+import DialogCard from '../dialog/DialogCard';
 
 type PackageDialogProps = {
     pkg: PackageModel | null
@@ -75,9 +76,7 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ pkg }) => {
     return (
 		<Box>
             <MessageAlert message={message} />
-			{/* <strong>Shipping Rate: </strong>{rate === null ? '...' : rate}<br /> */}
-			<strong>Sort Code: </strong>{rate === null ? '...' : sortCode}<br />
-			{/* <Button onClick={handleGetData} color="primary">Get Rate</Button> */}
+			<DialogCard title="Package Rate" cards={[{ label: 'Sort Code',  value: rate === null ? '...' : sortCode }]} />
 		</Box>
     );
 };

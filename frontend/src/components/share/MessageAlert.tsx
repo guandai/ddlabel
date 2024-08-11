@@ -1,4 +1,4 @@
-import { MessageContent } from "../types";
+import { MessageContent } from "../../types";
 import { Alert } from '@mui/material';
 
 type Prop = {

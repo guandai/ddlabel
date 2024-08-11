@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
-import MessageAlert from './MessageAlert';
-import { MessageContent } from '../types';
-import TransactionApi from '../api/TransectionApi';
+import MessageAlert from '../share/MessageAlert';
+import { MessageContent } from '../../types';
+import TransactionApi from '../../api/TransectionApi';
 import { TransactionModel } from '@ddlabel/shared';
-import { FlexBox, StyledBox } from '../util/styled';
+import { FlexBox, StyledBox } from '../../util/styled';
 import TransactionTableSideBar from './TransactionTableSideBar';
-import RecordsQuery from './RecordsQuery';
+import RecordsQuery from '../query/RecordsQuery';
 
 const TransactionTable: React.FC = () => {
   const [transactions, setTransactions] = useState<TransactionModel[]>([]);

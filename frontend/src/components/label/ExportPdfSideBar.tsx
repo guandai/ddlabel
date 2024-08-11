@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Button, List, ListItem } from '@mui/material';
 import { DownloadForOfflineRounded } from '@mui/icons-material';
-import { StyledSideBarBox } from '../util/styled';
+import { StyledSideBarBox } from '../../util/styled';
 
 type Props = {
 	capturePages: () => void;
