@@ -76,7 +76,7 @@ const StatusLogsDialog: React.FC<StatusLogDialogProps> = ({ open, handleClose, l
                 maxWidth="md" 
                 fullWidth
             >
-                <DialogTitle id="package-details-title">Log Details</DialogTitle>
+                <DialogTitle id="package-details-title">LOG DETAILS</DialogTitle>
                 {logs && (
                     <DialogContent>
                         {logs.map((log: BeansAI.StatusLog, idx: number) => renderStatusLog(log, idx))}
