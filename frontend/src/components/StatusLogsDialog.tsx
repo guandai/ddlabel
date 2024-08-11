@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Typography, ImageList, Box } from '@mui/material';
+import React from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, ImageList, Box } from '@mui/material';
 import { BeansAI } from '@ddlabel/shared';
 import { Line } from '../util/styled';
 import { unixTimeToString } from '../util/time';
-import BeansAiApi from '../external/beansApi';
 
 type StatusLogDialogProps = {
     open: boolean;
@@ -12,20 +11,6 @@ type StatusLogDialogProps = {
 }
 
 const StatusLogsDialog: React.FC<StatusLogDialogProps> = ({ open, handleClose, logs }) => {
-    const [pod, setPod] = useState<BeansAI.Pod | null>(null);
-    console.log(`logs`, logs);     
-    useEffect(() => {
-           
-        const fetchPod = async () => {
-            if (logs && logs.length > 0) {
-                console.log(`logs[0].item.listItemId`, logs[0].item);
-                const pod = await BeansAiApi.getPod(logs[0].item.listItemId );
-                setPod(pod);
-            }
-        };
-        fetchPod();
-    }, [logs]);
-
     const renderStatusLog = (log: BeansAI.StatusLog, idx: number) => 
         <Box key={`$stats_log_${idx}`}>
             <Typography variant="body2">Status: {log.description}</Typography>
