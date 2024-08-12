@@ -8,7 +8,7 @@ export class PackageApi {
 	getPackageById = async(id: string) => (await axios.get<GetPackageRes>(`${this.path}/${id}`, this.config)).data
 	createPackage = async(payload: CreatePackageReq) => (await axios.post<CreatePackageRes>(`${this.path}`, payload, this.config)).data
 	updatePackage = async(id: string, payload: UpdatePackageReq) => (await axios.put<UpdatePackageRes>(`${this.path}/${id}`, payload, this.config)).data
-	deletePackage = async(id: string) => (await axios.delete(`${this.path}/${id}`, this.config)).data
+	deletePackage = async(id: number) => (await axios.delete(`${this.path}/${id}`, this.config)).data
 	exportPackage = async(params: GetPackagesCsvReq) => (await axios.get<GetPackagesCsvRes>(`${this.path}/csv`, {...this.config, params})).data
 	importPackage = async(payload: ImportPackageReq, onUploadProgress: ((progressEvent: AxiosProgressEvent) => void), socketId?: string) => 
 		(await axios.post<ImportPackageRes>(

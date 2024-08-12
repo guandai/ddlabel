@@ -8,7 +8,6 @@ import logger from '../config/logger';
 import { AuthRequest } from '../types';
 import {
   AddressEnum,
-  GetCurrentUserRes,
   GetUserRes,
   GetUsersRes,
   LoginUserRes,
@@ -16,9 +15,8 @@ import {
   RegisterUserRes,
   ResponseAdv,
   SimpleRes,
-  UpdateCurrentUserRes,
+  UpdateUserRes,
   UpdateUserReq,
-  UpdateUserRes
 } from '@ddlabel/shared';
 import { aggregateError, notFound } from '../utils/errors';
 import { Transaction } from '../models/Transaction';
@@ -55,17 +53,13 @@ export const loginUser = async (req: AuthRequest, res: ResponseAdv<LoginUserRes>
       return res.status(400).json({ message: 'Invalid credentials' });
     }
   } catch (error: any) {
+    logger.error(`Error in loginUser: ${error}`);
     return res.status(400).json({ message: error.message });
   }
 };
 
-export const updateCurrentUser = async (req: AuthRequest, res: ResponseAdv<UpdateCurrentUserRes>) => {
-  if (!req.user) {
-    return res.status(404).json({ message: 'User not found' });
-  }
-
+export const updateUserById = async (req: AuthRequest, res: ResponseAdv<UpdateUserRes>) => {
   const user = req.body as UpdateUserReq & { id: number };
-  user.id = req.user.id;
   try {
     if (user.password) {
       user.password = await bcrypt.hash(user.password, 10);
@@ -76,28 +70,12 @@ export const updateCurrentUser = async (req: AuthRequest, res: ResponseAdv<Updat
     await Address.updateWithInfo(user.warehouseAddress);
     const [affectedCount]: [affectedCount: number] = await User.update(user, { where: { id: user.id } });
     const result: UpdateUserRes = { success: affectedCount > 0 };
+
     return res.json(result);
   } catch (error: any) {
+    logger.error(`Error in updateUserById: ${error}`);
     return res.status(400).json({ message: error.message });
   }
-};
-
-export const getCurrentUser = async (req: AuthRequest, res: ResponseAdv<GetCurrentUserRes>) => {
-  if (!req.user) { return notFound(res, 'Login Session') };
-
-  const user = await User.findOne({
-    where: { id: req.user.id },
-    attributes: ['id', 'name', 'email', 'role'],
-    include: [
-      { model: Address, as: 'warehouseAddress', where: { addressType: AddressEnum.user } },
-      // { model: Transaction, as: 'transactions', limit: 10 },
-      // { model: Package, as: 'packages', limit: 10 },
-    ],
-  });
-
-  if (!user) { return notFound(res, 'Current User') };
-
-  return res.json({ user });
 };
 
 export const getUsers = async (req: AuthRequest, res: ResponseAdv<GetUsersRes>) => {
@@ -113,13 +91,17 @@ export const getUsers = async (req: AuthRequest, res: ResponseAdv<GetUsersRes>) 
       limit,
       offset,
       include: [
-        { model: Address, as: 'warehouseAddress', where: {...whereAddress,  addressType: AddressEnum.user } },
+        { model: Address, 
+          as: 'warehouseAddress', 
+          attributes: ['id', 'name', 'address1', 'address2', 'zip', 'state', 'email', 'phone'], 
+          where: {...whereAddress,  addressType: AddressEnum.user } },
       ],
     });
     const total = rows.count;
     const users = rows.rows;
     return res.json({ users, total });
   } catch (error: any) {
+    logger.error(`Error in getUsers: ${error}`);
     return res.status(400).json({ message: error.message });
   }
 };
@@ -129,7 +111,11 @@ export const getUserById = async (req: AuthRequest, res: ResponseAdv<GetUserRes>
     const user = await User.findOne({
       attributes: ['id', 'name', 'email', 'role'],
       include: [
-        { model: Address, as: 'warehouseAddress', where: { addressType: AddressEnum.user } },
+        { model: Address, 
+          as: 'warehouseAddress', 
+          attributes: ['id', 'name', 'address1', 'address2', 'zip', 'state', 'email', 'phone'], 
+          where: { addressType: AddressEnum.user } 
+        },
         // { model: Transaction, as: 'transactions', limit: 10 },
         // { model: Package, as: 'packages', limit: 10 },
       ],
@@ -139,11 +125,12 @@ export const getUserById = async (req: AuthRequest, res: ResponseAdv<GetUserRes>
 
     return res.json({ user });
   } catch (error: any) {
+    logger.error(`Error in getUserById: ${error}`);
     return res.status(400).json({ message: error.message });
   }
 };
 
-export const deleteUser = async (req: AuthRequest, res: ResponseAdv<SimpleRes>) => {
+export const deleteUserById = async (req: AuthRequest, res: ResponseAdv<SimpleRes>) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) {
@@ -156,6 +143,7 @@ export const deleteUser = async (req: AuthRequest, res: ResponseAdv<SimpleRes>) 
     await Package.destroy({ where: { userId: user.id } });
     return res.json({ message: 'User deleted' });
   } catch (error: any) {
+    logger.error(`Error in deleteUser: ${error}`);
     return res.status(400).json({ message: error.message });
   }
 }

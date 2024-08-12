@@ -10,7 +10,7 @@ import MessageAlert from '../share/MessageAlert';
 import RecordsQuery from '../query/RecordsQuery';
 import UserApi from '../../api/UserApi';
 import { convertToTimeString } from '../../util/time';
-import ModelActions from './UsersActions';
+import ModelActions from '../share/ModelActions';
 
 const Users: React.FC = () => {
   const [users, setUsers] = useState<UserModel[]>([]);
@@ -45,7 +45,7 @@ const Users: React.FC = () => {
                   <TableCell>{user.warehouseAddress.address1}</TableCell>
                   <TableCell>{convertToTimeString(user.createdAt || '')}</TableCell>
                   <StyledTabelCell style={{ width: '200px', whiteSpace: 'nowrap' }}>
-                    <ModelActions model={user} setMessage={setMessage} modelName='users'/>
+                    <ModelActions model={user} setMessage={setMessage} modelName='users' deleteAction={UserApi.deleteUser}/>
                   </StyledTabelCell>
                 </TableRow>
               ))}

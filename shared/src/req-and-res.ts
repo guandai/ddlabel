@@ -10,12 +10,12 @@ export type RegisterUserRes = {
 	userId: number;
 };
 
-export type UpdateCurrentUserReq = Pick<UserAttributes, 'name' | 'email' | 'role'> & {
+export type UpdateUserReq = Omit<UserAttributes, 'password' > & {
 	password?: string;
 } & {
 	warehouseAddress: AddressAttributes;
 };
-export type UpdateCurrentUserRes = {
+export type UpdateUserRes = {
 	success: boolean;
 };
 
@@ -30,20 +30,11 @@ export type GetUserRes = {
 	user: UserModel
 };
 
-export type GetCurrentUserRes = {
-	user: UserModel;
-};
-
 export type LoginUserReq = Pick<UserAttributes, 'email' | 'password'>;
 export type LoginUserRes = {
 	token: string;
 	userId: number;
 	userRole: UserRolesEnum;
-};
-
-export type UpdateUserReq = Pick<UserAttributes, 'name' | 'email' | 'role'> & { password?: string } & { warehouseAddress: AddressAttributes };
-export type UpdateUserRes = {
-	success: boolean;
 };
 
 export type Models = UserAttributes | PackageModel | TransactionModel | AddressModel;
