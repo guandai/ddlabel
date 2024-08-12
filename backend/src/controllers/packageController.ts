@@ -60,14 +60,13 @@ export const getPackages = async (req: AuthRequest, res: ResponseAdv<GetPackages
   const relationQuery = getRelationQuery(req);
 
   try {
-    const packages = await Package.findAll({
+    const rows = await Package.findAndCountAll({
       ...relationQuery,
       limit,
       offset,
     });
 
-    const total = (await Package.count(relationQuery)) ;
-    return res.json({ total, packages });
+    return res.json({ total: rows.count, packages: rows.rows });
   } catch (error: any) {
     logger.error(`Error in getPackages: ${error}`);
     return res.status(400).json({ message: error.message });

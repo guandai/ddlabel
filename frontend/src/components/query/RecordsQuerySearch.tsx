@@ -11,14 +11,14 @@ type Props = {
 	setEndDate: React.Dispatch<React.SetStateAction<Date | null>>;
 	startDate: Date | null;
 	setStartDate: React.Dispatch<React.SetStateAction<Date | null>>;
-	tracking: string;
-	setTracking: React.Dispatch<React.SetStateAction<string>>;
+	trackingNo: string;
+	setTrackingNo: React.Dispatch<React.SetStateAction<string>>;
 	address: string;
 	setAddress: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const RecordsQuerySearch: React.FC<Props> = (prop) => {
-	const { setPage, startDate, setStartDate, endDate, setEndDate, tracking, setTracking, address, setAddress } = prop
+	const { setPage, startDate, setStartDate, endDate, setEndDate, trackingNo, setTrackingNo, address, setAddress } = prop
 
 	const onChangeStartDate = (newDate: Date | null) => {
 		if (!newDate) return;
@@ -35,7 +35,7 @@ const RecordsQuerySearch: React.FC<Props> = (prop) => {
 	}
 
 	const onChangeSearchTracking = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setTracking(event.target.value);
+		setTrackingNo(event.target.value);
 		setPage(1);
 	};
 	
@@ -47,9 +47,11 @@ const RecordsQuerySearch: React.FC<Props> = (prop) => {
 	const dataPickerStyle = {
 		width: '140px',
 		margin: '8px',
-		'& label': { fontSize: '14px', top: '-5px' },
-		'& input': { width:'90px', padding: '8px 0px 8px 8px' },
-		'& .MuiInputAdornment-root': { margin: '0px' }
+		'& label': { fontSize: '14px', top: '-8px' },
+		'& input': { fontSize: '14px', width:'90px', padding: '8px 0px 8px 8px' },
+		'& .MuiInputAdornment-root': { margin: '0px' },
+		'& .MuiInputLabel-formControl.Mui-focused': { top: '0px', transform: 'translate(14px, -9px) scale(0.75)' },
+		"& .MuiFormLabel-filled": { top: '0px' },
 	};
 	const textSearchStyle = { m: 1, width: '130px', '& label': { fontSize: '14px' } };
 	
@@ -79,7 +81,7 @@ const RecordsQuerySearch: React.FC<Props> = (prop) => {
 				sx={textSearchStyle}
 				label='Search Tracking'
 				type='text'
-				value={tracking}
+				value={trackingNo}
 				onChange={onChangeSearchTracking}
 			/>
 			<TextField

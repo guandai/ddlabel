@@ -1,4 +1,8 @@
 import { Optional } from 'sequelize';
+export declare enum UserRolesEnum {
+    worker = "worker",
+    admin = "admin"
+}
 export declare enum PackageSource {
     manual = "manual",
     csv = "csv",
@@ -27,21 +31,25 @@ export type UserModel = UserAttributes & {
     warehouseAddress: AddressAttributes;
     transactions: TransactionAttributes[];
     packages: PackageAttributes[];
+    createdAt?: string;
 };
 export type PackageModel = PackageAttributes & {
     user: UserAttributes;
     fromAddress: AddressAttributes;
     toAddress: AddressAttributes;
     transaction: TransactionAttributes;
+    createdAt?: string;
 };
 export type AddressModel = AddressAttributes & {
     user: UserAttributes;
     fromPackage: PackageAttributes;
     toPackage: PackageAttributes;
+    createdAt?: string;
 };
 export type TransactionModel = TransactionAttributes & {
     package: PackageAttributes;
     user: UserAttributes;
+    createdAt?: string;
 };
 export declare enum PortEnum {
     LAX = "LAX",
@@ -81,7 +89,7 @@ export type UserAttributes = {
     name: string;
     email: string;
     password: string;
-    role: string;
+    role: UserRolesEnum;
 };
 export type UserType = UserAttributes & {
     warehouseAddress: AddressAttributes;

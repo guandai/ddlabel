@@ -22,7 +22,7 @@ const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageModel[]>([]);
   const [message, setMessage] = useState<MessageContent>(null);
   const [statusLogs, setStatusLogs] = useState<StatusLogsMaps>([]);
-  const [filter, setFilter] = useState<FilterConfig>({ startDate: null, endDate: null, tracking: '', address: '' });
+  const [filter, setFilter] = useState<FilterConfig>({ startDate: null, endDate: null, trackingNo: '', address: '' });
 
   useEffect(() => {
     const loadPackageAndBeanLog = async () => {
@@ -63,7 +63,7 @@ const PackageTable: React.FC = () => {
               {packages.map((pkg) => (
                 <TableRow key={pkg.id}>
                   <StyledTabelCell sx={{ margin: '0px' }} >{pkg.toAddress.address1}</StyledTabelCell>
-                  <StyledTabelCell>{convertToTimeString((pkg as any).createdAt)}</StyledTabelCell>
+                  <StyledTabelCell>{convertToTimeString(pkg.createdAt || '')}</StyledTabelCell>
                   <StyledTabelCell>
                     <StatusLabel status={toStatus(pkg.id)}>{toStatus(pkg.id)}</StatusLabel>
                   </StyledTabelCell>

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isGetTransactionRes = exports.isGetTransactionsRes = exports.isGetPackagesRes = exports.isGetPackageRes = exports.ModelEnum = void 0;
+exports.isGetUserRes = exports.isGetUsersRes = exports.isGetTransactionRes = exports.isGetTransactionsRes = exports.isGetPackagesRes = exports.isGetPackageRes = exports.ModelEnum = void 0;
 var ModelEnum;
 (function (ModelEnum) {
     ModelEnum["user"] = "user";
@@ -25,3 +25,11 @@ var isGetTransactionRes = function (res) {
     return res.transaction !== undefined;
 };
 exports.isGetTransactionRes = isGetTransactionRes;
+var isGetUsersRes = function (res) {
+    return res.users !== undefined;
+};
+exports.isGetUsersRes = isGetUsersRes;
+var isGetUserRes = function (res) {
+    return res.user !== undefined;
+};
+exports.isGetUserRes = isGetUserRes;

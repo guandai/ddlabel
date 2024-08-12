@@ -7,7 +7,9 @@ import { Address } from '../models/Address';
 import logger from '../config/logger';
 import { AuthRequest } from '../types';
 import {
+  AddressEnum,
   GetCurrentUserRes,
+  GetUserRes,
   GetUsersRes,
   LoginUserRes,
   RegisterUserReq,
@@ -17,7 +19,10 @@ import {
   UpdateUserReq,
   UpdateUserRes
 } from '@ddlabel/shared';
-import { aggregateError } from '../utils/errors';
+import { aggregateError, notFound } from '../utils/errors';
+import { Transaction } from '../models/Transaction';
+import { Package } from '../models/Package';
+import { getAddressesWhere, getQueryWhere, getRelationQuery } from './packageControllerUtil';
 
 export const registerUser = async (req: Request, res: ResponseAdv<RegisterUserRes>) => {
   const { name, email, password, role, warehouseAddress }: RegisterUserReq = req.body;
@@ -44,7 +49,7 @@ export const loginUser = async (req: AuthRequest, res: ResponseAdv<LoginUserRes>
     
     if (user && (await bcrypt.compare(password, user.password))) {
       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: '7d' });
-      return res.json({ token, userId: user.id });
+      return res.json({ token, userId: user.id, userRole: user.role });
     } else {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
@@ -77,32 +82,61 @@ export const updateCurrentUser = async (req: AuthRequest, res: ResponseAdv<Updat
 };
 
 export const getCurrentUser = async (req: AuthRequest, res: ResponseAdv<GetCurrentUserRes>) => {
-  const notFound = () => res.status(404).json({ message: 'User not found' });
-
-  if (!req.user) { return notFound() };
+  if (!req.user) { return notFound(res, 'Login Session') };
 
   const user = await User.findOne({
     where: { id: req.user.id },
     attributes: ['id', 'name', 'email', 'role'],
     include: [
       { model: Address, as: 'warehouseAddress' },
+      { model: Transaction, as: 'transactions' },
+      { model: Package, as: 'packages' },
     ],
   });
 
-  if (!user) { return notFound() };
+  if (!user) { return notFound(res, 'Current User') };
 
   return res.json({ user });
 };
 
 export const getUsers = async (req: AuthRequest, res: ResponseAdv<GetUsersRes>) => {
+  const limit = parseInt(req.query.limit as string) || 100; // Default limit to 20 if not provided
+  const offset = parseInt(req.query.offset as string) || 0; // 
+  const where = getQueryWhere(req);
+  const whereAddress = getAddressesWhere(req, AddressEnum.user);
+  
   try {
-    const users = await User.findAll({
+    const rows = await User.findAndCountAll({
+      where,
+      attributes: ['id', 'name', 'email', 'role', 'createdAt'],
+      limit,
+      offset,
+      include: [
+        { model: Address, as: 'warehouseAddress', where: {...whereAddress,  addressType: AddressEnum.user } },
+      ],
+    });
+    const total = rows.count;
+    const users = rows.rows;
+    return res.json({ users, total });
+  } catch (error: any) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+export const getUserById = async (req: AuthRequest, res: ResponseAdv<GetUserRes>) => {
+  try {
+    const user = await User.findOne({
       attributes: ['id', 'name', 'email', 'role'],
       include: [
         { model: Address, as: 'warehouseAddress' },
+        { model: Transaction, as: 'transactions' },
+        { model: Package, as: 'packages' },
       ],
+      where: { id: req.params.id }
     });
-    return res.json({ users });
+    if (!user) { return notFound(res, 'User (By Id)') };
+
+    return res.json({ user });
   } catch (error: any) {
     return res.status(400).json({ message: error.message });
   }

@@ -5,7 +5,7 @@ import { tryLoad } from '../../util/errors';
 import AddressForm from '../share/AddressForm';
 import { MessageContent } from '../../types';
 import MessageAlert from '../share/MessageAlert';
-import { AddressEnum, UserModel } from '@ddlabel/shared';
+import { AddressEnum, UserModel, UserRolesEnum } from '@ddlabel/shared';
 import { AddressAttributes } from "@ddlabel/shared";
 import UserApi from '../../api/UserApi';
 import { StyledBox } from '../../util/styled';
@@ -24,12 +24,7 @@ type UserFormProps = {
   isRegister?: boolean;
 }
 
-const enum UserRoles {
-  worker = 'worker',
-  admin = 'admin',
-}
-
-const defaultUser = { role: UserRoles.worker, warehouseAddress: { addressType: AddressEnum.user } } as ProfileType;
+const defaultUser = { role: UserRolesEnum.worker, warehouseAddress: { addressType: AddressEnum.user } } as ProfileType;
 
 const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
   ;

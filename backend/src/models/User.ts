@@ -3,7 +3,7 @@ import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../config/database';
 import { Address } from './Address';
 import { Transaction } from './Transaction';
-import { UserAttributes, UserCreationAttributes } from '@ddlabel/shared';
+import { UserAttributes, UserCreationAttributes, UserRolesEnum } from '@ddlabel/shared';
 import { defineRelations } from '../config/relations';
 import { Package } from './Package';
 
@@ -12,11 +12,11 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public name!: string;
   public email!: string;
   public password!: string;
-  public role!: string;
+  public role!: UserRolesEnum
 
-  public warehouseAddress!: Address;
-  public packages!: Package[];
   public transactions!: Transaction[];
+  public packages!: Package[];
+  public warehouseAddress!: Address;
 }
 
 User.init(
@@ -43,14 +43,6 @@ User.init(
       type: DataTypes.ENUM('admin', 'worker'),
       allowNull: false,
     },
-    // warehouseAddressId: {
-    //   type: DataTypes.INTEGER.UNSIGNED,
-    //   allowNull: false,
-    //   references: {
-    //     model: Address,
-    //     key: 'id',
-    //   },
-    // },
   },
   {
     sequelize,
