@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Table, TableBody, TableContainer, TableHead, TableRow,
   Paper, Typography
@@ -23,6 +23,7 @@ const PackageTable: React.FC = () => {
   const [message, setMessage] = useState<MessageContent>(null);
   const [statusLogs, setStatusLogs] = useState<StatusLogsMaps>([]);
   const [filter, setFilter] = useState<FilterConfig>({ startDate: null, endDate: null, trackingNo: '', address: '' });
+  const prevPackagesRef = useRef(packages);
 
   useEffect(() => {
     const loadPackageAndBeanLog = async () => {
@@ -34,7 +35,13 @@ const PackageTable: React.FC = () => {
       setStatusLogs(statusLogsMap);
     };
 
-    tryLoad(setMessage, loadPackageAndBeanLog);
+    const prevPackages = prevPackagesRef.current;
+    if (JSON.stringify(prevPackages) !== JSON.stringify(packages)) {
+      tryLoad(setMessage, loadPackageAndBeanLog);
+    }
+
+    // Update the ref to the current value after comparison
+    prevPackagesRef.current = packages;
   }, [packages]);
 
   const toStatus = (pkgId: number) => {

@@ -28,7 +28,6 @@ const PackageForm: React.FC = () => {
   const [message, setMessage] = useState<MessageContent>(null);
   const navigate = useNavigate();
   const { id: packageId } = useParams<{ id: string }>(); // from url params
-  // const api = useMemo(() => new PackageApi(), [])
 
   const quickField = ({ name, type = 'number', pattern = '^[1-9][0-9]*$', required = true }: QuickFieldProp) => (
     <Grid item xs={12} sm={6}>

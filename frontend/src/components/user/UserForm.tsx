@@ -9,25 +9,27 @@ import { AddressEnum, UserModel, UserRolesEnum } from '@ddlabel/shared';
 import { AddressAttributes } from "@ddlabel/shared";
 import UserApi from '../../api/UserApi';
 import { StyledBox } from '../../util/styled';
+import { useParams } from 'react-router-dom';
 
 export type ProfileType = UserModel & { confirmPassword: string };
 
 type QuickFieldProp = {
   name: keyof ProfileType;
   autoComplete?: string;
-  type?: 'text' | 'password';
+  type?: 'text' | 'password'; 
   required?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
 type UserFormProps = {
+  isCurrentUser?: boolean;
   isRegister?: boolean;
 }
 
 const defaultUser = { role: UserRolesEnum.worker, warehouseAddress: { addressType: AddressEnum.user } } as ProfileType;
 
-const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
-  ;
+const UserForm: React.FC<UserFormProps> = ({ isRegister = false, isCurrentUser = false }) => {
+  const userId = useParams<{ id: string }>().id;
   const [profile, setProfile] = useState<ProfileType>(defaultUser);
   const [message, setMessage] = useState<MessageContent>(null);
 
@@ -41,30 +43,27 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
   }, [profile.confirmPassword, profile.password]);
 
   useEffect(() => {
-    if (isRegister) {
-      return;
-    }
-    const getCurrentUser = async () => {
-      setProfile({
-        ...(await UserApi.getCurrentUser()).user,
-        password: '', // Ensure password is empty initially
-        confirmPassword: '',
-      });
+    const fetchUserData = async () => {
+      if (!isRegister) {
+        const userResponse = isCurrentUser ? await UserApi.getCurrentUser() : await UserApi.getUser(Number(userId));
+        setProfile({
+          ...userResponse.user,
+          password: '',
+          confirmPassword: '',
+        });
+      }
     };
-    tryLoad(setMessage, getCurrentUser);
-  }, [isRegister]);
+    tryLoad(setMessage, fetchUserData);
+  }, [isRegister, userId, isCurrentUser]);
 
   useEffect(() => {
     // This will run after every render if status changes
     testPassword();
-  }
-    , [profile.confirmPassword, profile.password, testPassword]);
+  }, [profile.confirmPassword, profile.password, testPassword]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
-
-
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
@@ -133,6 +132,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
       />
     )
   };
+
   return (
     <Container component="main" maxWidth="md">
       <StyledBox>

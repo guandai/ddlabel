@@ -61,10 +61,10 @@ const PackageDialog: React.FC<PackageDialogProps> = ({ open, handleClose, pkg })
                 {/* <PackageGetRate pkg={pkg} /> */}
                 <BeansStatusInfo pkg={pkg} />
 
-                <DialogCard title="Package Information" cards={packageInfo} />
-                <DialogCard title="Sender Information" cards={senderInfo} />
-                <DialogCard title="Receiver Information" cards={receiverInfo} />
-                <DialogCard title="Package Dimensions" cards={packageDimensions} />
+                <DialogCard title="Package Information" gridNodes={packageInfo} />
+                <DialogCard title="Sender Information" gridNodes={senderInfo} />
+                <DialogCard title="Receiver Information" gridNodes={receiverInfo} />
+                <DialogCard title="Package Dimensions" gridNodes={packageDimensions} />
 
                 <DialogActions>
                     <Button onClick={handleClose} color="primary">Close</Button>

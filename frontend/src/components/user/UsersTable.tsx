@@ -1,7 +1,8 @@
+// frontend/src/components/user/UsersTable.tsx
 // frontend/src/components/Users.tsx
 import React, { useState } from 'react';
 import { Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { FlexBox, StyledBox } from '../../util/styled';
+import { FlexBox, StyledBox, StyledTabelCell } from '../../util/styled';
 import { MessageContent } from '../../types';
 import { UserModel } from '@ddlabel/shared';
 import UserTableSideBar from './UserTableSideBar';
@@ -9,14 +10,14 @@ import MessageAlert from '../share/MessageAlert';
 import RecordsQuery from '../query/RecordsQuery';
 import UserApi from '../../api/UserApi';
 import { convertToTimeString } from '../../util/time';
-
+import ModelActions from './UsersActions';
 
 const Users: React.FC = () => {
   const [users, setUsers] = useState<UserModel[]>([]);
   const [message, setMessage] = useState<MessageContent>(null);
 
   return (
-    <FlexBox component="main" maxWidth="lg" >
+    <FlexBox component="main" maxWidth="lg">
       <UserTableSideBar setUsers={setUsers} setMessage={setMessage} />
     
       <StyledBox>
@@ -32,6 +33,7 @@ const Users: React.FC = () => {
                 <TableCell>Role</TableCell>
                 <TableCell>Address</TableCell>
                 <TableCell>Created At</TableCell>
+                <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -42,6 +44,9 @@ const Users: React.FC = () => {
                   <TableCell>{user.role}</TableCell>
                   <TableCell>{user.warehouseAddress.address1}</TableCell>
                   <TableCell>{convertToTimeString(user.createdAt || '')}</TableCell>
+                  <StyledTabelCell style={{ width: '200px', whiteSpace: 'nowrap' }}>
+                    <ModelActions model={user} setMessage={setMessage} modelName='users'/>
+                  </StyledTabelCell>
                 </TableRow>
               ))}
             </TableBody>

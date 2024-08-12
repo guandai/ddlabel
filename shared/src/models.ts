@@ -176,3 +176,4 @@ export type ZipCodeAttributes = {
 	createdAt: Date;
 	updatedAt: Date;
   }
+

@@ -76,7 +76,7 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ pkg }) => {
     return (
 		<Box>
             <MessageAlert message={message} />
-			<DialogCard title="Package Rate" cards={[{ label: 'Sort Code',  value: rate === null ? '...' : sortCode }]} />
+			<DialogCard title="Package Rate" gridNodes={[{ label: 'Sort Code',  value: rate === null ? '...' : sortCode }]} />
 		</Box>
     );
 };

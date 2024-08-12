@@ -7,6 +7,7 @@ export class UserApi {
 	getCurrentUser = async () => (await axios.get<GetCurrentUserRes>(`${this.path}/me`, this.config)).data;
 	getUsers = async (params?: GetUsersReq ) => (await axios.get<GetUsersRes>(`${this.path}`, {...this.config, params})).data
 	getUser = async (userId: number) => (await axios.get<GetCurrentUserRes>(`${this.path}/${userId}`, this.config)).data;
+	deleteUser = async (userId: number) => (await axios.delete(`${this.path}/${userId}`, this.config)).data;
 	updateUser = async (payload: UpdateUserReq) => (await axios.put<UpdateUserRes>(`${this.path}/me`, payload, this.config)).data;
 	login = async (payload: LoginUserReq) => (await axios.post<LoginUserRes>(`${this.path}/login`, payload, this.config)).data;
 	register = async (payload: RegisterUserReq) => (await axios.post<RegisterUserRes>(`${this.path}/register`, payload, this.config)).data;

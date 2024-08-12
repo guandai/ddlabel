@@ -42,8 +42,8 @@ export type UpdateUserReq = Pick<UserAttributes, 'name' | 'email' | 'role'> & {
 export type UpdateUserRes = {
     success: boolean;
 };
-export type Model = UserModel | PackageModel | TransactionModel | AddressModel;
-export type Models = 'user' | 'package' | 'transaction' | 'address';
+export type Models = UserAttributes | PackageModel | TransactionModel | AddressModel;
+export type ModelNames = 'user' | 'package' | 'transaction' | 'address';
 export declare enum ModelEnum {
     user = "user",
     package = "package",
