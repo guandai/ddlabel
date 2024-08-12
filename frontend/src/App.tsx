@@ -1,7 +1,7 @@
 // frontend/src/App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import Users from './components/user/Users';
+import UsersTable from './components/user/UsersTable';
 import LoginForm from './components/user/LoginForm';
 import UserForm from './components/user/UserForm';
 import PackageForm from './components/package/PackageForm';
@@ -14,7 +14,6 @@ import PdfExporter from './components/label/PdfExporter';
 
 const AppContent: React.FC = () => {
   const location = useLocation();
-
   const showHeader = !(location.pathname.startsWith('/packages/') && location.pathname.match(/\/packages\/\d+\/label/));
 
   return (
@@ -23,7 +22,7 @@ const AppContent: React.FC = () => {
       <Routes>
         <Route path="/" element={<LoginForm />} />
         <Route path="/pdfs" element={<PdfExporter />} />
-        <Route path="/users" element={<Users />} />
+        <Route path="/users" element={<UsersTable />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<UserForm isRegister={true} />} />
         <Route path="/profile" element={<PrivateRoute component={UserForm} />} />

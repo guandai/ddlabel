@@ -1,6 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AddressEnum = exports.PortEnum = exports.PackageSource = void 0;
+exports.AddressEnum = exports.PortEnum = exports.PackageSource = exports.UserRolesEnum = void 0;
+var UserRolesEnum;
+(function (UserRolesEnum) {
+    UserRolesEnum["worker"] = "worker";
+    UserRolesEnum["admin"] = "admin";
+})(UserRolesEnum = exports.UserRolesEnum || (exports.UserRolesEnum = {}));
 // Packages
 var PackageSource;
 (function (PackageSource) {

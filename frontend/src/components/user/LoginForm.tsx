@@ -1,4 +1,4 @@
-// frontend/src/components/LoginForm.tsx
+// frontend/src/components/user/LoginForm.tsx
 import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, Container } from '@mui/material';
 import { tryLoad } from '../../util/errors';
@@ -21,7 +21,9 @@ const LoginForm: React.FC = () => {
     const login = async () => {
       const response = await UserApi.login(formData);
       localStorage.setItem('token', response.token);
+      localStorage.setItem('userRole', response.userRole);
       localStorage.setItem('userId', String(response.userId));
+
       setTimeout(() => {
         window.location.href = '/packages';
       }, 100);
@@ -31,7 +33,6 @@ const LoginForm: React.FC = () => {
 
   return (
     <Container component="main" maxWidth="lg">
-       
       <Box
         sx={{
           marginTop: 8,
@@ -46,7 +47,7 @@ const LoginForm: React.FC = () => {
         <Typography component="p" sx={{ mt: 2 }}>
           This system allows you to manage your shipping packages, generate logistic labels, and track your shipments.
         </Typography>
-        
+
         <MessageAlert message={message} />
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
           <TextField

@@ -6,11 +6,13 @@ import MonkeyLogo from '../../assets/svg/monkey_logo.svg';
 
 const Header: React.FC = () => {
   const isAuthenticated = !!localStorage.getItem('token'); // Check if user is authenticated
+  const userRole = localStorage.getItem('userRole');
   const navigate = useNavigate();
-
+  
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
     navigate('/login');
   };
 
@@ -18,7 +20,6 @@ const Header: React.FC = () => {
     if (!isAuthenticated) {
       navigate('/login');
     }
-
   }, [isAuthenticated, navigate]);
 
   return (
@@ -30,7 +31,7 @@ const Header: React.FC = () => {
         </Typography>
         {isAuthenticated && (
           <>
-            {<Button color="inherit" component={Link} to="/users">
+            {userRole === "admin"  && <Button color="inherit" component={Link} to="/users">
               USERS
             </Button>}
             <Button color="inherit" component={Link} to="/profile">

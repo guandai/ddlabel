@@ -1,7 +1,7 @@
 import { ResponseAdv } from "@ddlabel/shared";
 import moment from "moment";
 import { UniqueConstraintError } from "sequelize";
-
+import { Response } from "express";
 export const isValidJSON = (str: string) => {
 	try {
 		JSON.parse(str);
@@ -31,3 +31,5 @@ export const aggregateError = (error: UniqueConstraintError | Error) =>
 export const ReturnMsg = <T>(res: ResponseAdv<T>, message: string, code = 400) => res.status(code).json({ message});
 
 export const isDateValid = (date: string) => moment(date, moment.ISO_8601, true).isValid();
+
+export const notFound = (res: Response, model = `Record`) => res.status(404).json({ message: `${model} not found` });

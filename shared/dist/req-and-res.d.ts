@@ -1,5 +1,5 @@
 import { Optional } from 'sequelize';
-import { AddressAttributes, AddressModel, PackageModel, PostalZoneAttributes, TransactionModel, UserAttributes, UserModel } from "./models";
+import { AddressAttributes, AddressModel, PackageModel, PostalZoneAttributes, TransactionModel, UserAttributes, UserModel, UserRolesEnum } from "./models";
 import { SimpleRes } from './types';
 import { BeansAI } from './beans';
 export type RegisterUserReq = Pick<UserAttributes, 'name' | 'email' | 'password' | 'role'> & {
@@ -17,8 +17,13 @@ export type UpdateCurrentUserReq = Pick<UserAttributes, 'name' | 'email' | 'role
 export type UpdateCurrentUserRes = {
     success: boolean;
 };
+export type GetUsersReq = GetRecordsReq;
 export type GetUsersRes = {
     users: UserModel[];
+    total: number;
+};
+export type GetUserRes = {
+    user: UserModel;
 };
 export type GetCurrentUserRes = {
     user: UserModel;
@@ -27,6 +32,7 @@ export type LoginUserReq = Pick<UserAttributes, 'email' | 'password'>;
 export type LoginUserRes = {
     token: string;
     userId: number;
+    userRole: UserRolesEnum;
 };
 export type UpdateUserReq = Pick<UserAttributes, 'name' | 'email' | 'role'> & {
     password?: string;
@@ -46,15 +52,18 @@ export declare enum ModelEnum {
 }
 export type WeightUnit = 'lbs' | 'oz';
 export type VolumeUnit = 'inch' | 'mm';
-export type GetRecordsRes = GetPackagesRes | GetTransactionsRes;
-export type GetRecordRes = GetPackageRes | GetTransactionRes;
+export type GetRecordsRes = GetPackagesRes | GetTransactionsRes | GetUsersRes;
+export type GetRecordRes = GetPackageRes | GetTransactionRes | GetUserRes;
 export type PaginationRecordReq = {
     limit: number;
     offset: number;
 };
 export type SearchRecordReq = {
-    tracking: string;
-    address: string;
+    trackingNo?: string;
+    email?: string;
+    role?: UserRolesEnum;
+    name?: string;
+    address?: string;
 };
 export type DateRecordReq = {
     startDate: string;
@@ -132,3 +141,5 @@ export declare const isGetPackageRes: (res: GetRecordRes) => res is GetPackageRe
 export declare const isGetPackagesRes: (res: GetRecordsRes) => res is GetPackagesRes;
 export declare const isGetTransactionsRes: (res: GetRecordsRes) => res is GetTransactionsRes;
 export declare const isGetTransactionRes: (res: GetRecordRes) => res is GetTransactionRes;
+export declare const isGetUsersRes: (res: GetRecordsRes) => res is GetUsersRes;
+export declare const isGetUserRes: (res: GetRecordRes) => res is GetUserRes;

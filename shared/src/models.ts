@@ -1,5 +1,9 @@
 
 import { Optional } from 'sequelize';
+export enum UserRolesEnum {
+	worker = 'worker',
+	admin = 'admin',
+}
 
 // Packages
 export enum PackageSource {
@@ -34,6 +38,7 @@ export type UserModel = UserAttributes & {
 	warehouseAddress: AddressAttributes;
 	transactions: TransactionAttributes[];
 	packages: PackageAttributes[];
+	createdAt?: string
 }
 
 export type PackageModel = PackageAttributes & {
@@ -41,17 +46,20 @@ export type PackageModel = PackageAttributes & {
 	fromAddress: AddressAttributes;
 	toAddress: AddressAttributes;
 	transaction: TransactionAttributes;
+	createdAt?: string
 };
 
 export type AddressModel = AddressAttributes & {
 	user: UserAttributes;
 	fromPackage: PackageAttributes;
 	toPackage: PackageAttributes;
+	createdAt?: string
 };
 
 export type TransactionModel = TransactionAttributes & {	
 	package: PackageAttributes;
 	user: UserAttributes;
+	createdAt?: string
 };
 
 // Address
@@ -98,7 +106,7 @@ export type UserAttributes = {
 	name: string;
 	email: string;
 	password: string;
-	role: string;
+	role: UserRolesEnum;
 }
 
 export type UserType = UserAttributes & {
