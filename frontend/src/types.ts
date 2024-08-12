@@ -33,3 +33,5 @@ export type MessageContent = {
     text: string,
     level: 'error' | 'success' | 'info' | 'warning',
 } | null;
+
+export type SearchOptions = 'address' | 'date' | 'email' | 'trackingNo';
