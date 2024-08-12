@@ -10,6 +10,8 @@ import PackageApi from '../../api/PackageApi';
 import { useNavigate } from 'react-router-dom';
 import BeansAiApi from '../../external/beansApi';
 import { SetMessage, tryLoad } from '../../util/errors';
+import ModelDialog from '../dialog/ModelDialog';
+import ModelActions from '../share/ModelActions';
 
 type PackageActionsProps = {
   pkg: PackageModel;
@@ -17,36 +19,19 @@ type PackageActionsProps = {
 };
 
 const PackageActions: React.FC<PackageActionsProps> = ({ pkg, setMessage }) => {
-  const [pkgOpen, setPkgOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const [logs, setLogs] = useState<BeansAI.StatusLog[] | null>(null);
   const navigate = useNavigate();
-
-  const handleViewDetails = () => {
-    setPkgOpen(true);
-  };
-
-  const handlePkgClose = () => {
-    setPkgOpen(false);
-  };
-
-  const handleEdit = () => {
-    navigate(`/packages/edit/${pkg.id}`);
-  };
-
-  const handleDelete = async () => {
-    const deleteLoading = async () => {
-      await PackageApi.deletePackage(String(pkg.id));
-      setMessage({ text: 'Package deleted', level: 'success' });
-    };
-    tryLoad(setMessage, deleteLoading);
-  };
 
   const handleViewLog = async () => {
     const log = await BeansAiApi.getStatusLog({ trackingNo: pkg.trackingNo });
     setLogs(log.listItemReadableStatusLogs);
     setLogOpen(true);
   };
+
+  const handelLabel = () => {
+    navigate(`/packages/${pkg.id}/label`);
+  }
 
   const handleLogClose = () => {
     setLogOpen(false);
@@ -55,17 +40,11 @@ const PackageActions: React.FC<PackageActionsProps> = ({ pkg, setMessage }) => {
 
   return (
     <>
-      <IconButton onClick={handleViewDetails}><Visibility /></IconButton>
-      <IconButton onClick={handleEdit}><Edit /></IconButton>
-      <IconButton onClick={handleDelete}><Delete /></IconButton>
-      <IconButton onClick={() => generatePDF(pkg)}><PictureAsPdf /></IconButton>
-      <IconButton onClick={handleViewLog}><AssignmentTurnedInIcon /></IconButton>
-      <IconButton component="a" href={`/packages/${pkg.id}/label`} target="_blank"><Label /></IconButton>
-      
-      {/* Package Dialog */}
-      <PackageDialog open={pkgOpen} handleClose={handlePkgClose} pkg={pkg} />
-      
-      {/* Status Logs Dialog */}
+      <ModelActions model={pkg} modelName="packages" setMessage={setMessage} deleteAction={PackageApi.deletePackage} >
+        <IconButton onClick={() => generatePDF(pkg)}><PictureAsPdf /></IconButton>
+        <IconButton onClick={handleViewLog}><AssignmentTurnedInIcon /></IconButton>
+        <IconButton onClick={handelLabel}><Label /></IconButton>
+      </ModelActions>
       <StatusLogsDialog open={logOpen} handleClose={handleLogClose} logs={logs} />
     </>
   );

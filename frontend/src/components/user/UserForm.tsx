@@ -22,14 +22,16 @@ type QuickFieldProp = {
 };
 
 type UserFormProps = {
-  isCurrentUser?: boolean;
   isRegister?: boolean;
 }
 
 const defaultUser = { role: UserRolesEnum.worker, warehouseAddress: { addressType: AddressEnum.user } } as ProfileType;
 
-const UserForm: React.FC<UserFormProps> = ({ isRegister = false, isCurrentUser = false }) => {
-  const userId = useParams<{ id: string }>().id;
+const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
+  const paramsUserId = useParams<{ id: string }>().id;
+  const currentUserId = localStorage.getItem('userId');
+  const userId = (window.location.pathname === '/profile' && currentUserId) ? currentUserId : paramsUserId;
+
   const [profile, setProfile] = useState<ProfileType>(defaultUser);
   const [message, setMessage] = useState<MessageContent>(null);
 
@@ -45,7 +47,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false, isCurrentUser =
   useEffect(() => {
     const fetchUserData = async () => {
       if (!isRegister) {
-        const userResponse = isCurrentUser ? await UserApi.getCurrentUser() : await UserApi.getUser(Number(userId));
+        const userResponse = await UserApi.getUser(Number(userId));
         setProfile({
           ...userResponse.user,
           password: '',
@@ -54,7 +56,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false, isCurrentUser =
       }
     };
     tryLoad(setMessage, fetchUserData);
-  }, [isRegister, userId, isCurrentUser]);
+  }, [isRegister, userId]);
 
   useEffect(() => {
     // This will run after every render if status changes
