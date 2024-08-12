@@ -15,6 +15,7 @@ import {
   RegisterUserReq,
   RegisterUserRes,
   ResponseAdv,
+  SimpleRes,
   UpdateCurrentUserRes,
   UpdateUserReq,
   UpdateUserRes
@@ -88,9 +89,9 @@ export const getCurrentUser = async (req: AuthRequest, res: ResponseAdv<GetCurre
     where: { id: req.user.id },
     attributes: ['id', 'name', 'email', 'role'],
     include: [
-      { model: Address, as: 'warehouseAddress' },
-      { model: Transaction, as: 'transactions' },
-      { model: Package, as: 'packages' },
+      { model: Address, as: 'warehouseAddress', where: { addressType: AddressEnum.user } },
+      // { model: Transaction, as: 'transactions', limit: 10 },
+      // { model: Package, as: 'packages', limit: 10 },
     ],
   });
 
@@ -128,9 +129,9 @@ export const getUserById = async (req: AuthRequest, res: ResponseAdv<GetUserRes>
     const user = await User.findOne({
       attributes: ['id', 'name', 'email', 'role'],
       include: [
-        { model: Address, as: 'warehouseAddress' },
-        { model: Transaction, as: 'transactions' },
-        { model: Package, as: 'packages' },
+        { model: Address, as: 'warehouseAddress', where: { addressType: AddressEnum.user } },
+        // { model: Transaction, as: 'transactions', limit: 10 },
+        // { model: Package, as: 'packages', limit: 10 },
       ],
       where: { id: req.params.id }
     });
@@ -141,3 +142,20 @@ export const getUserById = async (req: AuthRequest, res: ResponseAdv<GetUserRes>
     return res.status(400).json({ message: error.message });
   }
 };
+
+export const deleteUser = async (req: AuthRequest, res: ResponseAdv<SimpleRes>) => {
+  try {
+    const user = await User.findByPk(req.params.id);
+    if (!user) {
+      return res.status(400).json({ message: 'User not found' });
+    }
+
+    await Address.destroy({ where: { userId: user.id, addressType: AddressEnum.user } });
+    await User.destroy({ where: { id: user.id } });
+    await Transaction.destroy({ where: { userId: user.id } });
+    await Package.destroy({ where: { userId: user.id } });
+    return res.json({ message: 'User deleted' });
+  } catch (error: any) {
+    return res.status(400).json({ message: error.message });
+  }
+}

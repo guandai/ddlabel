@@ -1,3 +1,4 @@
+// frontend/src/components/user/UsersTableSideBar.tsx
 import React from 'react';
 import { StyledSideBarBox } from '../../util/styled';
 import { Button, List, ListItem } from '@mui/material';

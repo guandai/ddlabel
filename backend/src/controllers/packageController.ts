@@ -97,8 +97,8 @@ export const deletePackage = async (req: AuthRequest, res: ResponseAdv<SimpleRes
       return res.status(400).json({ message: 'Package not found' });
     }
 
-    await Address.destroy({ where: { fromPackageId: pkg.id } });
-    await Address.destroy({ where: { toPackageId: pkg.id } });
+    await Address.destroy({ where: { fromPackageId: pkg.id, addressType: AddressEnum.fromPackage } });
+    await Address.destroy({ where: { toPackageId: pkg.id, addressType: AddressEnum.toPackage } });
     await Package.destroy({ where: { id: pkg.id } });
     return res.json({ message: 'Package deleted' });
   } catch (error: any) {

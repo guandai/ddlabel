@@ -115,3 +115,11 @@ export const Line = styled('span')({
 	width: '100%',
 	borderBottom: '1px solid #ccc',
 });
+
+
+export const toCapitalize = (inputString: string) =>{
+    if (!inputString) {
+        return "";
+    }
+    return inputString.charAt(0).toUpperCase() + inputString.slice(1);
+}

@@ -42,7 +42,7 @@ const BeansStatusInfo: React.FC<PackageDialogProps> = ({ pkg }) => {
     return (
 		<Box>
 			<MessageAlert message={message} />
-            <DialogCard title="Beans Status Info" cards={[{ label: 'Tracking Status',  value}]} />
+            <DialogCard title="Beans Status Info" gridNodes={[{ label: 'Tracking Status',  value}]} />
 		</Box>
     );
 };

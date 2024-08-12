@@ -46,8 +46,8 @@ export type UpdateUserRes = {
 	success: boolean;
 };
 
-export type Model = UserModel | PackageModel | TransactionModel | AddressModel;
-export type Models = 'user' | 'package' | 'transaction' | 'address';
+export type Models = UserAttributes | PackageModel | TransactionModel | AddressModel;
+export type ModelNames = 'user' | 'package' | 'transaction' | 'address';
 
 export enum ModelEnum {
 	user = 'user',

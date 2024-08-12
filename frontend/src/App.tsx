@@ -23,9 +23,10 @@ const AppContent: React.FC = () => {
         <Route path="/" element={<LoginForm />} />
         <Route path="/pdfs" element={<PdfExporter />} />
         <Route path="/users" element={<UsersTable />} />
+        <Route path="/users/edit/:id" element={<PrivateRoute component={UserForm} />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<UserForm isRegister={true} />} />
-        <Route path="/profile" element={<PrivateRoute component={UserForm} />} />
+        <Route path="/profile" element={<UserForm isCurrentUser={true} />} />
         <Route path="/packages/create" element={<PrivateRoute component={PackageForm} />} />
         <Route path="/packages/edit/:id" element={<PrivateRoute component={PackageForm} />} />
         <Route path="/packages" element={<PrivateRoute component={PackageTable} />} />

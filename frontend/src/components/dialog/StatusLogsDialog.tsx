@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, ImageList, ImageListItem } from '@mui/material';
 import { BeansAI } from '@ddlabel/shared';
 import { unixTimeToString } from '../../util/time';
-import DialogCard, { PackageCardType } from './DialogCard';
+import DialogCard, { GridNode } from './DialogCard';
 
 type StatusLogDialogProps = {
     open: boolean;
@@ -25,14 +25,14 @@ const StatusLogsDialog: React.FC<StatusLogDialogProps> = ({ open, handleClose, l
     };
 
     const renderStatusLog = (log: BeansAI.StatusLog, idx: number) => {
-        const cards: PackageCardType[] = [
+        const gridNodes: GridNode[] = [
             { label: 'Status', value: log.description },
             { label: 'Time', value: unixTimeToString(log.tsMillis) },
             { label: 'Address', value: log.item?.formattedAddress },
         ];
     
         if (log.pod) {
-            cards.push(
+            gridNodes.push(
                 { label: 'EventName', value: log.pod.eventCode.name },
                 { label: 'EventCode', value: log.pod.eventCode.code },
                 { label: 'Position', value: log.pod.positionType },
@@ -63,7 +63,7 @@ const StatusLogsDialog: React.FC<StatusLogDialogProps> = ({ open, handleClose, l
         }
     
         return (
-            <DialogCard key={`$stats_log_${idx}`} cards={cards} title={`Log Entry ${idx + 1}`} />
+            <DialogCard key={`$stats_log_${idx}`} gridNodes={gridNodes} title={`Log Entry ${idx + 1}`} />
         );
     };
 
