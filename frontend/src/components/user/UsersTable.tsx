@@ -23,7 +23,7 @@ const Users: React.FC = () => {
       <StyledBox>
         <Typography component="h1" variant="h4">Users</Typography>
         <MessageAlert message={message} />
-        <RecordsQuery getRecords={UserApi.getUsers} setRecords={setUsers} setMessage={setMessage} />
+        <RecordsQuery getRecords={UserApi.getUsers} setRecords={setUsers} setMessage={setMessage} searchList={['address', 'date', 'email']} />
         <TableContainer component={Paper} sx={{ mt: 3 }}>
           <Table>
             <TableHead>

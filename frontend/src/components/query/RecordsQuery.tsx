@@ -3,21 +3,21 @@ import { Box } from '@mui/material';
 import { tryLoad } from '../../util/errors';
 
 import { GetRecordsReq, GetRecordsRes, isGetPackagesRes, isGetTransactionsRes, isGetUsersRes } from '@ddlabel/shared';
-import { MessageContent } from '../../types';
+import { MessageContent, SearchOptions } from '../../types';
 import { formatDateToString } from '../../util/time';
 import RecordsQuerySearch from './RecordsQuerySearch';
 import RecordsPageQuery from './RecordsPageQuery';
 
 const PerPageList = [5, 10, 20, 40, 80];
-
+const SearchList: SearchOptions[] = ['address', 'date', 'trackingNo'];
 export type FilterConfig = {
 	startDate: Date | null;
 	endDate: Date | null;
 	trackingNo: string;
 	address: string;
 };
-	
 type Props = {
+	searchList?: SearchOptions[];
 	perPageList?: number[];
 	setFilter?: (filter: FilterConfig) => void;
 	getRecords: (params: GetRecordsReq) => Promise<GetRecordsRes>;
@@ -26,7 +26,7 @@ type Props = {
 };
 
 const RecordsQuery: React.FC<Props> = (prop) => {
-	const { getRecords, setRecords, setMessage, setFilter, perPageList = PerPageList } = prop;
+	const { getRecords, setRecords, setMessage, setFilter, perPageList = PerPageList, searchList=SearchList } = prop;
 	const [page, setPage] = useState(1);
 	const [startDate, setStartDate] = useState<Date | null>(null);
 	const [endDate, setEndDate] = useState<Date | null>(null);
@@ -35,6 +35,7 @@ const RecordsQuery: React.FC<Props> = (prop) => {
 	const [maxPage, setMaxPage] = useState(1);
 	const [trackingNo, setTrackingNo] = useState('');
 	const [address, setAddress] = useState('');
+	const [email, setEmail] = useState('');
 
 	useEffect(() => {
 		setFilter && setFilter({ startDate, endDate, trackingNo, address });
@@ -74,6 +75,9 @@ const RecordsQuery: React.FC<Props> = (prop) => {
 				setTrackingNo={setTrackingNo}
 				address={address}
 				setAddress={setAddress}
+				searchList={searchList}
+				email={email}
+				setEmail={setEmail}
 			/>
 			<RecordsPageQuery
 				page={page}
