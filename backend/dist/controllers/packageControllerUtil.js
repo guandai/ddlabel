@@ -4,9 +4,7 @@ exports.getRelationQuery = exports.getAddressesWhere = exports.getQueryWhere = v
 const shared_1 = require("@ddlabel/shared");
 const sequelize_1 = require("sequelize");
 const errors_1 = require("../utils/errors");
-const Transaction_1 = require("../models/Transaction");
 const Address_1 = require("../models/Address");
-const User_1 = require("../models/User");
 const getQueryWhere = (req) => {
     const startDate = req.query.startDate;
     const endDate = req.query.endDate;
@@ -41,8 +39,8 @@ exports.getAddressesWhere = getAddressesWhere;
 const getInclude = (whereFrom, whereTo) => [
     { model: Address_1.Address, as: 'fromAddress', where: whereFrom },
     { model: Address_1.Address, as: 'toAddress', where: whereTo },
-    { model: User_1.User, as: 'user' },
-    { model: Transaction_1.Transaction, as: 'transaction' },
+    // { model: User, as: 'user' },
+    // { model: Transaction, as: 'transaction' },
 ];
 const getRelationQuery = (req) => {
     const whereQuery = (0, exports.getQueryWhere)(req);
