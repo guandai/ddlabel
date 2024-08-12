@@ -1,14 +1,10 @@
 import React from 'react';
 import { Grid, Typography, Divider, Box } from '@mui/material';
+import { GridNode } from '../../types';
 
 type Prop = {
 	gridNodes: GridNode[];
 	title: string;
-}
-
-export type GridNode = {
-	label: string;
-	value: JSX.Element[] | JSX.Element | string | number | undefined | null;
 }
 
 const DialogCard: React.FC<Prop> = ({ gridNodes, title }) => {

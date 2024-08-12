@@ -5,6 +5,7 @@ import { Models } from '@ddlabel/shared';
 import { useNavigate } from 'react-router-dom';
 import { SetMessage, tryLoad } from '../../util/errors';
 import ModelDialog from '../dialog/ModelDialog';
+import { ModelActionOptions } from '../../types';
 
 type ModelActionsProps = {
   modelName: string;
@@ -12,11 +13,10 @@ type ModelActionsProps = {
   setMessage: SetMessage;
   deleteAction?: (id: number) => Promise<void>;
   children?: React.ReactNode;
-  actions?: ModelActions[];
+  actions?: ModelActionOptions[];
 };
 
-export type ModelActions = 'view' | 'edit' | 'delete';
-const ModelActions: React.FC<ModelActionsProps> = ({ model, setMessage, modelName, deleteAction, children, actions=['delete', 'view', 'edit'] }) => {
+const ModelActions: React.FC<ModelActionsProps> = ({ model, setMessage, modelName, deleteAction, children, actions = ['delete', 'view', 'edit'] }) => {
   const [detailOpen, setDetailOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -48,7 +48,7 @@ const ModelActions: React.FC<ModelActionsProps> = ({ model, setMessage, modelNam
       {actions.includes('edit') && <IconButton onClick={handleEdit}><Edit /></IconButton>}
       {actions.includes('delete') && <IconButton onClick={handleDelete}><Delete /></IconButton>}
       {children}
-      <ModelDialog open={detailOpen} handleClose={handleDetailClose} model={model} modelName={modelName}/>
+      <ModelDialog open={detailOpen} handleClose={handleDetailClose} model={model} modelName={modelName} />
     </>
   );
 };
