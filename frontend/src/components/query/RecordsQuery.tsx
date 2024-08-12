@@ -4,7 +4,7 @@ import { tryLoad } from '../../util/errors';
 
 import { GetRecordsReq, GetRecordsRes, isGetPackagesRes, isGetTransactionsRes, isGetUsersRes } from '@ddlabel/shared';
 import { MessageContent, SearchOptions } from '../../types';
-import { formatDateToString } from '../../util/time';
+import { toDateTime } from '../../util/time';
 import RecordsQuerySearch from './RecordsQuerySearch';
 import RecordsPageQuery from './RecordsPageQuery';
 
@@ -41,9 +41,10 @@ const RecordsQuery: React.FC<Props> = (prop) => {
 		setFilter && setFilter({ startDate, endDate, trackingNo, address });
 		const getFn = async () => {
 			const params: GetRecordsReq = {
-				startDate: startDate ? formatDateToString(startDate) : '',
-				endDate: endDate ? formatDateToString(endDate) : '',
+				startDate: startDate ? toDateTime(startDate, false) : '',
+				endDate: endDate ? toDateTime(endDate, false) : '',
 				trackingNo,
+				email,
 				address,
 				limit: perPage,
 				offset: (page - 1) * perPage
@@ -61,7 +62,7 @@ const RecordsQuery: React.FC<Props> = (prop) => {
 			setTotal(recordsRes.total);
 		}
 		tryLoad(setMessage, getFn);
-	}, [trackingNo, address, startDate, endDate, page, perPage, total, getRecords, setRecords, setMessage, setFilter]);
+	}, [email, trackingNo, address, startDate, endDate, page, perPage, total, getRecords, setRecords, setMessage, setFilter]);
 
 	return (
 		<Box width='100%' sx={{ mt: 2 }}>

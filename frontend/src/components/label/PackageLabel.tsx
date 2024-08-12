@@ -31,7 +31,7 @@ interface PackageLabelProps {
 }
 
 export const PackageLabel: React.FC<PackageLabelProps> = (prop) => {
-  const { width, height,  pkg, factor = 1 } = prop;
+  const { width, height, pkg, factor = 1 } = prop;
   const scaledWidth = scaleStyle(width || '4in', factor);
   const scaledHeight = scaleStyle(height || '6in', factor);
   return (

@@ -5,13 +5,14 @@ import PackageLabel from './PackageLabel';
 import { createRoot } from 'react-dom/client';
 import html2canvas from 'html2canvas';
 
+const pdfWidth = 4;
+const pdfHeight = 6;
+
 export const getLabelContainer = (pkg: PackageModel) => {
   const PPI = 300; // Desired PPI for the PDF
-  const mmToInch = 25.4; // Conversion factor from mm to inches
-  const widthInInches = 4; // Width of the label in inches
-  const heightInInches = 6; // Height of the label in inches
-  const widthInMM = widthInInches * mmToInch; // Width of the label in mm
-  const heightInMM = heightInInches * mmToInch; // Height of the label in mm
+  const mmToInch = 26.6; // Conversion factor from mm to inches
+  const widthInMM = pdfWidth * mmToInch; // Width of the label in mm
+  const heightInMM = pdfHeight * mmToInch; // Height of the label in mm
 
   // Calculate the scale factor
   const scaleFactor = PPI / 96; // 96 is the default screen PPI
@@ -33,7 +34,6 @@ export const getLabelContainer = (pkg: PackageModel) => {
 
 export const generatePDF = async (pkg: PackageModel) => {
   const { labelContainer, scaleFactor } = getLabelContainer(pkg);
-  // Wait for the component to render
   await new Promise(resolve => setTimeout(resolve, 1000));
 
   // Convert the label to a canvas
@@ -44,9 +44,9 @@ export const generatePDF = async (pkg: PackageModel) => {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'in',
-    format: [4, 6] // 4 inches x 6 inches
+    format: [pdfWidth, pdfHeight]
   });
-  doc.addImage(imgData, 'PNG', 0, 0, 4, 6); // Add the image to the PDF
+  doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight); // Add the image to the PDF
 
   // Clean up by removing the label container
   document.body.removeChild(labelContainer);

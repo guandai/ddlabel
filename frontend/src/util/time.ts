@@ -23,28 +23,22 @@ export const unixTimeToString = (time: number) => {
 }
 
 
-export const convertToTimeString = (isoString: string): string => {
+export const toDateTime = (date?: string | Date | null, showTime = true): string => {
     // Parse the string into a Date object
-    let dateObject = new Date(isoString);
+	if (!date) return '';
+    let dateObject = typeof date === 'string' ? new Date(date) : date;
 
     // Extract the date components
     let year = dateObject.getUTCFullYear();
-    let month = String(dateObject.getUTCMonth() + 1).padStart(2, '0'); // Months are zero-based
-    let day = String(dateObject.getUTCDate()).padStart(2, '0');
+    let month = String(dateObject.getMonth() + 1).padStart(2, '0');
+    let day = String(dateObject.getDate()).padStart(2, '0');
 
     // Extract the time components
-    let hours = String(dateObject.getUTCHours()).padStart(2, '0');
-    let minutes = String(dateObject.getUTCMinutes()).padStart(2, '0');
+    let hours = String(dateObject.getHours()).padStart(2, '0');
+    let minutes = String(dateObject.getMinutes()).padStart(2, '0');
 
+	const timeString = showTime ? ` ${hours}:${minutes}` : '';
     // Return the formatted date-time string
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
+    return `${year}-${month}-${day}${timeString}`;
 }
-
-
-export const formatDateToString = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-};
 

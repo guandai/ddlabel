@@ -3,6 +3,7 @@
 import { styled, Theme } from '@mui/material/styles';
 import { Box, TableCell } from '@mui/material';
 import { BeansStatus } from '@ddlabel/shared';
+import { toDateTime } from './time';
 
 export const StyledBox = styled(Box)({
 	marginTop: '64px',
@@ -122,4 +123,15 @@ export const toCapitalize = (inputString: string) =>{
         return "";
     }
     return inputString.charAt(0).toUpperCase() + inputString.slice(1);
+}
+
+export const spacedTitle = (title: string) => {
+	return title.replace(/([A-Z-_])/g, ' $1').toLowerCase();
+}
+
+export const formatNodeValue = (key: string, value: any) => {
+	if (key === 'createdAt' || key === 'updatedAt') {
+		return toDateTime(new Date(value)).toLocaleString();
+	}
+	return value;
 }
