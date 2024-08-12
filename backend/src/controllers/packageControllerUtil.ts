@@ -45,7 +45,7 @@ const getInclude = (whereFrom: WhereOptions, whereTo: WhereOptions) => [
 	{ model: Address, as: 'fromAddress', where: whereFrom },
 	{ model: Address, as: 'toAddress', where: whereTo },
 	{ model: User, as: 'user' },
-	{ model: Transaction, as: 'transaction' },
+	// { model: Transaction, as: 'transaction' },
 ];
 
 export const getRelationQuery = (req: AuthRequest) => {

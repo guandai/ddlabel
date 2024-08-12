@@ -20,18 +20,18 @@ export const getCsvPackages = async (req: AuthRequest, res: ResponseAdv<GetPacka
         {
           model: Address,
           as: 'fromAddress',
-          attributes: ['address1', 'address2', 'city', 'state', 'zip'],
+          attributes: ['address1', 'address2', 'city', 'state', 'zip', 'name', 'phone', 'email'],
         },
         {
           model: Address,
           as: 'toAddress',
-          attributes: ['address1', 'address2', 'city', 'state', 'zip'],
+          attributes: ['address1', 'address2', 'city', 'state', 'zip', 'name', 'phone', 'email'],
         },
-        {
-          model: Transaction,
-          as: 'transaction',
-          attributes: ['id', 'event', 'cost'],
-        },
+        // {
+        //   model: Transaction,
+        //   as: 'transaction',
+        //   attributes: ['id', 'event', 'cost'],
+        // },
       ],
     });
     
@@ -41,9 +41,11 @@ export const getCsvPackages = async (req: AuthRequest, res: ResponseAdv<GetPacka
     // Specify fields for the CSV
     const fields = [
       'id', 'trackingNo', 'createdAt', 'updatedAt', // Package fields
+      'fromAddress.name', 'fromAddress.phone', 'fromAddress.email', // From address fields
       'fromAddress.address1', 'fromAddress.address2', 'fromAddress.city', 'fromAddress.state', 'fromAddress.zip', // From address fields
+      'toAddress.name', 'toAddress.phone', 'toAddress.email', // To address fields
       'toAddress.address1', 'toAddress.address2', 'toAddress.city', 'toAddress.state', 'toAddress.zip', // To address fields
-      'transaction.transactionId', 'transaction.amount', 'transaction.currency', 'transaction.status' // Transaction fields
+      // 'transaction.transactionId', 'transaction.amount', 'transaction.currency', 'transaction.status' // Transaction fields
     ];
 
     // Convert JSON to CSV
