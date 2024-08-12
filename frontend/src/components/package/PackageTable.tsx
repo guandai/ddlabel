@@ -15,13 +15,14 @@ import RecordsQuery, { FilterConfig } from '../query/RecordsQuery';
 import PackageActions from './PackageActions';
 import BeansAiApi from '../../external/beansApi';
 import { MessageContent } from '../../types';
+import LoadingSpinner from '../../util/Spinner';
 
 type StatusLogsMaps = { [x: number]: BeansAI.ListItemReadableStatusLogs }
 
 const PackageTable: React.FC = () => {
   const [packages, setPackages] = useState<PackageModel[]>([]);
   const [message, setMessage] = useState<MessageContent>(null);
-  const [statusLogs, setStatusLogs] = useState<StatusLogsMaps>([]);
+  const [statusLogs, setStatusLogs] = useState<StatusLogsMaps >([]);
   const [filter, setFilter] = useState<FilterConfig>({ startDate: null, endDate: null, trackingNo: '', address: '' });
   const prevPackagesRef = useRef(packages);
 
@@ -72,7 +73,7 @@ const PackageTable: React.FC = () => {
                   <StyledTabelCell sx={{ margin: '0px' }} >{pkg.toAddress.address1}</StyledTabelCell>
                   <StyledTabelCell>{toDateTime(pkg.createdAt)}</StyledTabelCell>
                   <StyledTabelCell>
-                    <StatusLabel status={toStatus(pkg.id)}>{toStatus(pkg.id)}</StatusLabel>
+                  { !statusLogs[pkg.id] ? <LoadingSpinner/> : <StatusLabel status={toStatus(pkg.id)}> {toStatus(pkg.id)} </StatusLabel> }
                   </StyledTabelCell>
                   <StyledTabelCell>{pkg.trackingNo}</StyledTabelCell>
                   <StyledTabelCell style={{ width: '200px', whiteSpace: 'nowrap' }}>

@@ -130,8 +130,15 @@ export const spacedTitle = (title: string) => {
 }
 
 export const formatNodeValue = (key: string, value: any) => {
-	if (key === 'createdAt' || key === 'updatedAt') {
+	const lowKey = key.toLowerCase();
+	if (lowKey.includes('createdat') || lowKey.includes('updatedat')) {
 		return toDateTime(new Date(value)).toLocaleString();
 	}
 	return value;
+}
+
+
+export const skipTitle = (title: string) => {
+	const lowTitle = title.toLowerCase();
+	return lowTitle.includes('colorset') || lowTitle.includes('display')
 }

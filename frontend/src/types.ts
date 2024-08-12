@@ -35,3 +35,15 @@ export type MessageContent = {
 } | null;
 
 export type SearchOptions = 'address' | 'date' | 'email' | 'trackingNo';
+
+export type GridNode = {
+	label: string;
+	value: JSX.Element[] | JSX.Element | string | number | undefined | null;
+}
+
+export type GridNodesSection = {
+	title: string;
+	gridNodes: GridNode[];
+}
+
+export type ModelActionOptions = 'view' | 'edit' | 'delete';

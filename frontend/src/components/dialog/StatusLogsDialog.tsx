@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, ImageList, ImageListItem } from '@mui/material';
 import { BeansAI } from '@ddlabel/shared';
 import { unixTimeToString } from '../../util/time';
-import DialogCard, { GridNode } from './DialogCard';
+import DialogCard from './DialogCard';
+import { GridNode } from '../../types';
 
 type StatusLogDialogProps = {
     open: boolean;
