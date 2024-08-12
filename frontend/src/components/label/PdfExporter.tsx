@@ -19,23 +19,18 @@ const PdfExporter: React.FC = () => {
   // Create refs for each page
   const pagesRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  const preparePromises = async (pdf: jsPDF, pages: (HTMLDivElement | null)[]) => {
-    // Create an array of promises for rendering each page
-    const renderPromises = pages.map((page, idx) => {
+  const preparePromises = async (pdf: jsPDF, pages: (HTMLDivElement | null)[]) =>
+    pages.map(async (page, idx) => {
       if (!page) return Promise.resolve();
-      return html2canvas(page)
-        .then((canvas) => {
-          const imgData = canvas.toDataURL('image/jpeg', 0.7);
-          const imgWidth = 4;
-          const imgHeight = (canvas.height * imgWidth) / canvas.width;
-          if (idx !== 0) {
-            pdf.addPage();
-          }
-          pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
-        })
+      const canvas = await html2canvas(page)  
+      const imgData = canvas.toDataURL('image/jpeg', 0.7);
+      const imgWidth = 4;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      if (idx !== 0) {
+        pdf.addPage();
+      }
+      pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST');
     });
-    return renderPromises;
-  }
 
   const capturePages = async () => {
     setLoading(true);
@@ -43,9 +38,7 @@ const PdfExporter: React.FC = () => {
     const pdf = new jsPDF('p', 'in', [4, 6]);
 
     setTimeout(async () => {
-      const renderPromises = await preparePromises(pdf, pages);
-      // Wait for all renderings to finish
-      await Promise.all(renderPromises).then(() => {
+      await Promise.all(await preparePromises(pdf, pages)).then(() => {
         pdf.save('combined.pdf');
         setLoading(false);
       });

@@ -8,7 +8,7 @@ import { tryLoad } from '../../util/errors';
 
 import MessageAlert from '../share/MessageAlert';
 import PackageApi from '../../api/PackageApi';
-import { convertToTimeString } from '../../util/time';
+import { toDateTime } from '../../util/time';
 import PackageTableSideBar from './PackageTableSideBar';
 import { FlexBox, StatusLabel, StyledBox, StyledTabelCell } from '../../util/styled';
 import RecordsQuery, { FilterConfig } from '../query/RecordsQuery';
@@ -70,7 +70,7 @@ const PackageTable: React.FC = () => {
               {packages.map((pkg) => (
                 <TableRow key={pkg.id}>
                   <StyledTabelCell sx={{ margin: '0px' }} >{pkg.toAddress.address1}</StyledTabelCell>
-                  <StyledTabelCell>{convertToTimeString(pkg.createdAt || '')}</StyledTabelCell>
+                  <StyledTabelCell>{toDateTime(pkg.createdAt)}</StyledTabelCell>
                   <StyledTabelCell>
                     <StatusLabel status={toStatus(pkg.id)}>{toStatus(pkg.id)}</StatusLabel>
                   </StyledTabelCell>

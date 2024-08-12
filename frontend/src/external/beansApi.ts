@@ -1,3 +1,4 @@
+// frontend/src/external/beansApi.ts
 import axios from "axios";
 import { GetStatusLogRes, GetStatusLogReq, BeansAI } from "@ddlabel/shared";
 // https://isp.beans.ai/enterprise/v1/lists/itemsdocumentation/ky15d3jqrqf2dr49mgqgl?returnEmptyIfMissing=true
