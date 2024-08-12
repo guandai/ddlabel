@@ -52,7 +52,7 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ pkg }) => {
         if (!pkg) {
             return;
         }
-        const getZoneAndCost = async () => {
+        const callback = async () => {
             const zip = pkg?.toAddress.zip;
             setSortCode((await PostalZoneApi.getPostalZone({zip})).postalZone.sort_code);
 
@@ -64,7 +64,7 @@ const PackageGetRate: React.FC<PackageDialogProps> = ({ pkg }) => {
 
             setRate(`$${cost.toFixed(2)}`);
         };
-        tryLoad(setMessage, getZoneAndCost);
+        tryLoad(setMessage, callback);
     }, [pkg, setMessage, getCost, getZone]);
 
     useEffect(() => {

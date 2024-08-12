@@ -1,3 +1,4 @@
+// shared/src/req-and-res.ts
 import { Optional } from 'sequelize';
 import { AddressAttributes, AddressModel, PackageModel, PostalZoneAttributes, TransactionModel, UserAttributes, UserModel, UserRolesEnum } from "./models";
 import { SimpleRes } from './types';
@@ -37,7 +38,7 @@ export type LoginUserRes = {
 	userRole: UserRolesEnum;
 };
 
-export type Models = UserAttributes | PackageModel | TransactionModel | AddressModel;
+export type Models = UserAttributes | PackageModel | TransactionModel | AddressModel
 export type ModelNames = 'user' | 'package' | 'transaction' | 'address';
 
 export enum ModelEnum {

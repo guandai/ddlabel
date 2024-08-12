@@ -16,6 +16,17 @@ export class BeansAiApi {
 	public async getPod(itemId: string) {
 		return (await axios.get<BeansAI.Pod>(`${this.path}/itemsdocumentation/${itemId}?returnEmptyIfMissing=true`, {...this.config})).data;
 	}
+	// New method to get routes
+	public async getRoutes(updatedAfter?: number) {
+		const params = updatedAfter ? { updatedAfter } : {};
+		return (await axios.get<BeansAI.RouteList>(`${this.path}/routes`, { ...this.config, params })).data;
+	}
+
+	// New method to get items
+	public async getItems(updatedAfter?: number) {
+		const params = updatedAfter ? { updatedAfter } : { updatedAfter: 0 };
+		return (await axios.get<BeansAI.ItemList>(`${this.path}/items`, { ...this.config, params })).data;
+	}
 }
 
 const api = new BeansAiApi();

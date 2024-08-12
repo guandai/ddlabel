@@ -3,7 +3,7 @@ import { Button, List, ListItem } from '@mui/material';
 
 import { useNavigate } from 'react-router-dom';
 import PackageUploadMapping from '../upload/PackageUploadMapping';
-import { AddCircle, Download } from '@mui/icons-material';
+import { AddCircle, Download, PictureAsPdfTwoTone } from '@mui/icons-material';
 import { StyledSideBarBox } from '../../util/styled';
 import { FilterConfig } from '../query/RecordsQuery';
 import PackageApi from '../../api/PackageApi';
@@ -57,6 +57,16 @@ const PackageTableSideBar: React.FC<Props> = (prop) => {
 						startIcon={<Download />}
 						fullWidth>Export Csv</Button>
 				</ListItem>
+				<ListItem>
+					<Button
+						variant="contained"
+						onClick={() => navigate('/pdfs')}
+						startIcon={<PictureAsPdfTwoTone />}
+						fullWidth
+					>
+						Labels
+					</Button >
+				</ListItem >
 			</List>
 		</StyledSideBarBox>
 	);

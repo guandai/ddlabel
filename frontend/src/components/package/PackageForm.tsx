@@ -54,10 +54,10 @@ const PackageForm: React.FC = () => {
     if (!packageId) {
       return;
     }
-    const getPackageById = async () => {
+    const callback = async () => {
       setPackageData((await PackageApi.getPackageById(packageId)).package);
     }
-    tryLoad(setMessage, getPackageById);
+    tryLoad(setMessage, callback);
   }, [packageId]);
 
   const onSubmit = async (data: UpdatePackageReq | CreatePackageReq) => {

@@ -39,7 +39,7 @@ const RecordsQuery: React.FC<Props> = (prop) => {
 
 	useEffect(() => {
 		setFilter && setFilter({ startDate, endDate, trackingNo, address });
-		const getFn = async () => {
+		const callback = async () => {
 			const params: GetRecordsReq = {
 				startDate: startDate ? toDateTime(startDate, false) : '',
 				endDate: endDate ? toDateTime(endDate, false) : '',
@@ -61,7 +61,7 @@ const RecordsQuery: React.FC<Props> = (prop) => {
 			setMaxPage(Math.ceil(recordsRes.total / perPage));
 			setTotal(recordsRes.total);
 		}
-		tryLoad(setMessage, getFn);
+		tryLoad(setMessage, callback);
 	}, [email, trackingNo, address, startDate, endDate, page, perPage, total, getRecords, setRecords, setMessage, setFilter]);
 
 	return (
