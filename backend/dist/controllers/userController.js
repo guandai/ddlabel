@@ -12,13 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUsers = exports.getCurrentUser = exports.updateCurrentUser = exports.loginUser = exports.registerUser = void 0;
+exports.deleteUser = exports.getUserById = exports.getUsers = exports.getCurrentUser = exports.updateCurrentUser = exports.loginUser = exports.registerUser = void 0;
 const User_1 = require("../models/User");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const Address_1 = require("../models/Address");
 const logger_1 = __importDefault(require("../config/logger"));
+const shared_1 = require("@ddlabel/shared");
 const errors_1 = require("../utils/errors");
+const Transaction_1 = require("../models/Transaction");
+const Package_1 = require("../models/Package");
+const packageControllerUtil_1 = require("./packageControllerUtil");
 const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, email, password, role, warehouseAddress } = req.body;
     const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
@@ -43,7 +47,7 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         if (user && (yield bcryptjs_1.default.compare(password, user.password))) {
             const token = jsonwebtoken_1.default.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-            return res.json({ token, userId: user.id });
+            return res.json({ token, userId: user.id, userRole: user.role });
         }
         else {
             return res.status(400).json({ message: 'Invalid credentials' });
@@ -78,37 +82,86 @@ const updateCurrentUser = (req, res) => __awaiter(void 0, void 0, void 0, functi
 });
 exports.updateCurrentUser = updateCurrentUser;
 const getCurrentUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const notFound = () => res.status(404).json({ message: 'User not found' });
     if (!req.user) {
-        return notFound();
+        return (0, errors_1.notFound)(res, 'Login Session');
     }
     ;
     const user = yield User_1.User.findOne({
         where: { id: req.user.id },
         attributes: ['id', 'name', 'email', 'role'],
         include: [
-            { model: Address_1.Address, as: 'warehouseAddress' },
+            { model: Address_1.Address, as: 'warehouseAddress', where: { addressType: shared_1.AddressEnum.user } },
+            // { model: Transaction, as: 'transactions', limit: 10 },
+            // { model: Package, as: 'packages', limit: 10 },
         ],
     });
     if (!user) {
-        return notFound();
+        return (0, errors_1.notFound)(res, 'Current User');
     }
     ;
     return res.json({ user });
 });
 exports.getCurrentUser = getCurrentUser;
 const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const limit = parseInt(req.query.limit) || 100; // Default limit to 20 if not provided
+    const offset = parseInt(req.query.offset) || 0; // 
+    const where = (0, packageControllerUtil_1.getQueryWhere)(req);
+    const whereAddress = (0, packageControllerUtil_1.getAddressesWhere)(req, shared_1.AddressEnum.user);
     try {
-        const users = yield User_1.User.findAll({
-            attributes: ['id', 'name', 'email', 'role'],
+        const rows = yield User_1.User.findAndCountAll({
+            where,
+            attributes: ['id', 'name', 'email', 'role', 'createdAt'],
+            limit,
+            offset,
             include: [
-                { model: Address_1.Address, as: 'warehouseAddress' },
+                { model: Address_1.Address, as: 'warehouseAddress', where: Object.assign(Object.assign({}, whereAddress), { addressType: shared_1.AddressEnum.user }) },
             ],
         });
-        return res.json({ users });
+        const total = rows.count;
+        const users = rows.rows;
+        return res.json({ users, total });
     }
     catch (error) {
         return res.status(400).json({ message: error.message });
     }
 });
 exports.getUsers = getUsers;
+const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = yield User_1.User.findOne({
+            attributes: ['id', 'name', 'email', 'role'],
+            include: [
+                { model: Address_1.Address, as: 'warehouseAddress', where: { addressType: shared_1.AddressEnum.user } },
+                // { model: Transaction, as: 'transactions', limit: 10 },
+                // { model: Package, as: 'packages', limit: 10 },
+            ],
+            where: { id: req.params.id }
+        });
+        if (!user) {
+            return (0, errors_1.notFound)(res, 'User (By Id)');
+        }
+        ;
+        return res.json({ user });
+    }
+    catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+});
+exports.getUserById = getUserById;
+const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = yield User_1.User.findByPk(req.params.id);
+        if (!user) {
+            return res.status(400).json({ message: 'User not found' });
+        }
+        yield Address_1.Address.destroy({ where: { userId: user.id, addressType: shared_1.AddressEnum.user } });
+        yield User_1.User.destroy({ where: { id: user.id } });
+        yield Transaction_1.Transaction.destroy({ where: { userId: user.id } });
+        yield Package_1.Package.destroy({ where: { userId: user.id } });
+        return res.json({ message: 'User deleted' });
+    }
+    catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+});
+exports.deleteUser = deleteUser;

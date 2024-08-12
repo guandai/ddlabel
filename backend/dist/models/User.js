@@ -31,14 +31,6 @@ User.init({
         type: sequelize_1.DataTypes.ENUM('admin', 'worker'),
         allowNull: false,
     },
-    // warehouseAddressId: {
-    //   type: DataTypes.INTEGER.UNSIGNED,
-    //   allowNull: false,
-    //   references: {
-    //     model: Address,
-    //     key: 'id',
-    //   },
-    // },
 }, {
     sequelize: database_1.sequelize,
     tableName: 'users',

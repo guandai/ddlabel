@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isDateValid = exports.ReturnMsg = exports.aggregateError = exports.reducedError = exports.isValidJSON = void 0;
+exports.notFound = exports.isDateValid = exports.ReturnMsg = exports.aggregateError = exports.reducedError = exports.isValidJSON = void 0;
 const moment_1 = __importDefault(require("moment"));
 const isValidJSON = (str) => {
     try {
@@ -35,3 +35,5 @@ const ReturnMsg = (res, message, code = 400) => res.status(code).json({ message 
 exports.ReturnMsg = ReturnMsg;
 const isDateValid = (date) => (0, moment_1.default)(date, moment_1.default.ISO_8601, true).isValid();
 exports.isDateValid = isDateValid;
+const notFound = (res, model = `Record`) => res.status(404).json({ message: `${model} not found` });
+exports.notFound = notFound;

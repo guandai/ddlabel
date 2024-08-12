@@ -69,10 +69,9 @@ const getPackages = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     const offset = parseInt(req.query.offset) || 0; // 
     const relationQuery = (0, packageControllerUtil_1.getRelationQuery)(req);
     try {
-        const packages = yield Package_1.Package.findAll(Object.assign(Object.assign({}, relationQuery), { limit,
+        const rows = yield Package_1.Package.findAndCountAll(Object.assign(Object.assign({}, relationQuery), { limit,
             offset }));
-        const total = (yield Package_1.Package.count(relationQuery));
-        return res.json({ total, packages });
+        return res.json({ total: rows.count, packages: rows.rows });
     }
     catch (error) {
         logger_1.default.error(`Error in getPackages: ${error}`);
@@ -103,8 +102,8 @@ const deletePackage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         if (!pkg) {
             return res.status(400).json({ message: 'Package not found' });
         }
-        yield Address_1.Address.destroy({ where: { fromPackageId: pkg.id } });
-        yield Address_1.Address.destroy({ where: { toPackageId: pkg.id } });
+        yield Address_1.Address.destroy({ where: { fromPackageId: pkg.id, addressType: shared_1.AddressEnum.fromPackage } });
+        yield Address_1.Address.destroy({ where: { toPackageId: pkg.id, addressType: shared_1.AddressEnum.toPackage } });
         yield Package_1.Package.destroy({ where: { id: pkg.id } });
         return res.json({ message: 'Package deleted' });
     }
