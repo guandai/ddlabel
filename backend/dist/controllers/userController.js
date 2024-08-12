@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.getUserById = exports.getUsers = exports.getCurrentUser = exports.updateCurrentUser = exports.loginUser = exports.registerUser = void 0;
+exports.deleteUserById = exports.getUserById = exports.getUsers = exports.updateUserById = exports.loginUser = exports.registerUser = void 0;
 const User_1 = require("../models/User");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -54,16 +54,13 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
     }
     catch (error) {
+        logger_1.default.error(`Error in loginUser: ${error}`);
         return res.status(400).json({ message: error.message });
     }
 });
 exports.loginUser = loginUser;
-const updateCurrentUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req.user) {
-        return res.status(404).json({ message: 'User not found' });
-    }
+const updateUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = req.body;
-    user.id = req.user.id;
     try {
         if (user.password) {
             user.password = yield bcryptjs_1.default.hash(user.password, 10);
@@ -77,31 +74,11 @@ const updateCurrentUser = (req, res) => __awaiter(void 0, void 0, void 0, functi
         return res.json(result);
     }
     catch (error) {
+        logger_1.default.error(`Error in updateUserById: ${error}`);
         return res.status(400).json({ message: error.message });
     }
 });
-exports.updateCurrentUser = updateCurrentUser;
-const getCurrentUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req.user) {
-        return (0, errors_1.notFound)(res, 'Login Session');
-    }
-    ;
-    const user = yield User_1.User.findOne({
-        where: { id: req.user.id },
-        attributes: ['id', 'name', 'email', 'role'],
-        include: [
-            { model: Address_1.Address, as: 'warehouseAddress', where: { addressType: shared_1.AddressEnum.user } },
-            // { model: Transaction, as: 'transactions', limit: 10 },
-            // { model: Package, as: 'packages', limit: 10 },
-        ],
-    });
-    if (!user) {
-        return (0, errors_1.notFound)(res, 'Current User');
-    }
-    ;
-    return res.json({ user });
-});
-exports.getCurrentUser = getCurrentUser;
+exports.updateUserById = updateUserById;
 const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const limit = parseInt(req.query.limit) || 100; // Default limit to 20 if not provided
     const offset = parseInt(req.query.offset) || 0; // 
@@ -114,7 +91,10 @@ const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             limit,
             offset,
             include: [
-                { model: Address_1.Address, as: 'warehouseAddress', where: Object.assign(Object.assign({}, whereAddress), { addressType: shared_1.AddressEnum.user }) },
+                { model: Address_1.Address,
+                    as: 'warehouseAddress',
+                    attributes: ['id', 'name', 'address1', 'address2', 'zip', 'state', 'email', 'phone'],
+                    where: Object.assign(Object.assign({}, whereAddress), { addressType: shared_1.AddressEnum.user }) },
             ],
         });
         const total = rows.count;
@@ -122,6 +102,7 @@ const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.json({ users, total });
     }
     catch (error) {
+        logger_1.default.error(`Error in getUsers: ${error}`);
         return res.status(400).json({ message: error.message });
     }
 });
@@ -131,7 +112,11 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const user = yield User_1.User.findOne({
             attributes: ['id', 'name', 'email', 'role'],
             include: [
-                { model: Address_1.Address, as: 'warehouseAddress', where: { addressType: shared_1.AddressEnum.user } },
+                { model: Address_1.Address,
+                    as: 'warehouseAddress',
+                    attributes: ['id', 'name', 'address1', 'address2', 'zip', 'state', 'email', 'phone'],
+                    where: { addressType: shared_1.AddressEnum.user }
+                },
                 // { model: Transaction, as: 'transactions', limit: 10 },
                 // { model: Package, as: 'packages', limit: 10 },
             ],
@@ -144,11 +129,12 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         return res.json({ user });
     }
     catch (error) {
+        logger_1.default.error(`Error in getUserById: ${error}`);
         return res.status(400).json({ message: error.message });
     }
 });
 exports.getUserById = getUserById;
-const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = yield User_1.User.findByPk(req.params.id);
         if (!user) {
@@ -161,7 +147,8 @@ const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         return res.json({ message: 'User deleted' });
     }
     catch (error) {
+        logger_1.default.error(`Error in deleteUser: ${error}`);
         return res.status(400).json({ message: error.message });
     }
 });
-exports.deleteUser = deleteUser;
+exports.deleteUserById = deleteUserById;
