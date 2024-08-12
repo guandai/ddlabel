@@ -45,7 +45,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
   }, [profile.confirmPassword, profile.password]);
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const callback = async () => {
       if (!isRegister) {
         const userResponse = await UserApi.getUser(Number(userId));
         setProfile({
@@ -55,7 +55,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
         });
       }
     };
-    tryLoad(setMessage, fetchUserData);
+    tryLoad(setMessage, callback);
   }, [isRegister, userId]);
 
   useEffect(() => {
@@ -100,18 +100,18 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
     const profileCopy = { ...profile };
 
     if (isRegister) {
-      const registerUser = async () => {
+      const callback = async () => {
         await UserApi.register(profileCopy);
         window.location.href = '/login';
       };
-      tryLoad(setMessage, registerUser);
+      tryLoad(setMessage, callback);
     } else {
-      const updateUser = async () => {
+      const callback = async () => {
         await UserApi.updateUser(profileCopy);
         setMessage({ text: 'Profile updated successfully', level: 'success' });
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-      tryLoad(setMessage, updateUser);
+      tryLoad(setMessage, callback);
     }
   };
 

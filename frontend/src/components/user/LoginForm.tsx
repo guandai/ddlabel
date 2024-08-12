@@ -18,7 +18,7 @@ const LoginForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage({ text: '', level: 'info' });
-    const login = async () => {
+    const callback = async () => {
       const response = await UserApi.login(formData);
       localStorage.setItem('token', response.token);
       localStorage.setItem('userRole', response.userRole);
@@ -28,7 +28,7 @@ const LoginForm: React.FC = () => {
         window.location.href = '/packages';
       }, 100);
     };
-    tryLoad(setMessage, login);
+    tryLoad(setMessage, callback);
   };
 
   return (

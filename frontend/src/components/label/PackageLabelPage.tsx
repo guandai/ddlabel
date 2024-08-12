@@ -16,13 +16,13 @@ const PackageLabelPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const getPackageById = async () => {
+    const callback = async () => {
       id && setPkg((await new PackageApi().getPackageById(id)).package);
       setLoading(false);
     }
-    const closeLoading = () => setLoading(false);
+    const errorCallback = () => setLoading(false);
     const fetchPackage = async () => {
-      tryLoad(setMessage, getPackageById, closeLoading);
+      tryLoad(setMessage, callback, errorCallback);
     };
     fetchPackage();
   }, [id]);

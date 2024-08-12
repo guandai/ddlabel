@@ -40,11 +40,11 @@ const Header: React.FC = () => {
             <Button color="inherit" component={Link} to="/packages">
               PACKAGES
             </Button>
-            <Button color="inherit" component={Link} to="/pdfs">
-              LABELS
-            </Button>
-            <Button color="inherit" component={Link} to="/transactions">
+            {/* <Button color="inherit" component={Link} to="/transactions">
               TRANSACTIONS
+            </Button> */}
+            <Button color="inherit" component={Link} to="/beans/routes">
+              BEANS
             </Button>
             <Button color="inherit" onClick={handleLogout}>
               LOGOUT

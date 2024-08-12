@@ -11,6 +11,8 @@ import PackageLabelPage from './components/label/PackageLabelPage';
 import PrivateRoute from './components/PrivateRoute';
 import Header from './components/share/Header';
 import PdfExporter from './components/label/PdfExporter';
+import BeansItemsTable from './components/beans/BeansItemsTable';
+import BeansRoutesTable from './components/beans/BeansRoutesTable';
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -32,6 +34,8 @@ const AppContent: React.FC = () => {
         <Route path="/packages" element={<PrivateRoute component={PackageTable} />} />
         <Route path="/transactions" element={<PrivateRoute component={TransactionTable} />} />
         <Route path="/packages/:id/label" element={<PrivateRoute component={PackageLabelPage} />} />
+        <Route path="/beans/items" element={<PrivateRoute component={BeansItemsTable} />} />
+        <Route path="/beans/routes" element={<PrivateRoute component={BeansRoutesTable} />} />
       </Routes>
     </>
   );

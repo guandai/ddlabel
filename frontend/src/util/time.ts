@@ -23,10 +23,10 @@ export const unixTimeToString = (time: number) => {
 }
 
 
-export const toDateTime = (date?: string | Date | null, showTime = true): string => {
+export const toDateTime = (date?: string | number | Date | null, showTime = true): string => {
     // Parse the string into a Date object
 	if (!date) return '';
-    let dateObject = typeof date === 'string' ? new Date(date) : date;
+    let dateObject = typeof date === 'string' ||  typeof date === 'number' ? new Date(date) : date;
 
     // Extract the date components
     let year = dateObject.getUTCFullYear();

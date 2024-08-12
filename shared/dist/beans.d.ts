@@ -1,4 +1,60 @@
 export declare namespace BeansAI {
+    type ItemId = {
+        listItemId: string;
+        route: RouteId;
+    };
+    type ItemIdList = {
+        item: ItemId[];
+    };
+    interface ItemList {
+        item: Item[];
+    }
+    interface Dimensions {
+        length: number;
+        width: number;
+        height: number;
+    }
+    interface RouteList {
+        route: Route[];
+    }
+    interface Route {
+        listRouteId: string;
+        name: string;
+        dateStr: string;
+        status: 'OPEN' | 'CLOSED';
+        assignee?: Assignee;
+        warehouse?: Warehouse;
+        updatedAt: number;
+        accountBuid: string;
+        createdAt: string;
+        routePathMd5: string;
+        routeType: 'DEFAULT' | 'TEMPLATE';
+        startMode: 'warehouse' | 'custom' | 'first_stop';
+        endMode: 'warehouse' | 'custom' | 'anywhere';
+    }
+    interface Assignee {
+        listAssigneeId: string;
+        name: string;
+        email?: string;
+        phone?: string;
+        state: 'ACTIVE' | 'DISABLED';
+        role: 'OWNER' | 'MANAGER' | 'DRIVER';
+        latitude?: number;
+        longitude?: number;
+        positionsUpdatedAtMillis?: number;
+        updatedAt: number;
+    }
+    interface Warehouse {
+        listWarehouseId: string;
+        address: string;
+        formattedAddress?: string;
+        position?: LatLng;
+        updatedAt: number;
+    }
+    interface LatLng {
+        latitude: number;
+        longitude: number;
+    }
     type AddressComponents = {
         city: string;
         state: string;
@@ -13,29 +69,33 @@ export declare namespace BeansAI {
             type: string;
         };
     };
-    type Position = {
-        latitude: number;
-        longitude: number;
-    };
-    type Route = {
+    type RouteId = {
         listRouteId: string;
     };
     type Item = {
         listItemId: string;
+        route?: Route;
+        type: 'DROPOFF' | 'PICKUP';
         address: string;
-        formattedAddress: string;
-        status: string;
-        createdAt: number;
+        formattedAddress?: string;
+        unit?: string;
+        skipGeocoder?: boolean;
+        position?: LatLng;
+        customerName?: string;
+        customerPhone?: string;
+        notes?: string;
+        trackingId?: string;
+        numPackages?: number;
+        dimensions?: Dimensions;
+        status: 'NEW' | 'FINISHED' | 'FAILED' | 'NOLOCATION';
+        statusUpdatedAt?: number;
+        stopTimeSeconds?: number;
+        flavors?: string;
         updatedAt: number;
-        statusUpdatedAt: number;
-        route: Route;
+        signatureRequired?: boolean;
+        createdAt: number;
         routePriority: number;
-        trackingId: string;
-        numPackages: number;
-        type: string;
-        customerName: string;
-        position: Position;
-        displayPosition: Position;
+        displayPosition: LatLng;
         deliverFromStr: string;
         addressComponents: AddressComponents;
         origination: string;

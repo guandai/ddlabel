@@ -26,7 +26,7 @@ const PackageTable: React.FC = () => {
   const prevPackagesRef = useRef(packages);
 
   useEffect(() => {
-    const loadPackageAndBeanLog = async () => {
+    const callback = async () => {
       const statusLogsMap: StatusLogsMaps = {};
       for (const pkg of packages) {
         const log = (await BeansAiApi.getStatusLog({ trackingNo: pkg.trackingNo })).listItemReadableStatusLogs;
@@ -37,7 +37,7 @@ const PackageTable: React.FC = () => {
 
     const prevPackages = prevPackagesRef.current;
     if (JSON.stringify(prevPackages) !== JSON.stringify(packages)) {
-      tryLoad(setMessage, loadPackageAndBeanLog);
+      tryLoad(setMessage, callback);
     }
 
     // Update the ref to the current value after comparison
