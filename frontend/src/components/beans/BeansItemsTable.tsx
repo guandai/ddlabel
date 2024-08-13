@@ -21,7 +21,7 @@ const BeansItems: React.FC = () => {
       setBeansRecords(records);
     };
 	tryLoad(setMessage, callback);
-  }, [records]);
+  }, []);
   
   return (
     <FlexBox component="main" maxWidth="lg">

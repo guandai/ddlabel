@@ -20,8 +20,8 @@ const BeansRoutes: React.FC = () => {
       const records = (await BeansApi.getRoutes()).route;
       setBeansRecords(records);
     };
-	tryLoad(setMessage, callback);
-  }, [records]);
+	  tryLoad(setMessage, callback);
+  }, []);
 
   return (
     <FlexBox component="main" maxWidth="lg">

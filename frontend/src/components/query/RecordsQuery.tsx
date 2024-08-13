@@ -62,7 +62,7 @@ const RecordsQuery: React.FC<Props> = (prop) => {
 			setTotal(recordsRes.total);
 		}
 		tryLoad(setMessage, callback);
-	}, [email, trackingNo, address, startDate, endDate, page, perPage, total, getRecords, setRecords, setMessage, setFilter]);
+	}, [address, email, endDate, page, perPage, startDate, trackingNo, getRecords, setRecords, setMessage, setFilter]);
 
 	return (
 		<Box width='100%' sx={{ mt: 2 }}>
