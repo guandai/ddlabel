@@ -1,5 +1,4 @@
-// backend/src/server.ts
-import express, { NextFunction, RequestHandler, Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import http from 'http';
 import { Server } from 'socket.io';
@@ -10,7 +9,6 @@ import transactionRoutes from './routes/transactionRoutes';
 import shippingRateRoutes from './routes/shippingRateRoutes';
 import postalZoneRoutes from './routes/postalZoneRoutes';
 import compression from 'compression';
-
 import dotenv from 'dotenv';
 import logger from './config/logger';
 import zipCodeRoutes from './routes/zipCodeRoutes';
@@ -26,7 +24,6 @@ declare global {
   }
 }
 
-// Load environment variables from .env file
 const env = process.env.NODE_ENV || 'development';
 if (env === 'production') {
   dotenv.config({ path: '.env.production' });
@@ -39,18 +36,24 @@ const server = http.createServer(app);
 const io = new Server(server, {
   path: '/api/socket.io/',
   cors: {
-    origin: '*', methods: ['GET', 'POST'], allowedHeaders: ['Content-Type', 'Authorization', 'socket-id'],
+    origin: env === 'production' ? 'https://label.daidk.com' : '*',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'socket-id'],
+    credentials: true,
   },
 });
 
-const socketIoMiddleware = (req: Request, _res: Response, next: NextFunction ) => {
+const socketIoMiddleware = (req: Request, _res: Response, next: NextFunction) => {
   req.io = io;
   next();
 }
 
 // Middleware
 app.use(express.json());
-app.use(cors()); // Allow all requests
+app.use(cors({
+  origin: env === 'production' ? 'https://label.daidk.com' : '*',
+  credentials: true,
+}));
 app.use(compression());
 
 // Routes
@@ -70,8 +73,8 @@ connectDB().then(() => {
 });
 
 io.on('connection', (socket) => {
-  logger.info('a user connected');
+  logger.info(`User connected from origin: ${socket.handshake.headers.origin}`);
   socket.on('disconnect', () => {
-    logger.info('user disconnected');
+    logger.info('User disconnected');
   });
 });

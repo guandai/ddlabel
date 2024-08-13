@@ -20,8 +20,11 @@ const PackageUploadMapping: React.FC = () => {
 
   const getAutoMapping = (headers: string[]): HeaderMapping => {
     const autoMapping = {} as HeaderMapping;
-    CSV_KEYS.forEach(key => {
-      if (headers.includes(key)) { Object.assign(autoMapping, { [key]: key }); }
+    CSV_KEYS.forEach((key, idx) => {
+      const str = headers.find( s => s.toLowerCase().includes(key.toLowerCase()) );
+      console.log(`str: ${str}`);
+
+      if ( str ) { Object.assign(autoMapping, { [key]: str }); }
     });
     return autoMapping;
   };

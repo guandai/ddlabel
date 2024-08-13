@@ -7,14 +7,25 @@ import logger from '../config/logger';
 import { CsvRecord, defaultMapping, CSV_KEYS, HeaderMapping, KeyCsvRecord } from '@ddlabel/shared';
 
 export type BatchDataType = {
-	pkgBatch: PackageRoot[],
-	shipFromBatch: AddressCreationAttributes[],
-	shipToBatch: AddressCreationAttributes[],
+	errorArr: (CsvLogError | null)[],
+	pkgArr: PackageRoot[],
+	shipFromArr: AddressCreationAttributes[],
+	shipToArr: AddressCreationAttributes[],
 }
 
 export type PackageRoot = PackageCreationAttributes;
 export type CsvData = { [k: string]: string | number };
 
+export type CsvLogError = {
+	csvData: CsvData,
+	message: string,
+}
+export type PreparedData = {
+	mappedData: CsvRecord,
+	fromZipInfo: any,
+	toZipInfo: any,
+	logError: CsvLogError | null,
+}
 const getMappingData = (headers: CsvData, headerMapping: HeaderMapping): CsvRecord => {
 	return CSV_KEYS.reduce((acc: CsvRecord, csvKey: KeyCsvRecord) => {
 		const csvFileHeader = headerMapping[csvKey];
@@ -22,36 +33,38 @@ const getMappingData = (headers: CsvData, headerMapping: HeaderMapping): CsvReco
 	}, {} as CsvRecord);
 }
 
-export const getPreparedData = async (packageCsvMap: string, csvData: CsvData) => {
+export const getPreparedData = async (packageCsvMap: string, csvData: CsvData): Promise<PreparedData> => {
 	const headerMapping: HeaderMapping = isValidJSON(packageCsvMap) ? JSON.parse(packageCsvMap) : defaultMapping;
 	const mappedData = getMappingData(csvData, headerMapping);
 	const fromZipInfo = getZipInfo(getFromAddressZip(mappedData));
 	const toZipInfo = getZipInfo(getToAddressZip(mappedData));
+
 	if (!fromZipInfo) { 
 		logger.error(`Error in getPreparedData: no fromAddressZip, ${mappedData['fromAddressZip']}`);
-		return;
+		return { logError: { csvData, message: 'Error in getPreparedData: no fromAddressZip'}, mappedData, fromZipInfo, toZipInfo };
 	}
 	if (!toZipInfo) { 
 		logger.error(`Error in getPreparedData: no toAddressZip, ${mappedData['toAddressZip']}`);
-		return;
+		return { logError: { csvData, message: 'Error in getPreparedData: no toAddressZip'}, mappedData, fromZipInfo, toZipInfo };
 	}
 	return {
 		mappedData,
 		fromZipInfo,
 		toZipInfo,
+		logError: null,
 	};
 }
 
 export const processBatch = async (batchData: BatchDataType) => {
-	const { pkgBatch, shipFromBatch, shipToBatch } = batchData;
+	const { pkgArr, shipFromArr, shipToArr } = batchData;
 	try {
-		const packages = await Package.bulkCreate(pkgBatch);
+		const packages = await Package.bulkCreate(pkgArr);
 		packages.map((pkg, idx: number) => {
-			shipFromBatch[idx].fromPackageId = pkg.id;
-			shipToBatch[idx].toPackageId = pkg.id;
+			shipFromArr[idx].fromPackageId = pkg.id;
+			shipToArr[idx].toPackageId = pkg.id;
 		});
-		await Address.bulkCreateWithInfo(shipFromBatch);
-		await Address.bulkCreateWithInfo(shipToBatch);
+		await Address.bulkCreateWithInfo(shipFromArr);
+		await Address.bulkCreateWithInfo(shipToArr);
 	} catch (error: any) {
 		logger.error(`Error in processBatch: ${reducedError(error)}`);
 		throw error;

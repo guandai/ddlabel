@@ -1,9 +1,9 @@
 import { Response } from 'express';
 type CsvRecordRequired = {
 	weight: number,
-	fromName: string,
+	fromAddressName: string,
 	fromAddress1: string,
-	toName: string,
+	toAddressName: string,
 	toAddress1: string,
 }
 

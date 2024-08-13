@@ -31,8 +31,9 @@ const onData = async ({ req, csvData, pkgAll }: OnDataParams) => {
 	const userId = req.user.id;
 	if (!prepared) return;
 
-	const { mappedData, fromZipInfo, toZipInfo } = prepared;
-	pkgAll.pkgBatch.push({
+	const { mappedData, fromZipInfo, toZipInfo, logError } = prepared;
+	pkgAll.errorArr.push(logError);
+	pkgAll.pkgArr.push({
 		userId,
 		length: mappedData['length'] || 0,
 		width: mappedData['width'] || 0,
@@ -42,54 +43,45 @@ const onData = async ({ req, csvData, pkgAll }: OnDataParams) => {
 		referenceNo: mappedData['referenceNo'] || '',
 		source: PackageSource.api,
 	});
-	pkgAll.shipFromBatch.push({
+	pkgAll.shipFromArr.push({
 		...fromZipInfo,
-		name: mappedData['fromName'],
+		name: mappedData['fromAddressName'],
 		userId,
 		address1: mappedData['fromAddress1'],
 		address2: mappedData['fromAddress2'],
 		addressType: AddressEnum.fromPackage,
 	});
-	pkgAll.shipToBatch.push({
+	pkgAll.shipToArr.push({
 		...toZipInfo,
-		name: mappedData['toName'],
+		name: mappedData['toAddressName'],
 		userId,
 		address1: mappedData['toAddress1'],
 		address2: mappedData['toAddress2'],
 		addressType: AddressEnum.toPackage,
 	})
-	reportIoSocket('generate', req, pkgAll.pkgBatch.length, packageCsvLength);
+	reportIoSocket('generate', req, pkgAll.pkgArr.length, packageCsvLength);
 	return;
 };
 
 const onEnd = async ({ stream, req, pkgAll }: OnEndParams) => {
-	const { pkgBatch, shipFromBatch, shipToBatch } = pkgAll;
+	const { pkgArr, shipFromArr, shipToArr } = pkgAll;
 	let processed = 0;
-	const batchData: BatchDataType = {
-		pkgBatch: [],
-		shipFromBatch: [],
-		shipToBatch: [],
-	}
+	const totalBatches = Math.ceil(pkgArr.length / BATCH_SIZE);
 
-	const turns = Math.ceil(pkgBatch.length / BATCH_SIZE);
-
-	for (let i = 0; i < turns; i++) {
+	for (let i = 0; i < totalBatches; i++) {
 		const start = i * BATCH_SIZE;
-		const pkgDataSlice = pkgBatch.slice(start, start + BATCH_SIZE);
-		const fromSlice = shipFromBatch.slice(start, start + BATCH_SIZE);
-		const toSlice = shipToBatch.slice(start, start + BATCH_SIZE);
-
-		batchData.shipFromBatch = fromSlice;
-		batchData.shipToBatch = toSlice;
-		batchData.pkgBatch = pkgDataSlice;
+		const end = start + BATCH_SIZE;
+		const batchData: BatchDataType = {
+			errorArr: [],
+			pkgArr: pkgArr.slice(start, end),
+			shipFromArr: shipFromArr.slice(start, end),
+			shipToArr: shipToArr.slice(start, end),
+		};
 
 		try {
 			await processBatch(batchData);
-			batchData.pkgBatch = [];
-			batchData.shipFromBatch = [];
-			batchData.shipToBatch = [];
-			processed += pkgDataSlice.length;
-			reportIoSocket('insert', req, processed, pkgBatch.length);
+			processed += BATCH_SIZE;
+			reportIoSocket('insert', req, processed, pkgArr.length);
 			stream.emit('success');
 		} catch (error: any) {
 			logger.error(`Error in onEnd: ${error}`); // Log the detailed
@@ -105,9 +97,10 @@ export const importPackages = async (req: AuthRequest, res: ResponseAdv<ImportPa
 	}
 
 	const pkgAll: BatchDataType = {
-		pkgBatch: [],
-		shipFromBatch: [],
-		shipToBatch: [],
+		errorArr: [],
+		pkgArr: [],
+		shipFromArr: [],
+		shipToArr: [],
 	}
 
 	const stream = fs.createReadStream(file.path);

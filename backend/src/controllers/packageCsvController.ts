@@ -6,7 +6,6 @@ import { AuthRequest } from '../types';
 import { Address } from '../models/Address';
 import { Package } from '../models/Package';
 import { getRelationQuery } from './packageControllerUtil';
-import { Transaction } from '../models/Transaction';
 import { v4 as uuidv4 } from 'uuid';
 import { parse } from 'json2csv'; // Import parse from json2csv
 
@@ -38,14 +37,33 @@ export const getCsvPackages = async (req: AuthRequest, res: ResponseAdv<GetPacka
     // Convert the data to JSON
     const packagesData = packages.map(pkg => pkg.toJSON());
 
-    // Specify fields for the CSV
     const fields = [
-      'id', 'trackingNo', 'createdAt', 'updatedAt', // Package fields
-      'fromAddress.name', 'fromAddress.phone', 'fromAddress.email', // From address fields
-      'fromAddress.address1', 'fromAddress.address2', 'fromAddress.city', 'fromAddress.state', 'fromAddress.zip', // From address fields
-      'toAddress.name', 'toAddress.phone', 'toAddress.email', // To address fields
-      'toAddress.address1', 'toAddress.address2', 'toAddress.city', 'toAddress.state', 'toAddress.zip', // To address fields
-      // 'transaction.transactionId', 'transaction.amount', 'transaction.currency', 'transaction.status' // Transaction fields
+      { label: 'id', value: 'id' },
+      { label: 'weight', value: 'weight' },
+      { label: 'height', value: 'height' },
+      { label: 'length', value: 'length' },
+      { label: 'width', value: 'width' },
+      { label: 'referenceNo', value: 'referenceNo' },
+      { label: 'trackingNo', value: 'trackingNo' },
+      { label: 'createdAt', value: 'createdAt' },
+      { label: 'updatedAt', value: 'updatedAt' },
+      { label: 'toAddressName', value: 'toAddress.name' },
+      { label: 'toAddressPhone', value: 'toAddress.phone' },
+      { label: 'toAddressEmail', value: 'toAddress.email' },
+      { label: 'toAddress1', value: 'toAddress.address1' },
+      { label: 'toAddress2', value: 'toAddress.address2' },
+      { label: 'toAddressCity', value: 'toAddress.city' },
+      { label: 'toAddressState', value: 'toAddress.state' },
+      { label: 'toAddressZip', value: 'toAddress.zip' },
+      { label: 'fromAddressName', value: 'fromAddress.name' },
+      { label: 'fromAddressPhone', value: 'fromAddress.phone' },
+      { label: 'fromAddressEmail', value: 'fromAddress.email' },
+      { label: 'fromAddress1', value: 'fromAddress.address1' },
+      { label: 'fromAddress2', value: 'fromAddress.address2' },
+      { label: 'fromAddressCity', value: 'fromAddress.city' },
+      { label: 'fromAddressState', value: 'fromAddress.state' },
+      { label: 'fromAddressZip', value: 'fromAddress.zip' },
+      // Add more fields as necessary
     ];
 
     // Convert JSON to CSV
