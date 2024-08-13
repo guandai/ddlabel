@@ -62,7 +62,7 @@ const AddressForm: React.FC<AddressFormProps> = ({ setMessage, addressData, onCh
             backgroundColor: readOnly ? "#dddddd" : "transparent"
           }}
           required={required}
-          id={name}
+          id={`address-form-${name}`}
           fullWidth
           label={name}
           name={name}

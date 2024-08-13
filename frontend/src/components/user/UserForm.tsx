@@ -124,7 +124,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
         margin="normal"
         required={required}
         fullWidth
-        id={name}
+        id={`user-form-${name}`}
         label={name}
         name={name}
         autoComplete={autoComplete}

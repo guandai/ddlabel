@@ -30,7 +30,7 @@ const PackageTable: React.FC = () => {
       const statusLogsMap: StatusLogsMaps = {};
       for (const pkg of packages) {
         const log = (await BeansAiApi.getStatusLog({ trackingNo: pkg.trackingNo })).listItemReadableStatusLogs;
-        statusLogsMap[pkg.id] = log;
+        statusLogsMap[pkg.id] = log || [];
       }
       setStatusLogs(statusLogsMap);
     };
