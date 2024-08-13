@@ -24,7 +24,6 @@ const PackageTable: React.FC = () => {
   const [message, setMessage] = useState<MessageContent>(null);
   const [statusLogs, setStatusLogs] = useState<StatusLogsMaps >([]);
   const [filter, setFilter] = useState<FilterConfig>({ startDate: null, endDate: null, trackingNo: '', address: '' });
-  const prevPackagesRef = useRef(packages);
 
   useEffect(() => {
     const callback = async () => {
@@ -35,14 +34,7 @@ const PackageTable: React.FC = () => {
       }
       setStatusLogs(statusLogsMap);
     };
-
-    const prevPackages = prevPackagesRef.current;
-    if (JSON.stringify(prevPackages) !== JSON.stringify(packages)) {
-      tryLoad(setMessage, callback);
-    }
-
-    // Update the ref to the current value after comparison
-    prevPackagesRef.current = packages;
+    tryLoad(setMessage, callback);
   }, [packages]);
 
   const toStatus = (pkgId: number) => {

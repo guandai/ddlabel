@@ -1,5 +1,4 @@
 // backend/src/controllers/packageUpload.ts
-import { Request } from 'express';
 import { generateTrackingNo } from '../utils/generateTrackingNo';
 import multer from 'multer';
 import csv from 'csv-parser';
