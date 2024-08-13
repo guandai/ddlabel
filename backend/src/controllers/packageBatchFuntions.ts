@@ -5,27 +5,8 @@ import getZipInfo, { getFromAddressZip, getToAddressZip } from '../utils/getInfo
 import { isValidJSON, reducedError } from '../utils/errors';
 import logger from '../config/logger';
 import { CsvRecord, defaultMapping, CSV_KEYS, HeaderMapping, KeyCsvRecord } from '@ddlabel/shared';
+import { CsvData, PreparedData, BatchDataType } from '../types';
 
-export type BatchDataType = {
-	errorArr: (CsvLogError | null)[],
-	pkgArr: PackageRoot[],
-	shipFromArr: AddressCreationAttributes[],
-	shipToArr: AddressCreationAttributes[],
-}
-
-export type PackageRoot = PackageCreationAttributes;
-export type CsvData = { [k: string]: string | number };
-
-export type CsvLogError = {
-	csvData: CsvData,
-	message: string,
-}
-export type PreparedData = {
-	mappedData: CsvRecord,
-	fromZipInfo: any,
-	toZipInfo: any,
-	logError: CsvLogError | null,
-}
 const getMappingData = (headers: CsvData, headerMapping: HeaderMapping): CsvRecord => {
 	return CSV_KEYS.reduce((acc: CsvRecord, csvKey: KeyCsvRecord) => {
 		const csvFileHeader = headerMapping[csvKey];
@@ -59,6 +40,9 @@ export const processBatch = async (batchData: BatchDataType) => {
 	const { pkgArr, shipFromArr, shipToArr } = batchData;
 	try {
 		const packages = await Package.bulkCreate(pkgArr);
+		if (!packages) {
+			throw new Error(`Error in processBatch: failed to create packages ${pkgArr}`);
+		}
 		packages.map((pkg, idx: number) => {
 			shipFromArr[idx].fromPackageId = pkg.id;
 			shipToArr[idx].toPackageId = pkg.id;
