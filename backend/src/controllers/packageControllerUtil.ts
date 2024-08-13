@@ -42,8 +42,8 @@ export const getAddressesWhere = (req: AuthRequest, addressType: AddressEnum): W
 };
 
 const getInclude = (whereFrom: WhereOptions, whereTo: WhereOptions) => [
-	{ model: Address, as: 'fromAddress', where: whereFrom },
-	{ model: Address, as: 'toAddress', where: whereTo },
+	{ model: Address, as: 'fromAddress', where: whereFrom, required: false },
+	{ model: Address, as: 'toAddress', where: whereTo, required: false },
 	// { model: User, as: 'user' },
 	// { model: Transaction, as: 'transaction' },
 ];

@@ -1,6 +1,10 @@
 import { AuthRequest } from '../types';
 
-export const reportIoSocket = (eventName: string, req: AuthRequest, processed: number, total: number) => {
+type ReportIoProp = {
+	eventName: string, req: AuthRequest, processed: number, total: number;
+}
+export const reportIoSocket = (prop: ReportIoProp) => {
+	const { eventName, req, processed, total } = prop;
 	const io = req.io;
 	const socketId = req.headers['socket-id'] || 'no-id';
 
