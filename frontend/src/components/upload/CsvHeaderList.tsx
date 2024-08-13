@@ -25,7 +25,7 @@ const CsvHeaderList: React.FC<Prop> = (prop) => {
 					label={key}
 					labelId={`${key}-label`}
 					required={required}
-					placeholder={undefined}
+					placeholder='None'
 					value={headerMapping && headerMapping[key] ? headerMapping[key] : ''}
 					onChange={e => handleMappingChange(key, String(e.target.value))}
 				>

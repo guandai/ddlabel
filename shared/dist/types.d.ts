@@ -1,9 +1,9 @@
 import { Response } from 'express';
 type CsvRecordRequired = {
     weight: number;
-    fromName: string;
+    fromAddressName: string;
     fromAddress1: string;
-    toName: string;
+    toAddressName: string;
     toAddress1: string;
 };
 export type BeansStatus = 'FINISHED' | 'FAILED' | 'MISLOAD' | 'DELETED' | 'NEW' | 'IN_PROCESS' | 'NOLOCATION' | 'N/A';

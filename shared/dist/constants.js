@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.defaultMapping = exports.CSV_KEYS = exports.CSV_KEYS_REQUIRED = exports.CSV_KEYS_OPTIONAL = void 0;
-var ADDRESS_FROM_KEYS = ['fromName', 'fromAddress1'];
+var ADDRESS_FROM_KEYS = ['fromAddressName', 'fromAddress1'];
 var ADDRESS_FROM_KEYS_OPTIONAL = ['fromAddress2', 'fromAddressZip'];
-var ADDRESS_TO_KEYS = ['toName', 'toAddress1'];
+var ADDRESS_TO_KEYS = ['toAddressName', 'toAddress1'];
 var ADDRESS_TO_KEYS_OPTIONAL = ['toAddress2', 'toAddressZip'];
 var ROOT_KEYS = ['weight'];
 var ROOT_KEYS_OPTIONAL = ['length', 'width', 'height', 'trackingNo', 'referenceNo'];

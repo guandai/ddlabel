@@ -11,9 +11,9 @@ export declare const CSV_KEYS_OPTIONAL: (keyof {
     toAddress2?: string | undefined;
 } | keyof {
     weight: number;
-    fromName: string;
+    fromAddressName: string;
     fromAddress1: string;
-    toName: string;
+    toAddressName: string;
     toAddress1: string;
 })[];
 export declare const CSV_KEYS_REQUIRED: (keyof {
@@ -28,9 +28,9 @@ export declare const CSV_KEYS_REQUIRED: (keyof {
     toAddress2?: string | undefined;
 } | keyof {
     weight: number;
-    fromName: string;
+    fromAddressName: string;
     fromAddress1: string;
-    toName: string;
+    toAddressName: string;
     toAddress1: string;
 })[];
 export declare const CSV_KEYS: (keyof {
@@ -45,9 +45,9 @@ export declare const CSV_KEYS: (keyof {
     toAddress2?: string | undefined;
 } | keyof {
     weight: number;
-    fromName: string;
+    fromAddressName: string;
     fromAddress1: string;
-    toName: string;
+    toAddressName: string;
     toAddress1: string;
 })[];
 export declare const defaultMapping: HeaderMapping;
