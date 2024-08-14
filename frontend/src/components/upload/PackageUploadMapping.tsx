@@ -86,6 +86,15 @@ const PackageUploadMapping: React.FC = () => {
     setMessage(null);
   };
 
+  const TextWithLineBreaks = ({ text }: {text: string}) => {
+    return (
+      <Typography
+        component="div"
+        dangerouslySetInnerHTML={{ __html: text.replace(/\n/g, '<br />') }}
+      />
+    );
+  };
+
   return (
     <>
       <Button variant="contained" disabled={runStatus === RunStatus.running} startIcon={<Upload />} component="label" fullWidth >
@@ -105,7 +114,7 @@ const PackageUploadMapping: React.FC = () => {
             <>
               <Typography variant="h6" id="modal-title">Map CSV Headers</Typography>
               {runStatus !== RunStatus.running && <CloseButton handleModalClose={handleModalClose} />}
-              {message && <Alert severity={message.level}>{message.text}</Alert>}
+              {message && <Alert severity={message.level}><TextWithLineBreaks text={message.text}/></Alert>}
               {runStatus === RunStatus.ready &&
                 <CsvHeaderList
                   csvHeaders={csvHeaders}

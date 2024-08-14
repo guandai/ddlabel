@@ -3,8 +3,8 @@ import QRCode from 'qrcode.react';
 import BarcodeComponent from './BarcodeComponent';
 import { Box, Typography } from '@mui/material';
 import { cleanAddress, getStateId, PackageModel } from '@ddlabel/shared';
-import monkeyLogo from '../../assets/svg/monkey_logo.jpg'; // Import the main logo
-import monkeyFont from '../../assets/svg/monkey_font.jpg'; // Import the bottom-right logo
+import brandLogo from '../../assets/jpg/brand_logo.jpg'; // Import the main logo
+import brandFont from '../../assets/jpg/brand_font.jpg'; // Import the bottom-right logo
 import styled from 'styled-components';
 import { scaleStyle } from '../../util/styled';
 
@@ -49,7 +49,7 @@ export const PackageLabel: React.FC<PackageLabelProps> = (prop) => {
         <Box sx={{ textAlign: 'left', mr: `${8 * factor}px`, width: '70%' }}>
           {/* logo part */}
           <Box>
-            <img src={monkeyLogo} alt="Monkey Logo" style={{ display: 'inline', width: `${0.7 * factor}in`}} />
+            <img src={brandLogo} alt="Brand Logo" style={{ display: 'inline', width: `${0.7 * factor}in`}} />
             <Typography variant="h4" sx={{ fontSize: `${2 * factor }rem`, float: 'right', display: 'inline', fontWeight: 'bold' }}>{pkg.toAddress.sortCode}</Typography>
           </Box>
 
@@ -95,13 +95,13 @@ export const PackageLabel: React.FC<PackageLabelProps> = (prop) => {
         <Typography variant="body2" sx={{ textAlign: 'left', fontSize: `${0.8 * factor}rem` }}>
           Please return all packages instead of leaving them after finishing the Proof of Delivery (POD).
           <br />
-          Pod check email : monkeyexp100@gmail.com
+          Pod check email : check@example.com
       </Typography>
       </Box>
       {/* bottom line */}
       <Box sx={{ height: `${0.2 * factor}in`, display: 'flex', justifyContent: 'space-between', alignItems: "end", }}>
         <Box sx={{fontSize: `${1 * factor}rem`,}}> Reference No: {pkg.referenceNo}</Box>
-        <img src={monkeyFont} alt="Monkey Font Logo" style={{ width: `${5 * factor}em` }} />
+        <img src={brandFont} alt="Brand Font Logo" style={{ width: `${8 * factor}em` }} />
       </Box>
     </Box>
   );

@@ -16,7 +16,7 @@ export type ProfileType = UserModel & { confirmPassword: string };
 type QuickFieldProp = {
   name: keyof ProfileType;
   autoComplete?: string;
-  type?: 'text' | 'password'; 
+  type?: 'text' | 'password';
   required?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
@@ -75,13 +75,12 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
   };
 
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProfile({
-      ...profile,
-      warehouseAddress: {
-        ...profile.warehouseAddress,
-        [e.target.name]: e.target.value,
-      },
-    });
+    const address = {
+      ...profile.warehouseAddress,
+      [e.target.name]: e.target.value,
+    }
+
+    setProfile(prev => ({ ...prev, warehouseAddress: { ...prev.warehouseAddress, ...address } }));
   };
 
   const checkErrors = (): boolean => {
@@ -139,7 +138,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
     <Container component="main" maxWidth="md">
       <StyledBox>
         <Typography component="h1" variant="h4">
-          {isRegister ? 'Register' : 'User Profile'}
+          {isRegister ? 'Register User' : 'User Profile'}
         </Typography>
         <MessageAlert message={message} />
 
@@ -176,7 +175,7 @@ const UserForm: React.FC<UserFormProps> = ({ isRegister = false }) => {
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
-            {isRegister ? 'Register' : 'Update Profile'}
+            {isRegister ? 'Register User' : 'Update Profile'}
           </Button>
         </Box>
       </StyledBox>

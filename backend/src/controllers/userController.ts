@@ -17,10 +17,11 @@ import {
   UpdateUserRes,
   UpdateUserReq,
 } from '@ddlabel/shared';
-import { InvalidCredentialsError, NotFoundError, resHeaderError } from '../utils/errors';
+import { resHeaderError } from '../utils/errors';
 import { Transaction } from '../models/Transaction';
 import { Package } from '../models/Package';
 import { getAddressesWhere, getQueryWhere } from './packageControllerUtil';
+import { InvalidCredentialsError, NotFoundError } from '../utils/errorClasses';
 
 export const registerUser = async (req: Request, res: ResponseAdv<RegisterUserRes>) => {
   const { name, email, password, role, warehouseAddress }: RegisterUserReq = req.body;

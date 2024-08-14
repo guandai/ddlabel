@@ -45,7 +45,7 @@ const PackageTable: React.FC = () => {
     <FlexBox component="main" maxWidth="lg" >
       <PackageTableSideBar filter={filter} />
       <StyledBox>
-        <Typography component="h1" variant="h4" align='center'>Packages</Typography>
+        <Typography component="h1" variant="h4">Packages</Typography>
         <MessageAlert message={message} />
         <RecordsQuery getRecords={PackageApi.getPackages} setRecords={setPackages} setMessage={setMessage} perPageList={[5, 10, 20]} setFilter={setFilter} />
         <TableContainer component={Paper} sx={{ mt: 3 }}>

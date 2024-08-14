@@ -5,7 +5,8 @@ import { Package } from '../models/Package';
 import { User } from '../models/User';
 import { GetTransactionRes, GetTransactionsRes, ResponseAdv } from '@ddlabel/shared';
 import { AuthRequest } from '../types';
-import { NotFoundError, resHeaderError } from '../utils/errors';
+import { resHeaderError } from '../utils/errors';
+import { NotFoundError } from '../utils/errorClasses';
 
 export const getTransactions = async (req: AuthRequest, res: ResponseAdv<GetTransactionsRes>) => {
   const limit = parseInt(req.query.limit as string) || 100; // Default limit to 20 if not provided

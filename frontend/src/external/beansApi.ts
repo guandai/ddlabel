@@ -21,6 +21,10 @@ export class BeansAiApi {
 		const params = updatedAfter ? { updatedAfter } : {};
 		return (await axios.get<BeansAI.RouteList>(`${this.path}/routes`, { ...this.config, params })).data;
 	}
+	public async getRoutesItems(listRouteId: string, updatedAfter=0) {
+		const params = updatedAfter ? { updatedAfter } : {};
+		return (await axios.get<BeansAI.ItemList>(`${this.path}/routes/${listRouteId}/items`, { ...this.config, params })).data;
+	}
 
 	// New method to get items
 	public async getItems(updatedAfter?: number) {

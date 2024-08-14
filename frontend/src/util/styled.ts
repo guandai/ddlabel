@@ -9,7 +9,7 @@ export const StyledBox = styled(Box)({
 	marginTop: '64px',
 	display: 'flex',
 	flexDirection: 'column',
-	alignItems: 'center',
+	alignItems: 'left',
 	width: '100%',
 	flex: 8,
 	padding: '0 2em',

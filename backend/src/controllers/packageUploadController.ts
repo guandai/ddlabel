@@ -3,11 +3,11 @@ import multer from 'multer';
 import csv from 'csv-parser';
 import fs from 'fs';
 import path from 'path';
-import logger from '../config/logger';
 import { ImportPackageRes, ResponseAdv } from '@ddlabel/shared';
 import { AuthRequest, BatchDataType, CsvData } from '../types';
-import { onData, onEnd } from './packageStreamFuntions';
-import { aggregateError, handleSequelizeError, InvalidInputError, resHeaderError } from '../utils/errors';
+import { onData, onEnd, onError } from './packageStreamFuntions';
+import { resHeaderError } from '../utils/errors';
+import { InvalidInputError } from '../utils/errorClasses';
 
 export const importPackages = async (req: AuthRequest, res: ResponseAdv<ImportPackageRes>) => {
 	const { file } = req;
@@ -16,9 +16,10 @@ export const importPackages = async (req: AuthRequest, res: ResponseAdv<ImportPa
 			throw new InvalidInputError('No file uploaded');
 		}
 
-		const pkgAll: BatchDataType = {
+		const pkgGlobal: BatchDataType = {
 			processed: 0,
 			errorMap: [],
+			errorHash: { missingToZip:0 , missingFromZip: 0, trackingnoMustBeUnique: 0 },
 			pkgArr: [],
 			shipFromArr: [],
 			shipToArr: [],
@@ -28,12 +29,9 @@ export const importPackages = async (req: AuthRequest, res: ResponseAdv<ImportPa
 		// const writableStream = fs.createWriteStream('output.txt');
 
 		readableStream.pipe(csv())
-			.on('data', (csvData: CsvData) => onData({ req, csvData, pkgAll }))
-			.on('end', async () => onEnd({ req, res, pkgAll, file }))
-			.on('error', (error: any) => {
-				logger.error(`Error in importPackages onError: ${aggregateError(error)}`);
-				pkgAll.errorMap.push(handleSequelizeError('importPackagesPipe', error, req.file));
-			});
+			.on('data', (csvData: CsvData) => onData({ req, csvData, pkgGlobal }))
+			.on('end', async () => onEnd({ req, res, pkgGlobal, file }))
+			.on('error', (error: any) => onError( error, pkgGlobal ));
 	} catch (error: any) {
 		return resHeaderError('importPackages', error, req.file, res);
 	}

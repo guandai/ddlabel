@@ -1,7 +1,8 @@
 import { Response } from 'express';
 import { SortCode } from '../models/SortCode';
 import { AuthRequest } from '../types';
-import { NotFoundError, resHeaderError } from '../utils/errors';
+import { resHeaderError } from '../utils/errors';
+import { NotFoundError } from '../utils/errorClasses';
 
 exports.getAllSortCodes = async (req: AuthRequest, res: Response) => {
   try {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IconButton } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import { PictureAsPdf, Label } from '@mui/icons-material';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import { BeansAI, PackageModel } from '@ddlabel/shared';
@@ -39,13 +39,18 @@ const PackageActions: React.FC<PackageActionsProps> = ({ pkg, setMessage }) => {
   return (
     <>
       <ModelActions model={pkg} modelName="packages" setMessage={setMessage} deleteAction={PackageApi.deletePackage} >
-        <IconButton onClick={() => generatePDF(pkg)}><PictureAsPdf /></IconButton>
-        <IconButton onClick={handleViewLog}><AssignmentTurnedInIcon /></IconButton>
-        <IconButton onClick={handelLabel}><Label /></IconButton>
+        <Tooltip title="View Label">
+          <IconButton onClick={handelLabel}><Label /></IconButton>
+        </Tooltip>
+        <Tooltip title="View PDF">
+          <IconButton onClick={() => generatePDF(pkg)}><PictureAsPdf /></IconButton>
+        </Tooltip>
+        <Tooltip title="View Log">
+          <IconButton onClick={handleViewLog}><AssignmentTurnedInIcon /></IconButton>
+        </Tooltip>
       </ModelActions>
       <StatusLogsDialog open={logOpen} handleClose={handleLogClose} logs={logs} />
     </>
   );
 };
-
 export default PackageActions;

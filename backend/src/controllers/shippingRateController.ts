@@ -4,7 +4,8 @@ import { ShippingRate } from '../models/ShippingRate';
 import { Op } from 'sequelize';
 import { FullRateReq, VolumeUnit, WeightUnit } from '@ddlabel/shared';
 import { AuthRequest } from '../types';
-import { InvalidInputError, NotFoundError, resHeaderError } from '../utils/errors';
+import { resHeaderError } from '../utils/errors';
+import { InvalidInputError, NotFoundError } from '../utils/errorClasses';
 
 // Function to calculate shipping rate
 export const fullShippingRate = async (prop: FullRateReq): Promise<number | 'NO_RATE'> => {

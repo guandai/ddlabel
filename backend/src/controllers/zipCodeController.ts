@@ -2,7 +2,8 @@ import { ZipCode } from '../models/ZipCode';
 import getZipInfo from '../utils/getInfo';
 import { ResponseAdv, ZipInfo } from '@ddlabel/shared';
 import { AuthRequest } from '../types';
-import { NotFoundError, resHeaderError } from '../utils/errors';
+import { resHeaderError } from '../utils/errors';
+import { NotFoundError } from '../utils/errorClasses';
 
 export const getZipCode = async (req: AuthRequest, res: ResponseAdv<ZipCode>) => {
   const { zip } = req.params;
