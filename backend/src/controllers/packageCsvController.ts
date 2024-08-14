@@ -8,6 +8,35 @@ import { Package } from '../models/Package';
 import { getRelationQuery } from './packageControllerUtil';
 import { v4 as uuidv4 } from 'uuid';
 import { parse } from 'json2csv'; // Import parse from json2csv
+import { resHeaderError } from '../utils/errors';
+
+const csvFieldsMapping = [
+  { label: 'id', value: 'id' },
+  { label: 'weight', value: 'weight' },
+  { label: 'height', value: 'height' },
+  { label: 'length', value: 'length' },
+  { label: 'width', value: 'width' },
+  { label: 'referenceNo', value: 'referenceNo' },
+  { label: 'trackingNo', value: 'trackingNo' },
+  { label: 'createdAt', value: 'createdAt' },
+  { label: 'updatedAt', value: 'updatedAt' },
+  { label: 'toAddressName', value: 'toAddress.name' },
+  { label: 'toAddressPhone', value: 'toAddress.phone' },
+  { label: 'toAddressEmail', value: 'toAddress.email' },
+  { label: 'toAddress1', value: 'toAddress.address1' },
+  { label: 'toAddress2', value: 'toAddress.address2' },
+  { label: 'toAddressCity', value: 'toAddress.city' },
+  { label: 'toAddressState', value: 'toAddress.state' },
+  { label: 'toAddressZip', value: 'toAddress.zip' },
+  { label: 'fromAddressName', value: 'fromAddress.name' },
+  { label: 'fromAddressPhone', value: 'fromAddress.phone' },
+  { label: 'fromAddressEmail', value: 'fromAddress.email' },
+  { label: 'fromAddress1', value: 'fromAddress.address1' },
+  { label: 'fromAddress2', value: 'fromAddress.address2' },
+  { label: 'fromAddressCity', value: 'fromAddress.city' },
+  { label: 'fromAddressState', value: 'fromAddress.state' },
+  { label: 'fromAddressZip', value: 'fromAddress.zip' },
+];
 
 export const getCsvPackages = async (req: AuthRequest, res: ResponseAdv<GetPackagesCsvRes>) => {
   const relationQuery = getRelationQuery(req);
@@ -17,66 +46,25 @@ export const getCsvPackages = async (req: AuthRequest, res: ResponseAdv<GetPacka
       attributes: { exclude: ['userId'] }, // Exclude user column
       include: [
         {
-          model: Address,
-          as: 'fromAddress',
+          model: Address, as: 'fromAddress',
           attributes: ['address1', 'address2', 'city', 'state', 'zip', 'name', 'phone', 'email'],
         },
         {
-          model: Address,
-          as: 'toAddress',
+          model: Address, as: 'toAddress',
           attributes: ['address1', 'address2', 'city', 'state', 'zip', 'name', 'phone', 'email'],
         },
-        // {
-        //   model: Transaction,
-        //   as: 'transaction',
-        //   attributes: ['id', 'event', 'cost'],
-        // },
       ],
     });
     
     // Convert the data to JSON
     const packagesData = packages.map(pkg => pkg.toJSON());
-
-    const fields = [
-      { label: 'id', value: 'id' },
-      { label: 'weight', value: 'weight' },
-      { label: 'height', value: 'height' },
-      { label: 'length', value: 'length' },
-      { label: 'width', value: 'width' },
-      { label: 'referenceNo', value: 'referenceNo' },
-      { label: 'trackingNo', value: 'trackingNo' },
-      { label: 'createdAt', value: 'createdAt' },
-      { label: 'updatedAt', value: 'updatedAt' },
-      { label: 'toAddressName', value: 'toAddress.name' },
-      { label: 'toAddressPhone', value: 'toAddress.phone' },
-      { label: 'toAddressEmail', value: 'toAddress.email' },
-      { label: 'toAddress1', value: 'toAddress.address1' },
-      { label: 'toAddress2', value: 'toAddress.address2' },
-      { label: 'toAddressCity', value: 'toAddress.city' },
-      { label: 'toAddressState', value: 'toAddress.state' },
-      { label: 'toAddressZip', value: 'toAddress.zip' },
-      { label: 'fromAddressName', value: 'fromAddress.name' },
-      { label: 'fromAddressPhone', value: 'fromAddress.phone' },
-      { label: 'fromAddressEmail', value: 'fromAddress.email' },
-      { label: 'fromAddress1', value: 'fromAddress.address1' },
-      { label: 'fromAddress2', value: 'fromAddress.address2' },
-      { label: 'fromAddressCity', value: 'fromAddress.city' },
-      { label: 'fromAddressState', value: 'fromAddress.state' },
-      { label: 'fromAddressZip', value: 'fromAddress.zip' },
-      // Add more fields as necessary
-    ];
-
     // Convert JSON to CSV
-    const csv = parse(packagesData, { fields });
+    const csv = parse(packagesData, { fields: csvFieldsMapping });
 
-    // Set the headers to indicate a file download
     res.header('Content-Type', 'text/csv');
     res.header('Content-Disposition', `attachment; filename="packages_${uuidv4()}.csv"`);
-
-    // Send the CSV content as the response
     return res.send(csv);
   } catch (error: any) {
-    logger.error(`Error in getPackages: ${error}`);
-    return res.status(400).json({ message: error.message });
+    return resHeaderError('getCsvPackages', error, req.query, res);
   }
 };

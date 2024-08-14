@@ -7,51 +7,38 @@ import logger from '../config/logger';
 import { ImportPackageRes, ResponseAdv } from '@ddlabel/shared';
 import { AuthRequest, BatchDataType, CsvData } from '../types';
 import { onData, onEnd } from './packageStreamFuntions';
+import { aggregateError, handleSequelizeError, InvalidInputError, resHeaderError } from '../utils/errors';
 
 export const importPackages = async (req: AuthRequest, res: ResponseAdv<ImportPackageRes>) => {
 	const { file } = req;
-	if (!file) {
-		logger.error(`No file uploaded in importPackages`);
-		return res.status(400).send({ message: 'No file uploaded' });
+	try {
+		if (!file) {
+			throw new InvalidInputError('No file uploaded');
+		}
+
+		const pkgAll: BatchDataType = {
+			processed: 0,
+			errorMap: [],
+			pkgArr: [],
+			shipFromArr: [],
+			shipToArr: [],
+		}
+
+		const readableStream = fs.createReadStream(file.path);
+		// const writableStream = fs.createWriteStream('output.txt');
+
+		readableStream.pipe(csv())
+			.on('data', (csvData: CsvData) => onData({ req, csvData, pkgAll }))
+			.on('end', async () => onEnd({ req, res, pkgAll, file }))
+			.on('error', (error: any) => {
+				logger.error(`Error in importPackages onError: ${aggregateError(error)}`);
+				pkgAll.errorMap.push(handleSequelizeError('importPackagesPipe', error, req.file));
+			});
+	} catch (error: any) {
+		return resHeaderError('importPackages', error, req.file, res);
 	}
-
-	const pkgAll: BatchDataType = {
-		count: 0,
-		errorArr: [],
-		pkgArr: [],
-		shipFromArr: [],
-		shipToArr: [],
-	}
-
-	const stream = fs.createReadStream(file.path);
-	stream.pipe(csv())
-		.on('data', (csvData: CsvData) => onData({ req, csvData, pkgAll }))
-		.on('end', async () => onEnd({ stream, req, pkgAll }));
-
-	// error is not on pipe
-	stream.on('error', error => {
-		logger.error(`Error in importPackages onError: ${error}`);
-		deleteUploadedFile(file);
-		pkgAll.errorArr.push({message: error.message});
-		return res.status(400).send({ message: `Importing Error: ${error}` })
-	});
-
-	// success is not on pipe
-	stream.on('success', (msg) => {
-		console.log(`msg: ${msg}`);
-		deleteUploadedFile(file);
-		logger.info(`Process Done`);
-		return res.json({ message: `Importing Done!` });
-	});
 };
 
-const deleteUploadedFile = (file: Express.Multer.File) => {
-	fs.unlink(file.path, (unlinkError) => {
-		if (unlinkError) {
-			logger.error(`Failed to delete file after process: ${unlinkError}`);
-		}
-	});
-}
 const storage = multer.diskStorage({
 	destination: function (req, file, cb) {
 		cb(null, './uploads/');

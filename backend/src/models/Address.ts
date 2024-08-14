@@ -1,5 +1,5 @@
 // backend/src/models/Address.ts
-import { Model, DataTypes, Optional } from 'sequelize';
+import { Model, DataTypes } from 'sequelize';
 import { sequelize } from '../config/database';
 import { fixCityState, fixPort } from '../utils/getInfo';
 import { AddressAttributes, AddressCreationAttributes, AddressEnum, PortEnum } from '@ddlabel/shared';

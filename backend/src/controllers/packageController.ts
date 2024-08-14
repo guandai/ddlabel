@@ -12,15 +12,16 @@ import {
   PackageSource,
   ResponseAdv,
   SimpleRes,
-  UpdatePackageReq 
+  UpdatePackageReq
 } from '@ddlabel/shared';
 import { AuthRequest } from '../types';
 import { generateTrackingNo } from '../utils/generateTrackingNo';
 import { getRelationQuery } from './packageControllerUtil';
+import { handleSequelizeError, NotFoundError, resHeaderError } from '../utils/errors';
 
 export const createPackage = async (req: AuthRequest, res: ResponseAdv<CreatePackageRes>) => {
   if (!req.user) {
-    return res.status(404).json({ message: 'User not found' });
+    throw new NotFoundError('User not found');
   }
   const { fromAddress, toAddress, length, width, height, weight, referenceNo, trackingNo }: CreatePackageReq = req.body;
   const userId = req.user.id;
@@ -49,8 +50,7 @@ export const createPackage = async (req: AuthRequest, res: ResponseAdv<CreatePac
 
     return res.status(201).json({ success: true, packageId: pkg.id });
   } catch (error: any) {
-    logger.error(`Error in createPackage: ${error}`);
-    return res.status(400).json({ message: error.message, error: error.errors });
+    return resHeaderError('createPackage', error, {...req.body, user: req.user}, res);
   }
 };
 
@@ -69,7 +69,7 @@ export const getPackages = async (req: AuthRequest, res: ResponseAdv<GetPackages
     return res.json({ total: rows.count, packages: rows.rows });
   } catch (error: any) {
     logger.error(`Error in getPackages: ${error}`);
-    return res.status(400).json({ message: error.message });
+    return resHeaderError('getPackages', error, req.query, res);
   }
 };
 
@@ -78,7 +78,7 @@ export const updatePackage = async (req: AuthRequest, res: ResponseAdv<Package>)
   try {
     const pkg = await Package.findByPk(req.params.id);
     if (!pkg) {
-      return res.status(400).json({ message: 'Package not found' });
+      throw new NotFoundError('Package not found');
     }
 
     await Address.updateWithInfo(fromAddress);
@@ -86,7 +86,7 @@ export const updatePackage = async (req: AuthRequest, res: ResponseAdv<Package>)
     await pkg.update(rest);
     return res.json(pkg);
   } catch (error: any) {
-    return res.status(400).json({ message: error.message });
+    return resHeaderError('updatePackage', error, req.body, res);
   }
 };
 
@@ -94,7 +94,7 @@ export const deletePackage = async (req: AuthRequest, res: ResponseAdv<SimpleRes
   try {
     const pkg = await Package.findByPk(req.params.id);
     if (!pkg) {
-      return res.status(400).json({ message: 'Package not found' });
+      throw new NotFoundError('Package not found');
     }
 
     await Address.destroy({ where: { fromPackageId: pkg.id, addressType: AddressEnum.fromPackage } });
@@ -102,7 +102,7 @@ export const deletePackage = async (req: AuthRequest, res: ResponseAdv<SimpleRes
     await Package.destroy({ where: { id: pkg.id } });
     return res.json({ message: 'Package deleted' });
   } catch (error: any) {
-    return res.status(400).json({ message: error.message });
+    return resHeaderError('deletePackage', error, req.params, res);
   }
 };
 
@@ -119,10 +119,10 @@ export const getPackage = async (req: AuthRequest, res: ResponseAdv<GetPackageRe
     });
 
     if (!pkg) {
-      return res.status(400).json({ message: 'Package not found' });
+      throw new NotFoundError(`Package not found - ${id}`);
     }
     return res.json({ package: pkg });
   } catch (error: any) {
-    return res.status(400).json({ message: error.message });
+    return resHeaderError('getPackage', error, req.params, res);
   }
 };

@@ -1,30 +1,38 @@
 import { Request } from 'express';
-export type SimpleType = {
-	t: string
-}  
 
+type PackageRoot = PackageCreationAttributes;
 export interface AuthRequest extends Request {
 	user?: UserAttributes;
 }
 
 export type BatchDataType = {
-	count: number,
-	errorArr: (CsvLogError | null)[],
+	processed: number,
+	errorMap: ErrorRes[],
 	pkgArr: PackageRoot[],
 	shipFromArr: AddressCreationAttributes[],
 	shipToArr: AddressCreationAttributes[],
 }
 
-export type PackageRoot = PackageCreationAttributes;
-export type CsvData = { [k: string]: string | number };
 
-export type CsvLogError = {
-	csvData?: CsvData,
-	message: string,
-}
+export type CsvData = { [k: string]: string | number };
 export type PreparedData = {
 	mappedData: CsvRecord,
 	fromZipInfo: any,
 	toZipInfo: any,
-	logError: CsvLogError | null,
+} | {
+	csvUploadError: ErrorRes,
+}
+
+export type ErrorRes = {
+	name: string,
+	original: any;
+	data: unknown;
+	status: number;
+	message: string;
+	errors?: ValidationErrorItem[];
+	parent?: Error;
+	sql?: string;
+	where?: Record<string, unknown>;
+	stack?: any;
+	lastFn?: string;
 }

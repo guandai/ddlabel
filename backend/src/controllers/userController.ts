@@ -4,7 +4,6 @@ import { User } from '../models/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Address } from '../models/Address';
-import logger from '../config/logger';
 import { AuthRequest } from '../types';
 import {
   AddressEnum,
@@ -18,10 +17,10 @@ import {
   UpdateUserRes,
   UpdateUserReq,
 } from '@ddlabel/shared';
-import { aggregateError, notFound } from '../utils/errors';
+import { InvalidCredentialsError, NotFoundError, resHeaderError } from '../utils/errors';
 import { Transaction } from '../models/Transaction';
 import { Package } from '../models/Package';
-import { getAddressesWhere, getQueryWhere, getRelationQuery } from './packageControllerUtil';
+import { getAddressesWhere, getQueryWhere } from './packageControllerUtil';
 
 export const registerUser = async (req: Request, res: ResponseAdv<RegisterUserRes>) => {
   const { name, email, password, role, warehouseAddress }: RegisterUserReq = req.body;
@@ -33,8 +32,7 @@ export const registerUser = async (req: Request, res: ResponseAdv<RegisterUserRe
     await Address.createWithInfo(warehouseAddress);
     return res.status(201).json({ success: true, userId: user.id });
   } catch (error: any) {
-    logger.error(`Error in registerUser: ${error}`);
-    return res.status(400).json({ message: aggregateError(error), error });
+    return resHeaderError('registerUser', error, req.body, res);
   }
 };
 
@@ -43,18 +41,17 @@ export const loginUser = async (req: AuthRequest, res: ResponseAdv<LoginUserRes>
   try {
     const user = await User.findOne({ where: { email } });
     if (!user) {
-      return res.status(400).json({ message: 'user email not exist' });
+      throw new NotFoundError(`User not found - ${email}`);
     }
     
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: '7d' });
-      return res.json({ token, userId: user.id, userRole: user.role });
-    } else {
-      return res.status(400).json({ message: 'Invalid credentials' });
+    if (!await bcrypt.compare(password, user.password)) {
+      throw new InvalidCredentialsError(`Invalid credentials - ${email}`);
     }
+
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: '7d' });
+    return res.json({ token, userId: user.id, userRole: user.role });
   } catch (error: any) {
-    logger.error(`Error in loginUser: ${error}`);
-    return res.status(400).json({ message: error.message });
+    return resHeaderError('loginUser', error, req.body, res);
   }
 };
 
@@ -73,8 +70,7 @@ export const updateUserById = async (req: AuthRequest, res: ResponseAdv<UpdateUs
 
     return res.json(result);
   } catch (error: any) {
-    logger.error(`Error in updateUserById: ${error}`);
-    return res.status(400).json({ message: error.message });
+    return resHeaderError('updateUserById', error, req.body, res);
   }
 };
 
@@ -101,8 +97,7 @@ export const getUsers = async (req: AuthRequest, res: ResponseAdv<GetUsersRes>) 
     const users = rows.rows;
     return res.json({ users, total });
   } catch (error: any) {
-    logger.error(`Error in getUsers: ${error}`);
-    return res.status(400).json({ message: error.message });
+    return resHeaderError('getUsers', error, req.query, res);
   }
 };
 
@@ -116,17 +111,16 @@ export const getUserById = async (req: AuthRequest, res: ResponseAdv<GetUserRes>
           attributes: ['id', 'name', 'address1', 'address2', 'zip', 'state', 'email', 'phone'], 
           where: { addressType: AddressEnum.user } 
         },
-        // { model: Transaction, as: 'transactions', limit: 10 },
-        // { model: Package, as: 'packages', limit: 10 },
       ],
       where: { id: req.params.id }
     });
-    if (!user) { return notFound(res, 'User (By Id)') };
+    if (!user) { 
+      throw new NotFoundError(`User not found - ${req.params.id}`);
+    };
 
     return res.json({ user });
   } catch (error: any) {
-    logger.error(`Error in getUserById: ${error}`);
-    return res.status(400).json({ message: error.message });
+    return resHeaderError('getUserById', error, req.params, res);
   }
 };
 
@@ -134,7 +128,7 @@ export const deleteUserById = async (req: AuthRequest, res: ResponseAdv<SimpleRe
   try {
     const user = await User.findByPk(req.params.id);
     if (!user) {
-      return res.status(400).json({ message: 'User not found' });
+      throw new NotFoundError(`User not found - ${req.params.id}`);
     }
 
     await Address.destroy({ where: { userId: user.id, addressType: AddressEnum.user } });
@@ -143,7 +137,6 @@ export const deleteUserById = async (req: AuthRequest, res: ResponseAdv<SimpleRe
     await Package.destroy({ where: { userId: user.id } });
     return res.json({ message: 'User deleted' });
   } catch (error: any) {
-    logger.error(`Error in deleteUser: ${error}`);
-    return res.status(400).json({ message: error.message });
+    return resHeaderError('deleteUserById', error, req.params, res);
   }
 }

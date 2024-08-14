@@ -5,6 +5,7 @@ import { Package } from '../models/Package';
 import { User } from '../models/User';
 import { GetTransactionRes, GetTransactionsRes, ResponseAdv } from '@ddlabel/shared';
 import { AuthRequest } from '../types';
+import { NotFoundError, resHeaderError } from '../utils/errors';
 
 export const getTransactions = async (req: AuthRequest, res: ResponseAdv<GetTransactionsRes>) => {
   const limit = parseInt(req.query.limit as string) || 100; // Default limit to 20 if not provided
@@ -34,7 +35,7 @@ export const getTransactions = async (req: AuthRequest, res: ResponseAdv<GetTran
     });
     return res.json({ total, transactions });
   } catch (error: any) {
-    return res.status(400).json({ message: error.message });
+    return resHeaderError('getTransactions', error, req.query, res);
   }
 };
 
@@ -47,11 +48,10 @@ export const getTransactionById = async (req: AuthRequest, res: ResponseAdv<GetT
       ],
     });
     if (!transaction) {
-      return res.status(404).json({ message: 'Transaction not found' });
-      return;
+      throw new NotFoundError(`Transaction not found - ${req.params.id}`);
     }
     return res.json({transaction});
   } catch (error: any) {
-    return res.status(400).json({ message: error.message });
+    return resHeaderError('getTransactionById', error, req.params, res);
   }
 }
