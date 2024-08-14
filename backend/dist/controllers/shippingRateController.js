@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getFullRate = exports.getShippingRates = exports.getShippingRatesForWeight = exports.fullShippingRate = void 0;
 const ShippingRate_1 = require("../models/ShippingRate");
 const sequelize_1 = require("sequelize");
+const errors_1 = require("../utils/errors");
+const errorClasses_1 = require("../utils/errorClasses");
 // Function to calculate shipping rate
 const fullShippingRate = (prop) => __awaiter(void 0, void 0, void 0, function* () {
     let { weight, weightUnit, length, width, height, volumeUnit, zone } = prop;
@@ -68,14 +70,14 @@ const getShippingRates = (req, res) => __awaiter(void 0, void 0, void 0, functio
         return res.json(rates);
     }
     catch (error) {
-        return res.status(400).json({ message: error.message });
+        return (0, errors_1.resHeaderError)('getShippingRates', error, req.params, res);
     }
 });
 exports.getShippingRates = getShippingRates;
 const getFullRate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let { length, width, height, weight, zone, weightUnit, volumeUnit } = req.query;
     if (!length || !width || !height || !weight || !zone || !weightUnit || !volumeUnit) {
-        return res.status(400).json({ message: 'getFullRate: All parameters are required: length, width, height, weight, zone, weightUnit, volumeUnit' });
+        throw new errorClasses_1.InvalidInputError('getFullRate: All parameters are required');
     }
     try {
         const param = {
@@ -89,13 +91,13 @@ const getFullRate = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         };
         const totalCost = yield (0, exports.fullShippingRate)(param);
         if (totalCost === 'NO_RATE') {
-            return res.json({ totalCost: -1, message: `No shipping rate found for the specified weight and zone ${weight} ${weightUnit}` });
+            throw new errorClasses_1.NotFoundError(`No shipping rate found for weight and zone ${weight} ${weightUnit}`);
         }
         ;
         return res.json({ totalCost });
     }
     catch (error) {
-        return res.status(400).json({ message: error.message });
+        return (0, errors_1.resHeaderError)('getFullRate', error, req.params, res);
     }
 });
 exports.getFullRate = getFullRate;

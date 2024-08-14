@@ -15,6 +15,8 @@ const Transaction_1 = require("../models/Transaction");
 const sequelize_1 = require("sequelize");
 const Package_1 = require("../models/Package");
 const User_1 = require("../models/User");
+const errors_1 = require("../utils/errors");
+const errorClasses_1 = require("../utils/errorClasses");
 const getTransactions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const limit = parseInt(req.query.limit) || 100; // Default limit to 20 if not provided
     const offset = parseInt(req.query.offset) || 0; // 
@@ -42,7 +44,7 @@ const getTransactions = (req, res) => __awaiter(void 0, void 0, void 0, function
         return res.json({ total, transactions });
     }
     catch (error) {
-        return res.status(400).json({ message: error.message });
+        return (0, errors_1.resHeaderError)('getTransactions', error, req.query, res);
     }
 });
 exports.getTransactions = getTransactions;
@@ -55,13 +57,12 @@ const getTransactionById = (req, res) => __awaiter(void 0, void 0, void 0, funct
             ],
         });
         if (!transaction) {
-            return res.status(404).json({ message: 'Transaction not found' });
-            return;
+            throw new errorClasses_1.NotFoundError(`Transaction not found - ${req.params.id}`);
         }
         return res.json({ transaction });
     }
     catch (error) {
-        return res.status(400).json({ message: error.message });
+        return (0, errors_1.resHeaderError)('getTransactionById', error, req.params, res);
     }
 });
 exports.getTransactionById = getTransactionById;

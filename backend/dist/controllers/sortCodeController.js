@@ -10,13 +10,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const SortCode_1 = require("../models/SortCode");
+const errors_1 = require("../utils/errors");
 exports.getAllSortCodes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const sortCodes = yield SortCode_1.SortCode.findAll();
         return res.json(sortCodes);
     }
     catch (error) {
-        return res.status(400).json({ message: error.message });
+        return (0, errors_1.resHeaderError)('getAllSortCodes', error, req.query, res);
     }
 });
 exports.createSortCode = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -25,35 +26,31 @@ exports.createSortCode = (req, res) => __awaiter(void 0, void 0, void 0, functio
         return res.status(201).json(newSortCode);
     }
     catch (error) {
-        return res.status(400).json({ message: error.message });
+        return (0, errors_1.resHeaderError)('createSortCode', error, req.body, res);
     }
 });
 exports.updateSortCode = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
         const updated = yield SortCode_1.SortCode.update(req.body, { where: { id: id } });
-        if (updated) {
-            const updatedSortCode = yield SortCode_1.SortCode.findByPk(id);
-            return res.json(updatedSortCode);
+        if (!updated) {
+            throw new errors_1.NotFoundError(`Sort code not found - ${id}`);
         }
-        else {
-            return res.status(404).json({ message: 'Sort code not found' });
-        }
+        const updatedSortCode = yield SortCode_1.SortCode.findByPk(id);
+        return res.json(updatedSortCode);
     }
     catch (error) {
-        return res.status(400).json({ message: error.message });
+        return (0, errors_1.resHeaderError)('updateSortCode', error, req.params, res);
     }
 });
 exports.deleteSortCode = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (yield SortCode_1.SortCode.destroy({ where: { id: req.params } })) {
-            return res.status(200).send({ success: true });
+        if (!(yield SortCode_1.SortCode.destroy({ where: { id: req.params } }))) {
+            throw new errors_1.NotFoundError('Sort code not found');
         }
-        else {
-            return res.status(422).json({ message: 'Sort code not found' });
-        }
+        return res.status(200).send({ success: true });
     }
     catch (error) {
-        return res.status(400).json({ message: error.message });
+        return (0, errors_1.resHeaderError)('deleteSortCode', error, req.params, res);
     }
 });

@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// backend/src/server.ts
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const http_1 = __importDefault(require("http"));
@@ -19,7 +18,6 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const logger_1 = __importDefault(require("./config/logger"));
 const zipCodeRoutes_1 = __importDefault(require("./routes/zipCodeRoutes"));
 const auth_1 = require("./middleware/auth");
-// Load environment variables from .env file
 const env = process.env.NODE_ENV || 'development';
 if (env === 'production') {
     dotenv_1.default.config({ path: '.env.production' });
@@ -32,7 +30,10 @@ const server = http_1.default.createServer(app);
 const io = new socket_io_1.Server(server, {
     path: '/api/socket.io/',
     cors: {
-        origin: '*', methods: ['GET', 'POST'], allowedHeaders: ['Content-Type', 'Authorization', 'socket-id'],
+        origin: env === 'production' ? 'https://label.daidk.com' : '*',
+        methods: ['GET', 'POST'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'socket-id'],
+        credentials: true,
     },
 });
 const socketIoMiddleware = (req, _res, next) => {
@@ -41,7 +42,10 @@ const socketIoMiddleware = (req, _res, next) => {
 };
 // Middleware
 app.use(express_1.default.json());
-app.use((0, cors_1.default)()); // Allow all requests
+app.use((0, cors_1.default)({
+    origin: env === 'production' ? 'https://label.daidk.com' : '*',
+    credentials: true,
+}));
 app.use((0, compression_1.default)());
 // Routes
 app.use('/api/zipcodes/', zipCodeRoutes_1.default);
@@ -58,8 +62,8 @@ app.use('/api/packages', auth_1.authenticate, socketIoMiddleware, packageRoutes_
     });
 });
 io.on('connection', (socket) => {
-    logger_1.default.info('a user connected');
+    logger_1.default.info(`User connected from origin: ${socket.handshake.headers.origin}`);
     socket.on('disconnect', () => {
-        logger_1.default.info('user disconnected');
+        logger_1.default.info('User disconnected');
     });
 });

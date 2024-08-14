@@ -31,9 +31,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.processBatch = exports.getPreparedData = void 0;
 // backend/src/controllers/packageBatchFuntions.ts
@@ -41,8 +38,9 @@ const Package_1 = require("../models/Package");
 const Address_1 = require("../models/Address");
 const getInfo_1 = __importStar(require("../utils/getInfo"));
 const errors_1 = require("../utils/errors");
-const logger_1 = __importDefault(require("../config/logger"));
 const shared_1 = require("@ddlabel/shared");
+const getErrorRes_1 = require("../utils/getErrorRes");
+const errorClasses_1 = require("../utils/errorClasses");
 const getMappingData = (headers, headerMapping) => {
     return shared_1.CSV_KEYS.reduce((acc, csvKey) => {
         const csvFileHeader = headerMapping[csvKey];
@@ -55,33 +53,28 @@ const getPreparedData = (packageCsvMap, csvData) => __awaiter(void 0, void 0, vo
     const fromZipInfo = (0, getInfo_1.default)((0, getInfo_1.getFromAddressZip)(mappedData));
     const toZipInfo = (0, getInfo_1.default)((0, getInfo_1.getToAddressZip)(mappedData));
     if (!fromZipInfo) {
-        logger_1.default.error(`Error in getPreparedData: no fromAddressZip, ${mappedData['fromAddressZip']}`);
-        return;
+        const error = new errorClasses_1.InvalidInputError(`getPreparedData has no fromAddressZip`, 'missingFromZip');
+        return { csvUploadError: (0, getErrorRes_1.getErrorRes)({ fnName: 'getPreparedData:missingFromZip', error, data: csvData, disableLog: true }) };
     }
     if (!toZipInfo) {
-        logger_1.default.error(`Error in getPreparedData: no toAddressZip, ${mappedData['toAddressZip']}`);
-        return;
+        const error = new errorClasses_1.InvalidInputError(`getPreparedData has no toAddressZip`, "missingToZip");
+        return { csvUploadError: (0, getErrorRes_1.getErrorRes)({ fnName: 'getPreparedData:missingToZip', error, data: mappedData['toAddress1'], disableLog: true }) };
     }
-    return {
-        mappedData,
-        fromZipInfo,
-        toZipInfo,
-    };
+    return { mappedData, fromZipInfo, toZipInfo };
 });
 exports.getPreparedData = getPreparedData;
 const processBatch = (batchData) => __awaiter(void 0, void 0, void 0, function* () {
-    const { pkgBatch, shipFromBatch, shipToBatch } = batchData;
+    const { pkgArr, shipFromArr, shipToArr } = batchData;
     try {
-        const packages = yield Package_1.Package.bulkCreate(pkgBatch);
+        const packages = yield Package_1.Package.bulkCreate(pkgArr);
         packages.map((pkg, idx) => {
-            shipFromBatch[idx].fromPackageId = pkg.id;
-            shipToBatch[idx].toPackageId = pkg.id;
+            shipFromArr[idx].fromPackageId = pkg.id;
+            shipToArr[idx].toPackageId = pkg.id;
         });
-        yield Address_1.Address.bulkCreateWithInfo(shipFromBatch);
-        yield Address_1.Address.bulkCreateWithInfo(shipToBatch);
+        yield Address_1.Address.bulkCreateWithInfo(shipFromArr);
+        yield Address_1.Address.bulkCreateWithInfo(shipToArr);
     }
     catch (error) {
-        logger_1.default.error(`Error in processBatch: ${(0, errors_1.reducedError)(error)}`);
         throw error;
     }
 });

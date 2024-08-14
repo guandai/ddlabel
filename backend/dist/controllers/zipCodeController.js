@@ -15,17 +15,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getZipCodeFromFile = exports.getZipCode = void 0;
 const ZipCode_1 = require("../models/ZipCode");
 const getInfo_1 = __importDefault(require("../utils/getInfo"));
+const errors_1 = require("../utils/errors");
+const errorClasses_1 = require("../utils/errorClasses");
 const getZipCode = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { zip } = req.params;
     try {
-        const { zip } = req.params;
         const zipCode = yield ZipCode_1.ZipCode.findOne({ where: { zip } });
         if (!zipCode) {
-            return res.status(404).json({ message: 'Zip code not found' });
+            throw new errorClasses_1.NotFoundError(`Zip code not found - ${zip}`);
         }
         return res.json(zipCode);
     }
     catch (error) {
-        return res.status(400).json({ message: error.message });
+        return (0, errors_1.resHeaderError)('getZipCode', error, req.params, res);
     }
 });
 exports.getZipCode = getZipCode;

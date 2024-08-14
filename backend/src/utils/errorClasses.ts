@@ -17,24 +17,21 @@ const fixErrorClass = (scope: any , errorClass: Function) => {
 export class NotFoundError extends Error {
 	public status: number;
 
-	constructor(message: string = 'Resource not found') {
+	constructor(message: string = 'Resource not found', name='NotFoundError') {
 		super(message);
-		this.name = "NotFoundError";
+		this.name = name;
 		this.status = 404;
-		Object.defineProperty(this, 'message', { enumerable: true });
-		if (Error.captureStackTrace) {
-			Error.captureStackTrace(this, NotFoundError);
-		}
+		fixErrorClass(this, NotFoundError);
 	}
 }
 
 export class InvalidCredentialsError extends Error {
 	public status: number;
 
-	constructor(message: string = 'Invalid credentials provided') {
+	constructor(message: string = 'Invalid credentials provided', name='InvalidCredentialsError') {
 		super(message);
-		this.name = "InvalidCredentialsError";
-		this.status = 401; // 401 Unauthorized
+		this.name = name;
+		this.status = 401;
 		fixErrorClass(this, InvalidCredentialsError);
 	}
 }
@@ -42,11 +39,11 @@ export class InvalidCredentialsError extends Error {
 export class InvalidInputError extends Error {
 	public status: number;
 
-	constructor(message: string = 'Invalid input provided') {
+	constructor(message: string = 'Invalid input provided', name: string = 'InvalidInputError') {
 		super(message);
-		this.name = "InvalidInputError";
-		this.status = 400; // 401 Unauthorized
-		fixErrorClass(this, InvalidCredentialsError);
+		this.name = name
+		this.status = 400;
+		fixErrorClass(this, InvalidInputError);
 	}
 }
 
@@ -65,6 +62,6 @@ export class BatchCreationError extends Error {
 		this.original = original;
 		this.lastFn = lastFn;
 		this.errors = errors;
-		fixErrorClass(this, InvalidCredentialsError);
+		fixErrorClass(this, BatchCreationError);
     }
 }

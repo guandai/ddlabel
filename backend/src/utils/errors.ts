@@ -5,6 +5,7 @@ import { Response } from "express";
 import logger from "../config/logger";
 import { aggregateError, getErrorRes } from "./getErrorRes";
 import { BatchCreationError } from "./errorClasses";
+import { BatchDataType, ErrorRes } from "../types";
 
 export const isValidJSON = (str: string) => {
 	try {
@@ -14,7 +15,17 @@ export const isValidJSON = (str: string) => {
 		return false;
 	}
 }
-
+export const ternaryPutError = (name: string, pkgGlobal: BatchDataType , error: ErrorRes) => (name in pkgGlobal.errorHash) ? pkgGlobal.errorHash[name] ++ : pkgGlobal.errorMap.push(error);
+export const toCamelCase = (str: string): string => 
+	str.split(/[\s-_]+/)  // Split by spaces, dashes, or underscores
+	.map((word, index) => {
+		if (index === 0) {
+			return word.toLowerCase();  // First word should be all lowercase
+		}
+		return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();  // Capitalize the first letter of the rest
+	})
+	.join('');  // Join all the words without spaces
+	
 export const reducedConstraintError = (error: UniqueConstraintError) => {
 	const stacks = error.stack?.split('\n')
 	const lastFn = stacks?.pop()?.split(' ')[5] || '';

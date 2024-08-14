@@ -32,9 +32,11 @@ const logger_1 = __importDefault(require("../config/logger"));
 const shared_1 = require("@ddlabel/shared");
 const generateTrackingNo_1 = require("../utils/generateTrackingNo");
 const packageControllerUtil_1 = require("./packageControllerUtil");
+const errors_1 = require("../utils/errors");
+const errorClasses_1 = require("../utils/errorClasses");
 const createPackage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.user) {
-        return res.status(404).json({ message: 'User not found' });
+        throw new errorClasses_1.NotFoundError('User not found');
     }
     const { fromAddress, toAddress, length, width, height, weight, referenceNo, trackingNo } = req.body;
     const userId = req.user.id;
@@ -59,8 +61,7 @@ const createPackage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         return res.status(201).json({ success: true, packageId: pkg.id });
     }
     catch (error) {
-        logger_1.default.error(`Error in createPackage: ${error}`);
-        return res.status(400).json({ message: error.message, error: error.errors });
+        return (0, errors_1.resHeaderError)('createPackage', error, Object.assign(Object.assign({}, req.body), { user: req.user }), res);
     }
 });
 exports.createPackage = createPackage;
@@ -75,7 +76,7 @@ const getPackages = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
     catch (error) {
         logger_1.default.error(`Error in getPackages: ${error}`);
-        return res.status(400).json({ message: error.message });
+        return (0, errors_1.resHeaderError)('getPackages', error, req.query, res);
     }
 });
 exports.getPackages = getPackages;
@@ -84,7 +85,7 @@ const updatePackage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     try {
         const pkg = yield Package_1.Package.findByPk(req.params.id);
         if (!pkg) {
-            return res.status(400).json({ message: 'Package not found' });
+            throw new errorClasses_1.NotFoundError('Package not found');
         }
         yield Address_1.Address.updateWithInfo(fromAddress);
         yield Address_1.Address.updateWithInfo(toAddress);
@@ -92,7 +93,7 @@ const updatePackage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         return res.json(pkg);
     }
     catch (error) {
-        return res.status(400).json({ message: error.message });
+        return (0, errors_1.resHeaderError)('updatePackage', error, req.body, res);
     }
 });
 exports.updatePackage = updatePackage;
@@ -100,7 +101,7 @@ const deletePackage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     try {
         const pkg = yield Package_1.Package.findByPk(req.params.id);
         if (!pkg) {
-            return res.status(400).json({ message: 'Package not found' });
+            throw new errorClasses_1.NotFoundError('Package not found');
         }
         yield Address_1.Address.destroy({ where: { fromPackageId: pkg.id, addressType: shared_1.AddressEnum.fromPackage } });
         yield Address_1.Address.destroy({ where: { toPackageId: pkg.id, addressType: shared_1.AddressEnum.toPackage } });
@@ -108,7 +109,7 @@ const deletePackage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         return res.json({ message: 'Package deleted' });
     }
     catch (error) {
-        return res.status(400).json({ message: error.message });
+        return (0, errors_1.resHeaderError)('deletePackage', error, req.params, res);
     }
 });
 exports.deletePackage = deletePackage;
@@ -124,12 +125,12 @@ const getPackage = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             ],
         });
         if (!pkg) {
-            return res.status(400).json({ message: 'Package not found' });
+            throw new errorClasses_1.NotFoundError(`Package not found - ${id}`);
         }
         return res.json({ package: pkg });
     }
     catch (error) {
-        return res.status(400).json({ message: error.message });
+        return (0, errors_1.resHeaderError)('getPackage', error, req.params, res);
     }
 });
 exports.getPackage = getPackage;

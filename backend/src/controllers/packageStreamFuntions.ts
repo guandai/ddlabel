@@ -1,18 +1,18 @@
 // backend/src/controllers/packageBatchFuntions.ts
-import { ResponseAdv, PackageSource, AddressEnum, SimpleRes, ImportPackageRes } from '@ddlabel/shared';
+import { ResponseAdv, PackageSource, AddressEnum, SimpleRes } from '@ddlabel/shared';
 import logger from '../config/logger';
 import { AuthRequest, BatchDataType, CsvData } from '../types';
-import { reducedConstraintError } from '../utils/errors';
+import { ternaryPutError, reducedConstraintError } from '../utils/errors';
 import { generateTrackingNo } from '../utils/generateTrackingNo';
 import reportIoSocket from '../utils/reportIo';
 import { getPreparedData, processBatch } from './packageBatchFuntions';
 import fs from 'fs';
-import { getErrorRes } from '../utils/getErrorRes';
+import { aggregateError, getErrorRes } from '../utils/getErrorRes';
 
 type OnDataParams = {
 	req: AuthRequest,
 	csvData: CsvData,
-	pkgAll: BatchDataType,
+	pkgGlobal: BatchDataType,
 }
 
 type OnEndParams = {
@@ -21,16 +21,16 @@ type OnEndParams = {
 
 type FinishEndParams = {
 	res: ResponseAdv<SimpleRes>,
-	pkgAll: BatchDataType,
+	pkgGlobal: BatchDataType,
 	file: Express.Multer.File,
 }
 
 const BATCH_SIZE = 100;
 
-const pkgAllPush = (req: AuthRequest, pkgAll: BatchDataType, prepared: any) => {
+const pkgGlobalPush = (req: AuthRequest, pkgGlobal: BatchDataType, prepared: any) => {
 	const { user: { id: userId } } = req;
 	const { mappedData, fromZipInfo, toZipInfo } = prepared;
-	pkgAll.pkgArr.push({
+	pkgGlobal.pkgArr.push({
 		userId,
 		length: mappedData['length'] || 0,
 		width: mappedData['width'] || 0,
@@ -40,7 +40,7 @@ const pkgAllPush = (req: AuthRequest, pkgAll: BatchDataType, prepared: any) => {
 		referenceNo: mappedData['referenceNo'] || '',
 		source: PackageSource.api,
 	});
-	pkgAll.shipFromArr.push({
+	pkgGlobal.shipFromArr.push({
 		...fromZipInfo,
 		name: mappedData['fromAddressName'],
 		userId,
@@ -48,7 +48,7 @@ const pkgAllPush = (req: AuthRequest, pkgAll: BatchDataType, prepared: any) => {
 		address2: mappedData['fromAddress2'],
 		addressType: AddressEnum.fromPackage,
 	});
-	pkgAll.shipToArr.push({
+	pkgGlobal.shipToArr.push({
 		...toZipInfo,
 		name: mappedData['toAddressName'],
 		userId,
@@ -59,32 +59,45 @@ const pkgAllPush = (req: AuthRequest, pkgAll: BatchDataType, prepared: any) => {
 	return;
 }
 
-export const onData = async ({ req, csvData, pkgAll }: OnDataParams) => {
+export const onError = (error: any, pkgGlobal: BatchDataType) => {
+	logger.error(`Error in importPackages onError: ${aggregateError(error)}`);
+	pkgGlobal.errorMap.push(getErrorRes({ fnName: 'importPackages', error }));
+}
+
+export const onData = async ({ req, csvData, pkgGlobal }: OnDataParams) => {
 	const { packageCsvMap, packageCsvLength } = req.body;
-	pkgAll.processed ++;
+	pkgGlobal.processed ++;
 	const prepared = await getPreparedData(packageCsvMap, csvData);
 	if ('csvUploadError' in prepared) {
-		const {name} = prepared.csvUploadError;
-		(name in pkgAll.errorHash) ? pkgAll.errorHash[name] ++ : pkgAll.errorMap.push(prepared.csvUploadError);
+		console.log(`prepared.csvUploadError.name`, prepared.csvUploadError.name);
+		ternaryPutError(prepared.csvUploadError.name, pkgGlobal, prepared.csvUploadError);	
 	} else {
-		pkgAllPush(req, pkgAll, prepared);
+		pkgGlobalPush(req, pkgGlobal, prepared);
 	}
-	reportIoSocket({ eventName: 'generate', req, processed: pkgAll.processed + 1, total: packageCsvLength });
+	reportIoSocket({ eventName: 'generate', req, processed: pkgGlobal.processed + 1, total: packageCsvLength });
 };
 
+const TranslatedError = {
+	trackingnoMustBeUnique: 'must has an unique trackingNo',
+	missingToZip: 'missing receiver address zip',
+	missingFromZip: 'missing sender address zip',
+};
+const formatErrorForFe = (key: string, count: number) => `${count} resource(s) ${TranslatedError[key as keyof typeof TranslatedError]}`;
 const finishProcessing = (params: FinishEndParams) => {
-	const { res, pkgAll, file } = params;
+	const { res, pkgGlobal, file } = params;
 	deleteUploadedFile(file);
-	if (pkgAll.errorMap.length > 0) {
-		return res.status(400).json({ errors: pkgAll.errorMap, message: `Importing Done with error: ${(pkgAll.errorMap.length)}` });
+	if (pkgGlobal.errorMap.length > 0 || Object.keys(pkgGlobal.errorHash).length > 0) {
+		const messageMaps = pkgGlobal.errorMap.map(e => e.message).join(',\n ');
+		const messagehash = Object.entries(pkgGlobal.errorHash).map(([key, count]) => formatErrorForFe(key, count)).join('\n ');
+		return res.status(400).json({ errors: pkgGlobal.errorMap, message: `Importing Done with error: \n${messageMaps}${messagehash}` });
 	}
 	return res.json({ message: `Importing Done!` });
 	// return resHeaderError('getUsers', error, req.query, res);
 }
 
 export const onEnd = async (params: OnEndParams) => {
-	const { req, res, pkgAll, file } = params;
-	const { pkgArr, shipFromArr, shipToArr } = pkgAll;
+	const { req, res, pkgGlobal, file } = params;
+	const { pkgArr, shipFromArr, shipToArr } = pkgGlobal;
 	const totalBatches = Math.ceil(pkgArr.length / BATCH_SIZE);
 
 	for (let i = 0; i < totalBatches; i++) {
@@ -101,13 +114,14 @@ export const onEnd = async (params: OnEndParams) => {
 		try {
 			await processBatch(batchData);
 		} catch (error: any) {
-			logger.error(`Error in onEnd: ${reducedConstraintError(error)}`);
-			pkgAll.errorMap.push(getErrorRes({ fnName: 'onEnd', error }));
+			const errorRes = getErrorRes({ fnName: 'onEnd', error });
+			logger.error(`Error in onEnd: ${errorRes.message}`);
+			ternaryPutError('trackingnoMustBeUnique', pkgGlobal, errorRes);
 		} finally {
 			reportIoSocket({ eventName: 'insert', req, processed: batchData.processed, total: pkgArr.length });
 		}
 	}
-	finishProcessing({ res, pkgAll, file });
+	finishProcessing({ res, pkgGlobal, file });
 };
 
 const deleteUploadedFile = (file: Express.Multer.File) => {

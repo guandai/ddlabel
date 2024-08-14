@@ -2,10 +2,11 @@ import { UniqueConstraintError, ValidationError, ForeignKeyConstraintError, Data
 import logger from "../config/logger";
 import { ErrorRes } from "../types";
 import { NotFoundError, InvalidCredentialsError, InvalidInputError } from "./errorClasses";
+import { toCamelCase } from "./errors";
 
 const reducedError = (error: Error | ValidationErrorItem) => {
     const properties = {
-        name: 'name' in error ? error.name : 'noNameError',
+        name: 'name' in error ? error.name : toCamelCase(error.message),
         message: error.message,
         value: (error as any).value, // Casting to 'any' to avoid TypeScript error for non-standard properties
         path: (error as any).path,
