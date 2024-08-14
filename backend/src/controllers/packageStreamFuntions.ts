@@ -2,11 +2,12 @@
 import { ResponseAdv, PackageSource, AddressEnum, SimpleRes, ImportPackageRes } from '@ddlabel/shared';
 import logger from '../config/logger';
 import { AuthRequest, BatchDataType, CsvData } from '../types';
-import { aggregateError, handleSequelizeError, reducedConstraintError } from '../utils/errors';
+import { reducedConstraintError } from '../utils/errors';
 import { generateTrackingNo } from '../utils/generateTrackingNo';
 import reportIoSocket from '../utils/reportIo';
 import { getPreparedData, processBatch } from './packageBatchFuntions';
 import fs from 'fs';
+import { getErrorRes } from '../utils/getErrorRes';
 
 type OnDataParams = {
 	req: AuthRequest,
@@ -63,7 +64,8 @@ export const onData = async ({ req, csvData, pkgAll }: OnDataParams) => {
 	pkgAll.processed ++;
 	const prepared = await getPreparedData(packageCsvMap, csvData);
 	if ('csvUploadError' in prepared) {
-		pkgAll.errorMap.push(prepared.csvUploadError);
+		const {name} = prepared.csvUploadError;
+		(name in pkgAll.errorHash) ? pkgAll.errorHash[name] ++ : pkgAll.errorMap.push(prepared.csvUploadError);
 	} else {
 		pkgAllPush(req, pkgAll, prepared);
 	}
@@ -91,6 +93,7 @@ export const onEnd = async (params: OnEndParams) => {
 		const batchData: BatchDataType = {
 			processed: Math.min(end, pkgArr.length),
 			errorMap: [],
+			errorHash: {},
 			pkgArr: pkgArr.slice(start, end),
 			shipFromArr: shipFromArr.slice(start, end),
 			shipToArr: shipToArr.slice(start, end),
@@ -99,7 +102,7 @@ export const onEnd = async (params: OnEndParams) => {
 			await processBatch(batchData);
 		} catch (error: any) {
 			logger.error(`Error in onEnd: ${reducedConstraintError(error)}`);
-			pkgAll.errorMap.push(handleSequelizeError('onEnd', error, {start, end}));
+			pkgAll.errorMap.push(getErrorRes({ fnName: 'onEnd', error }));
 		} finally {
 			reportIoSocket({ eventName: 'insert', req, processed: batchData.processed, total: pkgArr.length });
 		}

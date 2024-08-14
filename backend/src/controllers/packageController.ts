@@ -17,7 +17,8 @@ import {
 import { AuthRequest } from '../types';
 import { generateTrackingNo } from '../utils/generateTrackingNo';
 import { getRelationQuery } from './packageControllerUtil';
-import { handleSequelizeError, NotFoundError, resHeaderError } from '../utils/errors';
+import { resHeaderError } from '../utils/errors';
+import { NotFoundError } from '../utils/errorClasses';
 
 export const createPackage = async (req: AuthRequest, res: ResponseAdv<CreatePackageRes>) => {
   if (!req.user) {

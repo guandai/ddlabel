@@ -7,7 +7,9 @@ import logger from '../config/logger';
 import { ImportPackageRes, ResponseAdv } from '@ddlabel/shared';
 import { AuthRequest, BatchDataType, CsvData } from '../types';
 import { onData, onEnd } from './packageStreamFuntions';
-import { aggregateError, handleSequelizeError, InvalidInputError, resHeaderError } from '../utils/errors';
+import { resHeaderError } from '../utils/errors';
+import { aggregateError, getErrorRes } from '../utils/getErrorRes';
+import { InvalidInputError } from '../utils/errorClasses';
 
 export const importPackages = async (req: AuthRequest, res: ResponseAdv<ImportPackageRes>) => {
 	const { file } = req;
@@ -19,6 +21,7 @@ export const importPackages = async (req: AuthRequest, res: ResponseAdv<ImportPa
 		const pkgAll: BatchDataType = {
 			processed: 0,
 			errorMap: [],
+			errorHash: { missingToZipError:0 , missingFromZipError: 0 },
 			pkgArr: [],
 			shipFromArr: [],
 			shipToArr: [],
@@ -32,7 +35,7 @@ export const importPackages = async (req: AuthRequest, res: ResponseAdv<ImportPa
 			.on('end', async () => onEnd({ req, res, pkgAll, file }))
 			.on('error', (error: any) => {
 				logger.error(`Error in importPackages onError: ${aggregateError(error)}`);
-				pkgAll.errorMap.push(handleSequelizeError('importPackagesPipe', error, req.file));
+				pkgAll.errorMap.push(getErrorRes({ fnName: 'importPackages', error }));
 			});
 	} catch (error: any) {
 		return resHeaderError('importPackages', error, req.file, res);

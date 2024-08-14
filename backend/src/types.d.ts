@@ -8,6 +8,7 @@ export interface AuthRequest extends Request {
 export type BatchDataType = {
 	processed: number,
 	errorMap: ErrorRes[],
+	errorHash: Record<string, number>,
 	pkgArr: PackageRoot[],
 	shipFromArr: AddressCreationAttributes[],
 	shipToArr: AddressCreationAttributes[],

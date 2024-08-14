@@ -2,11 +2,11 @@
 import { Package } from '../models/Package';
 import { Address } from '../models/Address';
 import getZipInfo, { getFromAddressZip, getToAddressZip } from '../utils/getInfo';
-import { handleSequelizeError, InvalidInputError, isValidJSON } from '../utils/errors';
-import logger from '../config/logger';
+import { isValidJSON } from '../utils/errors';
 import { CsvRecord, defaultMapping, CSV_KEYS, HeaderMapping, KeyCsvRecord } from '@ddlabel/shared';
 import { CsvData, PreparedData, BatchDataType } from '../types';
-import { log } from 'console';
+import { getErrorRes } from '../utils/getErrorRes';
+import { InvalidInputError } from '../utils/errorClasses';
 
 const getMappingData = (headers: CsvData, headerMapping: HeaderMapping): CsvRecord => {
 	return CSV_KEYS.reduce((acc: CsvRecord, csvKey: KeyCsvRecord) => {
@@ -24,11 +24,11 @@ export const getPreparedData = async (packageCsvMap: string, csvData: CsvData): 
 
 	if (!fromZipInfo) { 
 		const error = new InvalidInputError(`getPreparedData has no fromAddressZip`);
-		return { csvUploadError: handleSequelizeError('missingFromZipError', error, {address: mappedData['fromAddress1']}) };
+		return { csvUploadError: getErrorRes({ fnName: 'missingFromZipError', error, data: mappedData['fromAddress1'], disableLog: true } ) };
 	}
 	if (!toZipInfo) { 
 		const error = new InvalidInputError(`getPreparedData has no toAddressZip`);
-		return { csvUploadError: handleSequelizeError('missingToZipError',   error, {address: mappedData['toAddress1']}) };
+		return { csvUploadError: getErrorRes( { fnName: 'missingToZipError', error, data: mappedData['toAddress1'], disableLog: true } ) };
 	}
 	return { mappedData, fromZipInfo, toZipInfo };
 }
