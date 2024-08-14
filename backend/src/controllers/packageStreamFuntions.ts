@@ -1,8 +1,8 @@
 // backend/src/controllers/packageBatchFuntions.ts
-import { PackageSource, AddressEnum } from '@ddlabel/shared';
+import { ResponseAdv, PackageSource, AddressEnum, SimpleRes, ImportPackageRes } from '@ddlabel/shared';
 import logger from '../config/logger';
 import { AuthRequest, BatchDataType, CsvData } from '../types';
-import { aggregateError } from '../utils/errors';
+import { aggregateError, handleSequelizeError, reducedConstraintError } from '../utils/errors';
 import { generateTrackingNo } from '../utils/generateTrackingNo';
 import reportIoSocket from '../utils/reportIo';
 import { getPreparedData, processBatch } from './packageBatchFuntions';
@@ -15,15 +15,19 @@ type OnDataParams = {
 }
 
 type OnEndParams = {
-	stream: fs.ReadStream,
 	req: AuthRequest,
+} & FinishEndParams;
+
+type FinishEndParams = {
+	res: ResponseAdv<SimpleRes>,
 	pkgAll: BatchDataType,
+	file: Express.Multer.File,
 }
 
-const BATCH_SIZE = 500;
+const BATCH_SIZE = 100;
 
 const pkgAllPush = (req: AuthRequest, pkgAll: BatchDataType, prepared: any) => {
-	const { user: { id: userId }, body: { packageCsvLength } } = req;
+	const { user: { id: userId } } = req;
 	const { mappedData, fromZipInfo, toZipInfo } = prepared;
 	pkgAll.pkgArr.push({
 		userId,
@@ -51,23 +55,33 @@ const pkgAllPush = (req: AuthRequest, pkgAll: BatchDataType, prepared: any) => {
 		address2: mappedData['toAddress2'],
 		addressType: AddressEnum.toPackage,
 	})
-
-	reportIoSocket({ eventName: 'generate', req, processed: pkgAll.count, total: packageCsvLength });
 	return;
 }
 
 export const onData = async ({ req, csvData, pkgAll }: OnDataParams) => {
-	pkgAll.count++;
-	const prepared = await getPreparedData(req.body.packageCsvMap, csvData);
-	if (prepared.logError) {
-		pkgAll.errorArr.push(prepared.logError);
-		return; // skip one data
+	const { packageCsvMap, packageCsvLength } = req.body;
+	pkgAll.processed ++;
+	const prepared = await getPreparedData(packageCsvMap, csvData);
+	if ('csvUploadError' in prepared) {
+		pkgAll.errorMap.push(prepared.csvUploadError);
+	} else {
+		pkgAllPush(req, pkgAll, prepared);
 	}
-
-	return pkgAllPush(req, pkgAll, prepared);
+	reportIoSocket({ eventName: 'generate', req, processed: pkgAll.processed + 1, total: packageCsvLength });
 };
 
-export const onEnd = async ({ stream, req, pkgAll }: OnEndParams) => {
+const finishProcessing = (params: FinishEndParams) => {
+	const { res, pkgAll, file } = params;
+	deleteUploadedFile(file);
+	if (pkgAll.errorMap.length > 0) {
+		return res.status(400).json({ errors: pkgAll.errorMap, message: `Importing Done with error: ${(pkgAll.errorMap.length)}` });
+	}
+	return res.json({ message: `Importing Done!` });
+	// return resHeaderError('getUsers', error, req.query, res);
+}
+
+export const onEnd = async (params: OnEndParams) => {
+	const { req, res, pkgAll, file } = params;
 	const { pkgArr, shipFromArr, shipToArr } = pkgAll;
 	const totalBatches = Math.ceil(pkgArr.length / BATCH_SIZE);
 
@@ -75,8 +89,8 @@ export const onEnd = async ({ stream, req, pkgAll }: OnEndParams) => {
 		const start = i * BATCH_SIZE;
 		const end = start + BATCH_SIZE;
 		const batchData: BatchDataType = {
-			count: BATCH_SIZE,  // not used
-			errorArr: [],
+			processed: Math.min(end, pkgArr.length),
+			errorMap: [],
 			pkgArr: pkgArr.slice(start, end),
 			shipFromArr: shipFromArr.slice(start, end),
 			shipToArr: shipToArr.slice(start, end),
@@ -84,12 +98,19 @@ export const onEnd = async ({ stream, req, pkgAll }: OnEndParams) => {
 		try {
 			await processBatch(batchData);
 		} catch (error: any) {
-			logger.error(`Error in onEnd: ${error}`); // Log the detailed
-			pkgAll.errorArr.push({ message: aggregateError(error) });
+			logger.error(`Error in onEnd: ${reducedConstraintError(error)}`);
+			pkgAll.errorMap.push(handleSequelizeError('onEnd', error, {start, end}));
 		} finally {
-			reportIoSocket({ eventName: 'insert', req, processed: Math.min(end, pkgArr.length), total: pkgArr.length });
+			reportIoSocket({ eventName: 'insert', req, processed: batchData.processed, total: pkgArr.length });
 		}
 	}
-	stream.emit('success');
-
+	finishProcessing({ res, pkgAll, file });
 };
+
+const deleteUploadedFile = (file: Express.Multer.File) => {
+	fs.unlink(file.path, (unlinkError) => {
+		if (unlinkError) {
+			logger.error(`Failed to delete file after process: ${unlinkError}`);
+		}
+	});
+}

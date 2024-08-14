@@ -45,7 +45,9 @@ export type ZipInfo = {
 export type SimpleRes = {
 	message: string;
 	success?: false;
-	error?: Error;
+	error?: unknown;
+	errors?: unknown[];
 };
 
 export type ResponseAdv<T> = Response<T | SimpleRes>;
+export type ResponseSimple = Response<SimpleRes>;
