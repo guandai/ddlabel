@@ -15,7 +15,7 @@ const BeansTableSideBar: React.FC = () => {
 				</ListItem>
 				<ListItem>
 					<Button fullWidth variant="contained" color="primary" component={Link} to="/beans/items" sx={{ mr: 2 }}>
-						View Items
+						View Stops
 					</Button>
 				</ListItem>
 			</List>

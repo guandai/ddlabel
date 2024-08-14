@@ -15,7 +15,7 @@ const UserTableSideBar: React.FC<Props> = (prop) => {
 			<List sx={{ minHeight: '100vh' }}>
 				<ListItem>
 					<Button fullWidth variant="contained" color="primary" component={Link} to="/register" sx={{ mr: 2 }}>
-						Register
+						Register User
 					</Button>
 				</ListItem>
 			</List>

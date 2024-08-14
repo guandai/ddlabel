@@ -10,6 +10,7 @@ import { toDateTime } from '../../util/time';
 import ModelActions from '../share/ModelActions';
 import { tryLoad } from '../../util/errors';
 import { BeansAI, Models } from '@ddlabel/shared';
+import BeansRoutesActions from './BeansRoutesActions';
 
 const BeansRoutes: React.FC = () => {
   const [records, setBeansRecords] = useState<BeansAI.Route[]>([]);
@@ -38,6 +39,7 @@ const BeansRoutes: React.FC = () => {
                 <TableCell>Status</TableCell>
                 <TableCell>Start</TableCell>
                 <TableCell>End</TableCell>
+                <TableCell>Status</TableCell>
                 <TableCell>Created At</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
@@ -52,7 +54,7 @@ const BeansRoutes: React.FC = () => {
                   <TableCell>{record.status}</TableCell>
                   <TableCell>{toDateTime(record.createdAt || '')}</TableCell>
                   <StyledTabelCell style={{ width: '200px', whiteSpace: 'nowrap' }}>
-                    <ModelActions model={record as any as Models} setMessage={setMessage} modelName='routes' actions={['view']}/>
+                    <BeansRoutesActions model={record as any as Models} listRouteId={record.listRouteId} setMessage={setMessage} />
                   </StyledTabelCell>
                 </TableRow>
               ))}

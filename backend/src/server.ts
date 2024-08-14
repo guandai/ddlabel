@@ -36,7 +36,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   path: '/api/socket.io/',
   cors: {
-    origin: env === 'production' ? 'https://label.daidk.com' : '*',
+    origin: '*',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization', 'socket-id'],
     credentials: true,
@@ -51,7 +51,7 @@ const socketIoMiddleware = (req: Request, _res: Response, next: NextFunction) =>
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: env === 'production' ? 'https://label.daidk.com' : '*',
+  origin: '*',
   credentials: true,
 }));
 app.use(compression());

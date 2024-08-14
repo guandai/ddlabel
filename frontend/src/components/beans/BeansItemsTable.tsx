@@ -10,25 +10,27 @@ import { toDateTime } from '../../util/time';
 import ModelActions from '../share/ModelActions';
 import { tryLoad } from '../../util/errors';
 import { BeansAI, Models } from '@ddlabel/shared';
+import { useParams } from 'react-router-dom';
 
-const BeansItems: React.FC = () => {
+const BeansItemsTable: React.FC = () => {
   const [records, setBeansRecords] = useState<BeansAI.Item[]>([]);
   const [message, setMessage] = useState<MessageContent>(null);
+  const listRouteId = useParams<{ listRouteId: string }>().listRouteId;
 
   useEffect(() => {
     const callback = async () => {
-      const records = (await BeansApi.getItems()).item;
+      const records = (listRouteId) ? (await BeansApi.getRoutesItems(listRouteId)).item : (await BeansApi.getItems()).item;
       setBeansRecords(records);
     };
 	tryLoad(setMessage, callback);
-  }, []);
+  }, [listRouteId]);
   
   return (
     <FlexBox component="main" maxWidth="lg">
       <BeansTableSideBar/>
     
       <StyledBox>
-        <Typography component="h1" variant="h4">Beans Items</Typography>
+        <Typography component="h1" variant="h4">Beans Stops</Typography>
         <MessageAlert message={message} />
         
         <TableContainer component={Paper} sx={{ mt: 3 }}>
@@ -44,7 +46,7 @@ const BeansItems: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {records.map((record) => (
+              {records && records.map((record) => (
                 <TableRow key={`item_${record.listItemId}`}>
                   <TableCell>{record.trackingId}</TableCell>
                   <TableCell>{record.address}</TableCell>
@@ -64,4 +66,4 @@ const BeansItems: React.FC = () => {
   );
 };
 
-export default BeansItems;
+export default BeansItemsTable;

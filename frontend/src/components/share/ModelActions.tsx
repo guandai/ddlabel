@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IconButton } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import { Visibility, Edit, Delete } from '@mui/icons-material';
 import { Models } from '@ddlabel/shared';
 import { useNavigate } from 'react-router-dom';
@@ -44,9 +44,21 @@ const ModelActions: React.FC<ModelActionsProps> = ({ model, setMessage, modelNam
 
   return (
     <>
-      {actions.includes('view') && <IconButton onClick={handleViewDetails}><Visibility /></IconButton>}
-      {actions.includes('edit') && <IconButton onClick={handleEdit}><Edit /></IconButton>}
-      {actions.includes('delete') && <IconButton onClick={handleDelete}><Delete /></IconButton>}
+      {actions.includes('view') && (
+        <Tooltip title="View Details">
+          <IconButton onClick={handleViewDetails}><Visibility /></IconButton>
+        </Tooltip>
+      )}
+      {actions.includes('edit') && (
+        <Tooltip title="Edit">
+          <IconButton onClick={handleEdit}><Edit /></IconButton>
+        </Tooltip>
+      )}
+      {actions.includes('delete') && (
+        <Tooltip title="Delete">
+          <IconButton onClick={handleDelete}><Delete /></IconButton>
+        </Tooltip>
+      )}
       {children}
       <ModelDialog open={detailOpen} handleClose={handleDetailClose} model={model} modelName={modelName} />
     </>

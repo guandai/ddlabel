@@ -30,7 +30,7 @@ const server = http_1.default.createServer(app);
 const io = new socket_io_1.Server(server, {
     path: '/api/socket.io/',
     cors: {
-        origin: env === 'production' ? 'https://label.daidk.com' : '*',
+        origin: '*',
         methods: ['GET', 'POST'],
         allowedHeaders: ['Content-Type', 'Authorization', 'socket-id'],
         credentials: true,
@@ -43,7 +43,7 @@ const socketIoMiddleware = (req, _res, next) => {
 // Middleware
 app.use(express_1.default.json());
 app.use((0, cors_1.default)({
-    origin: env === 'production' ? 'https://label.daidk.com' : '*',
+    origin: '*',
     credentials: true,
 }));
 app.use((0, compression_1.default)());

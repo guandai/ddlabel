@@ -1,14 +1,5 @@
 import { Optional } from 'sequelize';
-import {
-    AddressAttributes,
-    AddressModel,
-    PackageModel,
-    PostalZoneAttributes,
-    TransactionModel,
-    UserAttributes,
-    UserModel,
-    UserRolesEnum
-} from "./models";
+import { AddressAttributes, AddressModel, PackageModel, PostalZoneAttributes, TransactionModel, UserAttributes, UserModel, UserRolesEnum } from "./models";
 import { SimpleRes } from './types';
 import { BeansAI } from './beans';
 export type RegisterUserReq = Pick<UserAttributes, 'name' | 'email' | 'password' | 'role'> & {

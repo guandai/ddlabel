@@ -36,6 +36,7 @@ const AppContent: React.FC = () => {
         <Route path="/packages/:id/label" element={<PrivateRoute component={PackageLabelPage} />} />
         <Route path="/beans/items" element={<PrivateRoute component={BeansItemsTable} />} />
         <Route path="/beans/routes" element={<PrivateRoute component={BeansRoutesTable} />} />
+        <Route path="/beans/routes/:listRouteId/items" element={<PrivateRoute component={BeansItemsTable} />} />
       </Routes>
     </>
   );
